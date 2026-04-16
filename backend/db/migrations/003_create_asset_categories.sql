@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS asset_categories (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL UNIQUE,
+  description TEXT,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
