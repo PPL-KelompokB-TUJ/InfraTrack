@@ -8,6 +8,7 @@ import {
   updateInfrastructureAsset,
   uploadInfrastructureAssetPhoto,
 } from '../lib/infrastructureAssetsService';
+import { getActiveInfrastructureCategoryNames } from '../lib/masterDataService';
 
 const conditionLabelStyles = {
   baik: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -20,6 +21,7 @@ function formatCoordinate(lat, lng) {
 }
 
 export default function AssetManagementPage() {
+  const [categoryOptions, setCategoryOptions] = useState(['Jalan', 'Jembatan', 'Fasum']);
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +46,21 @@ export default function AssetManagementPage() {
   useEffect(() => {
     loadAssets();
   }, [loadAssets]);
+
+  useEffect(() => {
+    async function loadCategoryOptions() {
+      try {
+        const options = await getActiveInfrastructureCategoryNames();
+        if (options.length > 0) {
+          setCategoryOptions(options);
+        }
+      } catch (error) {
+        setErrorMessage((prev) => prev || error.message || 'Gagal memuat kategori referensi.');
+      }
+    }
+
+    loadCategoryOptions();
+  }, []);
 
   const totalAssets = useMemo(() => assets.length, [assets]);
 
@@ -246,6 +263,7 @@ export default function AssetManagementPage() {
         isOpen={isModalOpen}
         isSubmitting={isSaving}
         initialAsset={editingAsset}
+        categoryOptions={categoryOptions}
         onClose={handleCloseModal}
         onSubmit={handleSubmitAsset}
       />

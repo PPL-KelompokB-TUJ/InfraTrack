@@ -13,7 +13,8 @@ Do not put secret key in `.env` frontend.
 Run in Supabase SQL Editor:
 
 1. `supabase/create_infrastructure_assets.sql`
-2. `supabase/setup_assets_photos_storage.sql`
+2. `supabase/create_master_reference_tables.sql`
+3. `supabase/setup_assets_photos_storage.sql`
 
 ## 3) Query Patterns (lat/lng)
 Read assets from the view:
