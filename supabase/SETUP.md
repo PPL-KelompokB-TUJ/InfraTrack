@@ -46,7 +46,7 @@ Insert asset from lat/lng:
 ```sql
 insert into public.infrastructure_assets (
   name,
-  category,
+  infrastructure_category_id,
   location,
   condition,
   year_built,
@@ -54,7 +54,12 @@ insert into public.infrastructure_assets (
 )
 values (
   'Jalan Raya Mawar',
-  'Jalan',
+  (
+    select id
+    from public.infrastructure_categories
+    where name = 'Jalan'
+    limit 1
+  ),
   st_setsrid(st_makepoint(106.816666, -6.2), 4326)::geography,
   'baik',
   2020,
@@ -69,7 +74,7 @@ insert into public.damage_reports (
   reporter_name,
   reporter_email,
   reporter_phone,
-  damage_type,
+  damage_type_id,
   urgency_level,
   description,
   photo_url,
@@ -82,7 +87,13 @@ values (
   'Budi Santoso',
   'budi@example.com',
   '081234567890',
-  'Jalan berlubang',
+  (
+    select id
+    from public.damage_types
+    where name = 'Lainnya'
+    order by is_default desc, created_at asc
+    limit 1
+  ),
   'tinggi',
   'Lubang besar di depan toko mie',
   'https://example.com/photo.jpg',
@@ -108,7 +119,7 @@ For Supabase JS insert/update, send `location` as EWKT string:
 const location = `SRID=4326;POINT(${lng} ${lat})`;
 ```
 
-Then insert into `public.infrastructure_assets` or `public.damage_reports`.
+Then insert into `public.infrastructure_assets` or `public.damage_reports` dengan kolom FK (`infrastructure_category_id`, `damage_type_id`).
 For reading, query `public.infrastructure_assets_view` or `public.damage_reports` to get `lat` and `lng` directly.
 
 ## 6) PBI-02 Features (Damage Report)

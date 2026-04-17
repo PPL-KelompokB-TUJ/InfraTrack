@@ -5,6 +5,16 @@ const DAMAGE_TYPE_TABLE = 'damage_types';
 const PRIORITY_SCALE_TABLE = 'priority_scales';
 
 const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Fasum'];
+const FALLBACK_DAMAGE_TYPE_OPTIONS = [
+  'Jalan berlubang',
+  'Jembatan rusak',
+  'Trotoar pecah',
+  'Saluran macet',
+  'Tiang roboh',
+  'Lampu jalan rusak',
+  'Marka kerusakan',
+  'Lainnya',
+];
 
 function toBoolean(value) {
   return Boolean(value);
@@ -42,6 +52,40 @@ export async function getInfrastructureCategories() {
   }
 
   return data || [];
+}
+
+export async function getActiveDamageTypeNames() {
+  const { data, error } = await supabase
+    .from(DAMAGE_TYPE_TABLE)
+    .select('name, is_default')
+    .eq('is_active', true)
+    .order('is_default', { ascending: false })
+    .order('name', { ascending: true });
+
+  if (error) {
+    if (error.code === '42P01') {
+      return FALLBACK_DAMAGE_TYPE_OPTIONS;
+    }
+
+    throw new Error(error.message);
+  }
+
+  const uniqueNames = [];
+  const seen = new Set();
+
+  for (const item of data || []) {
+    const name = String(item.name || '').trim();
+    const key = name.toLowerCase();
+
+    if (!name || seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    uniqueNames.push(name);
+  }
+
+  return uniqueNames.length > 0 ? uniqueNames : FALLBACK_DAMAGE_TYPE_OPTIONS;
 }
 
 export async function createInfrastructureCategory(payload) {

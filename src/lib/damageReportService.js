@@ -1,5 +1,35 @@
 import { supabase } from './supabaseClient';
 
+async function resolveDamageTypeIdByName(damageTypeName) {
+  const normalizedDamageTypeName = String(damageTypeName || '').trim();
+
+  if (!normalizedDamageTypeName) {
+    throw new Error('Jenis kerusakan tidak boleh kosong.');
+  }
+
+  const { data, error } = await supabase
+    .from('damage_types')
+    .select('id, is_default, created_at')
+    .eq('name', normalizedDamageTypeName)
+    .eq('is_active', true)
+    .order('is_default', { ascending: false })
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.id) {
+    throw new Error(
+      `Jenis kerusakan "${normalizedDamageTypeName}" tidak ditemukan pada master data aktif.`
+    );
+  }
+
+  return data.id;
+}
+
 /**
  * Generate unique ticket code for damage reports
  * Format: INF-YYYYMMDD-XXXXX (where XXXXX is random)
@@ -31,6 +61,7 @@ export const submitDamageReport = async ({
   photoFile,
 }) => {
   try {
+    const damageTypeId = await resolveDamageTypeIdByName(damageType);
     let photoUrl = null;
 
     // Upload photo if provided
@@ -88,7 +119,7 @@ export const submitDamageReport = async ({
           reporter_name: reporterName,
           reporter_email: reporterEmail,
           reporter_phone: reporterPhone,
-          damage_type: damageType,
+          damage_type_id: damageTypeId,
           urgency_level: urgencyLevel,
           description,
           photo_url: photoUrl,
@@ -127,7 +158,7 @@ export const getDamageReportByTicket = async (ticketCode) => {
   try {
     const { data, error } = await supabase
       .from('damage_reports')
-      .select('*')
+      .select('*, damage_types(name)')
       .eq('ticket_code', ticketCode)
       .single();
 
@@ -137,7 +168,10 @@ export const getDamageReportByTicket = async (ticketCode) => {
 
     return {
       success: true,
-      report: data,
+      report: {
+        ...data,
+        damage_type: data.damage_types?.name || '-',
+      },
     };
   } catch (error) {
     console.error('Error fetching damage report:', error);
@@ -159,7 +193,7 @@ export const getAllDamageReports = async ({
   try {
     let query = supabase
       .from('damage_reports')
-      .select('*', { count: 'exact' })
+      .select('*, damage_types(name)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -175,7 +209,10 @@ export const getAllDamageReports = async ({
 
     return {
       success: true,
-      reports: data,
+      reports: (data || []).map((item) => ({
+        ...item,
+        damage_type: item.damage_types?.name || '-',
+      })),
       total: count,
     };
   } catch (error) {

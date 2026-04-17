@@ -172,3 +172,109 @@ and not exists (
   from public.priority_scales
   where is_default = true
 );
+
+-- Migrate infrastructure_assets.category (text) to infrastructure_category_id (uuid FK)
+do $$
+declare
+  v_default_category_id uuid;
+begin
+  if to_regclass('public.infrastructure_assets') is null then
+    return;
+  end if;
+
+  alter table public.infrastructure_assets
+    add column if not exists infrastructure_category_id uuid;
+
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'infrastructure_assets'
+      and column_name = 'category'
+  ) then
+    update public.infrastructure_assets assets
+    set infrastructure_category_id = categories.id
+    from public.infrastructure_categories categories
+    where assets.infrastructure_category_id is null
+      and lower(trim(assets.category)) = lower(trim(categories.name));
+  end if;
+
+  select id
+  into v_default_category_id
+  from public.infrastructure_categories
+  where is_default = true
+  order by created_at asc
+  limit 1;
+
+  if v_default_category_id is null then
+    select id
+    into v_default_category_id
+    from public.infrastructure_categories
+    order by created_at asc
+    limit 1;
+  end if;
+
+  if v_default_category_id is not null then
+    update public.infrastructure_assets
+    set infrastructure_category_id = v_default_category_id
+    where infrastructure_category_id is null;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'infrastructure_assets_category_fk'
+      and conrelid = 'public.infrastructure_assets'::regclass
+  ) then
+    alter table public.infrastructure_assets
+      add constraint infrastructure_assets_category_fk
+      foreign key (infrastructure_category_id)
+      references public.infrastructure_categories(id)
+      on update cascade
+      on delete restrict;
+  end if;
+
+  if not exists (
+    select 1
+    from public.infrastructure_assets
+    where infrastructure_category_id is null
+  ) then
+    alter table public.infrastructure_assets
+      alter column infrastructure_category_id set not null;
+  end if;
+
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'infrastructure_assets'
+      and column_name = 'category'
+  ) then
+    drop view if exists public.infrastructure_assets_view;
+
+    alter table public.infrastructure_assets
+      drop column category;
+  end if;
+end
+$$;
+
+create index if not exists infrastructure_assets_infrastructure_category_id_idx
+  on public.infrastructure_assets(infrastructure_category_id);
+
+create or replace view public.infrastructure_assets_view as
+select
+  assets.id,
+  assets.name,
+  coalesce(categories.name, '-') as category,
+  st_y(assets.location::geometry) as lat,
+  st_x(assets.location::geometry) as lng,
+  assets.condition,
+  assets.year_built,
+  assets.photo_url,
+  assets.created_at,
+  assets.updated_at
+from public.infrastructure_assets assets
+left join public.infrastructure_categories categories
+  on categories.id = assets.infrastructure_category_id;
+
+grant select on public.infrastructure_assets_view to anon, authenticated;

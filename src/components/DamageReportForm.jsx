@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle, Loader, MapPin, Camera } from 'lucide-react';
 import { submitDamageReport } from '../lib/damageReportService';
-
-const damage_types = [
-  'Jalan berlubang',
-  'Jembatan rusak',
-  'Trotoar pecah',
-  'Saluran macet',
-  'Tiang roboh',
-  'Lampu jalan rusak',
-  'Marka kerusakan',
-  'Lainnya',
-];
+import { getActiveDamageTypeNames } from '../lib/masterDataService';
 
 const urgency_levels = [
   { value: 'rendah', label: 'Rendah' },
@@ -40,10 +30,35 @@ export default function DamageReportForm() {
   const [ticketCode, setTicketCode] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
+  const [damageTypeOptions, setDamageTypeOptions] = useState([]);
 
   // Get GPS location on component mount
   useEffect(() => {
     getGPSLocation();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDamageTypeOptions() {
+      try {
+        const options = await getActiveDamageTypeNames();
+
+        if (isMounted) {
+          setDamageTypeOptions(options);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Gagal memuat jenis kerusakan referensi');
+        }
+      }
+    }
+
+    loadDamageTypeOptions();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const getGPSLocation = () => {
@@ -354,7 +369,7 @@ export default function DamageReportForm() {
             required
           >
             <option value="">-- Pilih Jenis Kerusakan --</option>
-            {damage_types.map((type) => (
+            {damageTypeOptions.map((type) => (
               <option key={type} value={type}>
                 {type}
               </option>
