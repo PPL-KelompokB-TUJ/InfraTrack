@@ -3,11 +3,11 @@ import { Search, AlertCircle, CheckCircle, Clock, MapPin } from 'lucide-react';
 import { getDamageReportByTicket } from '../lib/damageReportService';
 
 const statusColors = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  terverifikasi: 'bg-blue-100 text-blue-800',
-  ditolak: 'bg-red-100 text-red-800',
-  sedang_dikerjakan: 'bg-purple-100 text-purple-800',
-  selesai: 'bg-green-100 text-green-800',
+  pending: 'border-amber-200 bg-amber-50 text-amber-800',
+  terverifikasi: 'border-cyan-200 bg-cyan-50 text-cyan-800',
+  ditolak: 'border-rose-200 bg-rose-50 text-rose-800',
+  sedang_dikerjakan: 'border-indigo-200 bg-indigo-50 text-indigo-800',
+  selesai: 'border-emerald-200 bg-emerald-50 text-emerald-800',
 };
 
 const statusLabels = {
@@ -74,243 +74,194 @@ export default function TrackDamageReportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <section className="surface-panel hero-rise rounded-3xl p-6 sm:p-8">
+        <div className="text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+            InfraTrack / Tracking Publik
+          </p>
+          <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-800 sm:text-4xl">
             Lacak Status Laporan
           </h1>
-          <p className="text-gray-600">
+          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
             Gunakan kode tiket untuk melacak status laporan kerusakan Anda
           </p>
         </div>
 
-        {/* Search Form */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <form onSubmit={handleSearch} className="flex gap-2">
+        <div className="surface-card mx-auto mt-7 max-w-3xl rounded-2xl p-4 sm:p-5">
+          <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
               value={ticketCode}
               onChange={(e) => setTicketCode(e.target.value.toUpperCase())}
               placeholder="Masukkan kode tiket (mis: INF-20240101-XXXXX)"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 rounded-xl border border-cyan-100 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-cyan-400"
             />
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-semibold flex items-center gap-2 transition"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
             >
               <Search className="w-5 h-5" />
               Cari
             </button>
           </form>
+
+          <p className="mt-3 text-xs text-slate-500">
+            Format contoh: <span className="font-semibold text-slate-700">INF-20260417-ABC12</span>
+          </p>
         </div>
 
-        {/* Error Message */}
         {error && searched && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <p className="text-red-700">{error}</p>
+          <div className="mx-auto mt-5 max-w-3xl rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+            <div className="flex gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <p>{error}</p>
+            </div>
           </div>
         )}
 
-        {/* Loading State */}
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin">
-              <Clock className="w-12 h-12 text-blue-600" />
+          <div className="py-12 text-center">
+            <div className="inline-flex rounded-full bg-cyan-50 p-4 text-cyan-700">
+              <Clock className="h-8 w-8 animate-spin" />
             </div>
-            <p className="text-gray-600 mt-4">Mencari laporan...</p>
+            <p className="mt-3 text-sm text-slate-600">Mencari laporan...</p>
           </div>
         )}
 
-        {/* Report Details */}
         {report && !loading && (
-          <div className="space-y-4">
-            {/* Status Card */}
-            <div className={`rounded-lg p-6 ${statusColors[report.status]}`}>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold">Status Laporan</h3>
-                {getStatusIcon(report.status)}
-              </div>
-              <p className="text-2xl font-bold">
-                {statusLabels[report.status]}
-              </p>
-            </div>
-
-            {/* Report Information */}
-            <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-semibold">
-                  Kode Tiket
-                </p>
-                <p className="text-lg font-bold text-gray-800">
-                  {report.ticket_code}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+          <div className="mx-auto mt-7 max-w-4xl space-y-4">
+            <section className={`rounded-2xl border p-5 ${statusColors[report.status]}`}>
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-semibold">
-                    Jenis Kerusakan
-                  </p>
-                  <p className="text-gray-800">{report.damage_type}</p>
+                  <p className="text-xs uppercase tracking-wide opacity-80">Status Saat Ini</p>
+                  <p className="mt-1 text-2xl font-extrabold">{statusLabels[report.status]}</p>
                 </div>
+                <div className="rounded-xl bg-white/70 p-2">{getStatusIcon(report.status)}</div>
+              </div>
+            </section>
+
+            <section className="surface-card rounded-2xl p-5 sm:p-6">
+              <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-semibold">
-                    Tingkat Urgensi
-                  </p>
-                  <p className="text-gray-800 capitalize">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Kode Tiket</p>
+                  <p className="mt-1 text-lg font-bold text-slate-800">{report.ticket_code}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Jenis Kerusakan</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-800">{report.damage_type}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Tingkat Urgensi</p>
+                  <p className="mt-1 text-sm font-semibold capitalize text-slate-800">
                     {report.urgency_level}
                   </p>
                 </div>
-              </div>
 
-              <div>
-                <p className="text-xs text-gray-500 uppercase font-semibold">
-                  Deskripsi
-                </p>
-                <p className="text-gray-800">{report.description}</p>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-semibold">
-                    Lokasi
-                  </p>
-                  <p className="text-gray-800">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Lokasi</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-800">
                     {report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}
                   </p>
                 </div>
               </div>
 
+              <div className="mt-5 border-t border-cyan-100 pt-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Deskripsi</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-700">{report.description}</p>
+              </div>
+
               {report.photo_url && (
-                <div>
-                  <p className="text-xs text-gray-500 uppercase font-semibold mb-2">
-                    Foto Kerusakan
-                  </p>
+                <div className="mt-5">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Foto Kerusakan</p>
                   <img
                     src={report.photo_url}
                     alt="Damage"
-                    className="w-full max-h-64 object-cover rounded-lg"
+                    className="mt-2 w-full rounded-xl border border-cyan-100 object-cover"
                   />
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+              <div className="mt-5 grid gap-4 border-t border-cyan-100 pt-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-semibold">
-                    Tanggal Dilaporkan
-                  </p>
-                  <p className="text-sm text-gray-800">
-                    {formatDate(report.created_at)}
-                  </p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Tanggal Dilaporkan</p>
+                  <p className="mt-1 text-sm text-slate-700">{formatDate(report.created_at)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-semibold">
-                    Terakhir Diperbarui
-                  </p>
-                  <p className="text-sm text-gray-800">
-                    {formatDate(report.updated_at)}
-                  </p>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Terakhir Diperbarui</p>
+                  <p className="mt-1 text-sm text-slate-700">{formatDate(report.updated_at)}</p>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* Timeline */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-bold text-gray-800 mb-4">Timeline Laporan</h3>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                    <div className="w-1 h-12 bg-gray-300"></div>
-                  </div>
+            <section className="surface-card rounded-2xl p-5 sm:p-6">
+              <h3 className="text-base font-bold text-slate-800">Timeline Laporan</h3>
+              <div className="mt-4 space-y-4">
+                <div className="flex gap-3">
+                  <div className="mt-1 h-3 w-3 rounded-full bg-cyan-600" />
                   <div>
-                    <p className="font-semibold text-gray-800">
-                      Laporan Dikirim
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {formatDate(report.created_at)}
+                    <p className="text-sm font-semibold text-slate-800">Laporan Dikirim</p>
+                    <p className="text-xs text-slate-500">{formatDate(report.created_at)}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div
+                    className={`mt-1 h-3 w-3 rounded-full ${
+                      report.status !== 'pending' ? 'bg-cyan-600' : 'bg-slate-300'
+                    }`}
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Verifikasi</p>
+                    <p className="text-xs text-slate-500">
+                      {report.status !== 'pending' ? 'Selesai' : 'Menunggu verifikasi'}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        report.status !== 'pending'
-                          ? 'bg-blue-600'
-                          : 'bg-gray-300'
-                      }`}
-                    ></div>
-                    <div className="w-1 h-12 bg-gray-300"></div>
-                  </div>
+                <div className="flex gap-3">
+                  <div
+                    className={`mt-1 h-3 w-3 rounded-full ${
+                      ['sedang_dikerjakan', 'selesai'].includes(report.status)
+                        ? 'bg-cyan-600'
+                        : 'bg-slate-300'
+                    }`}
+                  />
                   <div>
-                    <p className="font-semibold text-gray-800">
-                      Verifikasi
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {report.status !== 'pending'
-                        ? 'Selesai'
-                        : 'Menunggu verifikasi'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-3 h-3 rounded-full ${
-                        ['sedang_dikerjakan', 'selesai'].includes(
-                          report.status
-                        )
-                          ? 'bg-blue-600'
-                          : 'bg-gray-300'
-                      }`}
-                    ></div>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      Penanganan
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {['sedang_dikerjakan', 'selesai'].includes(
-                        report.status
-                      )
-                        ? 'Dalam Proses'
-                        : 'Menunggu'}
+                    <p className="text-sm font-semibold text-slate-800">Penanganan</p>
+                    <p className="text-xs text-slate-500">
+                      {['sedang_dikerjakan', 'selesai'].includes(report.status)
+                        ? 'Dalam proses / selesai'
+                        : 'Menunggu tindak lanjut'}
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && searched && !report && !error && (
-          <div className="text-center py-12">
-            <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">Laporan tidak ditemukan</p>
+          <div className="py-12 text-center">
+            <AlertCircle className="mx-auto h-12 w-12 text-slate-400" />
+            <p className="mt-3 text-sm text-slate-600">Laporan tidak ditemukan</p>
           </div>
         )}
 
-        {/* Info Box */}
         {!searched && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-            <h3 className="font-bold text-blue-900 mb-2">Tips:</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Kode tiket diberikan setelah Anda berhasil mengirim laporan</li>
-              <li>• Gunakan kode tiket untuk melacak status laporan kapan saja</li>
-              <li>• Status laporan akan diperbarui secara berkala</li>
+          <div className="mx-auto mt-7 max-w-3xl rounded-2xl border border-cyan-100 bg-cyan-50/70 p-5">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-cyan-800">Tips Tracking</h3>
+            <ul className="mt-3 space-y-1.5 text-sm text-cyan-900">
+              <li>• Kode tiket didapat setelah laporan berhasil dikirim.</li>
+              <li>• Simpan kode tiket untuk memantau progres kapan saja.</li>
+              <li>• Status laporan akan diperbarui berkala oleh admin.</li>
             </ul>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

@@ -1,127 +1,163 @@
-import React, { useState } from 'react';
-import { MapPin, AlertCircle, Phone } from 'lucide-react';
+import React from 'react';
+import { AlertCircle, Clock3, MapPin, Phone } from 'lucide-react';
 import DamageReportForm from '../components/DamageReportForm';
+
+const highlights = [
+  {
+    icon: MapPin,
+    title: 'Koordinat Presisi',
+    description:
+      'Gunakan GPS atau isi koordinat manual agar lokasi kerusakan tercatat dengan akurat.',
+  },
+  {
+    icon: AlertCircle,
+    title: 'Verifikasi Cepat',
+    description:
+      'Laporan tervalidasi untuk membantu tim menentukan prioritas penanganan lebih objektif.',
+  },
+  {
+    icon: Clock3,
+    title: 'Tracking Transparan',
+    description:
+      'Setiap laporan memiliki kode tiket agar masyarakat bisa memantau progres secara mandiri.',
+  },
+];
+
+const faqs = [
+  {
+    question: 'Apakah perlu membuat akun untuk melaporkan?',
+    answer:
+      'Tidak perlu. Pelaporan bersifat publik agar warga dapat melapor dengan cepat tanpa proses registrasi.',
+  },
+  {
+    question: 'Berapa lama proses verifikasi laporan?',
+    answer:
+      'Umumnya 1-3 hari kerja, tergantung kelengkapan data lokasi, foto, dan tingkat urgensi laporan.',
+  },
+  {
+    question: 'Bagaimana cara melacak status laporan?',
+    answer:
+      'Setelah submit, Anda akan menerima kode tiket. Gunakan kode tersebut pada menu Lacak Laporan.',
+  },
+  {
+    question: 'Apakah data pribadi saya aman?',
+    answer:
+      'Ya. Data kontak hanya dipakai untuk validasi dan komunikasi tindak lanjut laporan.',
+  },
+];
 
 export default function ReportDamagePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      {/* Header */}
-      <div className="bg-blue-600 text-white py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">Lapor Kerusakan Infrastruktur</h1>
-          <p className="text-blue-100 text-lg">
-            Membantu pemerintah menjaga kelestarian infrastruktur publik dengan pelaporan yang mudah dan transparan
+    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <section className="surface-panel hero-rise relative overflow-hidden rounded-3xl p-6 sm:p-10">
+        <div className="pointer-events-none absolute -right-20 -top-16 h-56 w-56 rounded-full bg-cyan-300/30 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-teal-300/25 blur-3xl" />
+
+        <div className="relative grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">
+              InfraTrack / Pelaporan Publik
+            </p>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+              Lapor Kerusakan Infrastruktur
+              <span className="block text-cyan-700">Lebih Cepat, Lebih Transparan</span>
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+              Bantu pemerintah daerah menjaga kualitas infrastruktur publik. Kirim laporan
+              lengkap dengan lokasi dan foto, lalu pantau status penanganan secara mandiri.
+            </p>
+          </div>
+
+          <div className="surface-card rounded-2xl p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+              Kenapa InfraTrack
+            </p>
+            <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-xl bg-cyan-50 px-2 py-3">
+                <p className="text-lg font-extrabold text-cyan-800">24/7</p>
+                <p className="mt-1 text-[11px] text-slate-600">Akses Pelaporan</p>
+              </div>
+              <div className="rounded-xl bg-teal-50 px-2 py-3">
+                <p className="text-lg font-extrabold text-teal-800">Tanpa</p>
+                <p className="mt-1 text-[11px] text-slate-600">Buat Akun</p>
+              </div>
+              <div className="rounded-xl bg-sky-50 px-2 py-3">
+                <p className="text-lg font-extrabold text-sky-800">1</p>
+                <p className="mt-1 text-[11px] text-slate-600">Kode Tiket</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="stagger-fade mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          {highlights.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <article key={item.title} className="surface-card rounded-2xl p-5">
+                <div className="inline-flex rounded-xl bg-cyan-100 p-2.5 text-cyan-700">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h2 className="mt-4 text-lg font-bold text-slate-800">{item.title}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.description}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mt-8 grid gap-8 xl:grid-cols-[1.25fr_0.75fr]">
+        <div className="surface-panel rounded-3xl p-5 sm:p-7">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+            Form Pelaporan
           </p>
-        </div>
-      </div>
+          <h2 className="mt-2 text-2xl font-extrabold text-slate-800">Kirim Laporan Anda</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Isi data dengan lengkap agar proses verifikasi dan penanganan dapat dilakukan lebih
+            cepat.
+          </p>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto py-12 px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Info Card 1 */}
-          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col gap-4">
-            <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-blue-600" />
+          <div className="mt-6 rounded-2xl border border-cyan-100 bg-white/90 p-3 sm:p-5">
+            <DamageReportForm />
+          </div>
+        </div>
+
+        <aside className="space-y-6">
+          <div className="surface-panel rounded-3xl p-5 sm:p-6">
+            <h3 className="text-lg font-bold text-slate-800">Pertanyaan Umum</h3>
+            <div className="mt-4 space-y-3">
+              {faqs.map((item) => (
+                <article key={item.question} className="surface-card rounded-xl p-4">
+                  <h4 className="text-sm font-bold text-slate-800">{item.question}</h4>
+                  <p className="mt-1.5 text-sm text-slate-600">{item.answer}</p>
+                </article>
+              ))}
             </div>
-            <h3 className="text-lg font-bold text-gray-800">Lokasi Otomatis</h3>
-            <p className="text-gray-600 text-sm">
-              Gunakan GPS perangkat Anda untuk menentukan lokasi kerusakan secara akurat
+          </div>
+
+          <div className="surface-panel rounded-3xl p-5 sm:p-6">
+            <h3 className="text-lg font-bold text-slate-800">Butuh Bantuan Cepat?</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Hubungi kanal resmi untuk bantuan pelaporan dan kendala penggunaan aplikasi.
             </p>
-          </div>
-
-          {/* Info Card 2 */}
-          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col gap-4">
-            <div className="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center">
-              <AlertCircle className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800">Verifikasi Cepat</h3>
-            <p className="text-gray-600 text-sm">
-              Tim kami akan memverifikasi laporan dan menentukan prioritas penanganan
-            </p>
-          </div>
-
-          {/* Info Card 3 */}
-          <div className="bg-white rounded-lg shadow-md p-6 flex flex-col gap-4">
-            <div className="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center">
-              <Phone className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800">Lacak Status</h3>
-            <p className="text-gray-600 text-sm">
-              Gunakan kode tiket untuk melacak status laporan Anda kapan saja
-            </p>
-          </div>
-        </div>
-
-        {/* Form Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <DamageReportForm />
-        </div>
-
-        {/* FAQ Section */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Pertanyaan Umum</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* FAQ Item 1 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-bold text-gray-800 mb-2">
-                Apakah perlu membuat akun untuk melaporkan?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Tidak perlu. Anda dapat melaporkan kerusakan tanpa membuat akun. Data kontak Anda akan digunakan
-                untuk verifikasi laporan.
-              </p>
-            </div>
-
-            {/* FAQ Item 2 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-bold text-gray-800 mb-2">
-                Berapa lama waktu proses verifikasi?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Tim kami biasanya memverifikasi laporan dalam 1-3 hari kerja. Status laporan akan diperbarui
-                secara berkala.
-              </p>
-            </div>
-
-            {/* FAQ Item 3 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-bold text-gray-800 mb-2">
-                Bagaimana cara melacak status laporan?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Setelah laporan dikirim, Anda akan menerima kode tiket. Gunakan kode ini di halaman "Lacak
-                Laporan" untuk melihat status terbaru.
-              </p>
-            </div>
-
-            {/* FAQ Item 4 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="font-bold text-gray-800 mb-2">
-                Apakah data pribadi saya aman?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Ya. Data pribadi Anda dienkripsi dan hanya digunakan untuk keperluan verifikasi dan komunikasi
-                terkait laporan Anda.
-              </p>
+            <div className="mt-4 space-y-3">
+              <div className="surface-card flex items-center gap-3 rounded-xl p-4">
+                <div className="rounded-lg bg-cyan-100 p-2 text-cyan-700">
+                  <Phone className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">Telepon</p>
+                  <p className="text-sm font-semibold text-slate-800">1500-123 (Bebas Pulsa)</p>
+                </div>
+              </div>
+              <div className="surface-card rounded-xl p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Email</p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">laporan@infratrack.gov.id</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Contact Info */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-8">
-          <h3 className="text-xl font-bold text-blue-900 mb-4">Butuh Bantuan?</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-blue-800">
-            <div>
-              <p className="font-semibold mb-1">Telepon</p>
-              <p>1500-123 (Bebas Pulsa)</p>
-            </div>
-            <div>
-              <p className="font-semibold mb-1">Email</p>
-              <p>laporan@infratrack.gov.id</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        </aside>
+      </section>
+    </main>
   );
 }

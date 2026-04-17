@@ -18,8 +18,8 @@ export default function DamageReportForm() {
     damageType: '',
     urgencyLevel: '',
     description: '',
-    latitude: null,
-    longitude: null,
+    latitude: '',
+    longitude: '',
   });
 
   const [photoFile, setPhotoFile] = useState(null);
@@ -75,8 +75,8 @@ export default function DamageReportForm() {
       (position) => {
         setFormData((prev) => ({
           ...prev,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: position.coords.latitude.toFixed(6),
+          longitude: position.coords.longitude.toFixed(6),
         }));
         setLocationStatus(
           `Lokasi ditemukan: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
@@ -85,7 +85,9 @@ export default function DamageReportForm() {
       },
       (error) => {
         console.error('GPS error:', error);
-        setLocationStatus(`GPS Error: ${error.message}`);
+        setLocationStatus(
+          `Akses GPS ditolak atau gagal (${error.message}). Silakan isi koordinat manual.`
+        );
         setGpsLoading(false);
       },
       {
@@ -131,6 +133,13 @@ export default function DamageReportForm() {
     }));
   };
 
+  const handleCoordinateChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const validateForm = () => {
     if (!formData.reporterName.trim()) {
       setError('Nama pelapor harus diisi');
@@ -162,8 +171,16 @@ export default function DamageReportForm() {
       return false;
     }
 
-    if (formData.latitude === null || formData.longitude === null) {
-      setError('Lokasi tidak dapat ditentukan. Silakan aktifkan GPS dan coba lagi');
+    const latitude = Number(formData.latitude);
+    const longitude = Number(formData.longitude);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      setError('Koordinat tidak valid. Gunakan GPS atau isi koordinat manual dengan benar.');
+      return false;
+    }
+
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      setError('Rentang koordinat tidak valid (lat: -90..90, lng: -180..180).');
       return false;
     }
 
@@ -192,8 +209,8 @@ export default function DamageReportForm() {
       damageType: formData.damageType,
       urgencyLevel: formData.urgencyLevel,
       description: formData.description,
-      latitude: formData.latitude,
-      longitude: formData.longitude,
+      latitude: Number(formData.latitude),
+      longitude: Number(formData.longitude),
       photoFile,
     });
 
@@ -210,8 +227,8 @@ export default function DamageReportForm() {
         damageType: '',
         urgencyLevel: '',
         description: '',
-        latitude: null,
-        longitude: null,
+        latitude: '',
+        longitude: '',
       });
       setPhotoFile(null);
       setPhotoPreview(null);
@@ -223,28 +240,28 @@ export default function DamageReportForm() {
   };
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-5">
       {/* Success Message */}
       {success && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+          <div className="surface-panel w-full max-w-md rounded-3xl p-8 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">
+            <h3 className="mb-2 text-xl font-bold text-slate-800">
               Laporan Berhasil Dikirim!
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="mb-4 text-sm text-slate-600">
               Terima kasih telah melaporkan kerusakan infrastruktur.
             </p>
-            <div className="bg-blue-50 p-4 rounded-lg mb-6">
-              <p className="text-sm text-gray-600">Kode Tiket Laporan:</p>
-              <p className="text-2xl font-bold text-blue-600">{ticketCode}</p>
-              <p className="text-xs text-gray-500 mt-2">
+            <div className="mb-6 rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Kode Tiket Laporan</p>
+              <p className="mt-1 text-2xl font-bold text-cyan-700">{ticketCode}</p>
+              <p className="mt-2 text-xs text-slate-500">
                 Simpan kode ini untuk melacak status laporan Anda
               </p>
             </div>
             <button
               onClick={() => setSuccess(false)}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 font-semibold"
+              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
             >
               Tutup
             </button>
@@ -254,15 +271,15 @@ export default function DamageReportForm() {
 
       {/* Error Message */}
       {error && (
-        <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="flex gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <p>{error}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-5">
-        <h2 className="text-2xl font-bold text-gray-800">Laporkan Kerusakan Infrastruktur</h2>
-        <p className="text-gray-600 text-sm">
+      <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl bg-white p-2">
+        <h2 className="text-xl font-bold text-slate-800">Form Laporan Kerusakan</h2>
+        <p className="text-sm text-slate-600">
           Bantu kami menjaga kelestarian infrastruktur publik dengan melaporkan kerusakan yang Anda temukan.
         </p>
 
@@ -277,7 +294,7 @@ export default function DamageReportForm() {
             value={formData.reporterName}
             onChange={handleInputChange}
             placeholder="Masukkan nama Anda"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
             required
           />
         </div>
@@ -293,7 +310,7 @@ export default function DamageReportForm() {
             value={formData.reporterEmail}
             onChange={handleInputChange}
             placeholder="email@example.com"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
             required
           />
         </div>
@@ -309,47 +326,61 @@ export default function DamageReportForm() {
             value={formData.reporterPhone}
             onChange={handleInputChange}
             placeholder="08123456789"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
             required
           />
         </div>
 
         {/* Lokasi GPS */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
             <MapPin className="w-4 h-4" /> Lokasi (GPS) *
           </label>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4">
             {gpsLoading ? (
-              <div className="flex items-center gap-2 text-blue-600">
+              <div className="flex items-center gap-2 text-cyan-700">
                 <Loader className="w-4 h-4 animate-spin" />
                 <span>Mengakses GPS...</span>
               </div>
             ) : (
               <>
-                <p className="text-sm text-gray-600 mb-2">{locationStatus}</p>
-                {formData.latitude && formData.longitude && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-xs text-gray-500">Latitude</p>
-                      <p className="text-sm font-semibold text-gray-800">
-                        {formData.latitude.toFixed(6)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Longitude</p>
-                      <p className="text-sm font-semibold text-gray-800">
-                        {formData.longitude.toFixed(6)}
-                      </p>
-                    </div>
+                <p className="mb-3 text-sm text-slate-600">{locationStatus || 'Belum ada koordinat.'}</p>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Latitude</p>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formData.latitude}
+                      onChange={(event) =>
+                        handleCoordinateChange('latitude', event.target.value)
+                      }
+                      placeholder="-6.200000"
+                      className="mt-1.5 w-full rounded-lg border border-cyan-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-500"
+                    />
                   </div>
-                )}
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Longitude</p>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formData.longitude}
+                      onChange={(event) =>
+                        handleCoordinateChange('longitude', event.target.value)
+                      }
+                      placeholder="106.816666"
+                      className="mt-1.5 w-full rounded-lg border border-cyan-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
               </>
             )}
             <button
               type="button"
               onClick={getGPSLocation}
-              className="mt-3 w-full text-sm bg-blue-100 text-blue-700 py-2 rounded hover:bg-blue-200 font-semibold"
+              className="mt-3 w-full rounded-lg border border-cyan-200 bg-white py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100"
             >
               Perbarui Lokasi
             </button>
@@ -365,7 +396,7 @@ export default function DamageReportForm() {
             name="damageType"
             value={formData.damageType}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
             required
           >
             <option value="">-- Pilih Jenis Kerusakan --</option>
@@ -386,7 +417,7 @@ export default function DamageReportForm() {
             name="urgencyLevel"
             value={formData.urgencyLevel}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
             required
           >
             <option value="">-- Pilih Tingkat Urgensi --</option>
@@ -409,7 +440,7 @@ export default function DamageReportForm() {
             onChange={handleInputChange}
             placeholder="Jelaskan detail kerusakan yang Anda temukan..."
             rows="4"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
             required
           />
         </div>
@@ -419,7 +450,7 @@ export default function DamageReportForm() {
           <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
             <Camera className="w-4 h-4" /> Foto Kerusakan *
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 hover:bg-blue-50 cursor-pointer transition">
+          <div className="cursor-pointer rounded-xl border-2 border-dashed border-cyan-200 p-6 text-center transition hover:border-cyan-500 hover:bg-cyan-50">
             <input
               type="file"
               accept="image/*"
@@ -434,17 +465,17 @@ export default function DamageReportForm() {
                   <img
                     src={photoPreview}
                     alt="Preview"
-                    className="w-full max-h-64 object-cover rounded-lg mx-auto"
+                    className="mx-auto w-full max-h-64 rounded-lg object-cover"
                   />
-                  <p className="text-sm text-gray-600">Klik untuk ganti foto</p>
+                  <p className="text-sm text-slate-600">Klik untuk ganti foto</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Camera className="w-12 h-12 text-gray-400 mx-auto" />
-                  <p className="text-sm text-gray-600">
+                  <Camera className="mx-auto h-12 w-12 text-slate-400" />
+                  <p className="text-sm text-slate-600">
                     Klik atau drag foto ke sini
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     Format: JPG, PNG, GIF (Maks 5MB)
                   </p>
                 </div>
@@ -457,7 +488,7 @@ export default function DamageReportForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-semibold transition flex items-center justify-center gap-2"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 py-3 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
         >
           {loading ? (
             <>
