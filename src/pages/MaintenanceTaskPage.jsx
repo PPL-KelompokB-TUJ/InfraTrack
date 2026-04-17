@@ -74,6 +74,10 @@ export default function MaintenanceTaskPage() {
         getInfrastructureAssets(),
       ]);
 
+      if (!reportsResponse?.success) {
+        throw new Error(reportsResponse?.error || 'Gagal memuat laporan kerusakan.');
+      }
+
       setTasks(tasksData);
       setReports(reportsResponse.reports || []);
       setAssets(assetsData);
@@ -115,16 +119,25 @@ export default function MaintenanceTaskPage() {
 
   // Handle modal open for creating new task
   function handleOpenCreateModal() {
+    setErrorMessage('');
+
     // Cari report yang belum memiliki penugasan
-    const unassignedReport = reports.find(
-      r => r.status === 'terverifikasi' && !tasks.some(t => t.report_id === r.id)
+    const unassignedReports = reports.filter(
+      (report) => !tasks.some((task) => task.report_id === report.id)
     );
 
-    if (unassignedReport) {
-      const relatedAsset = assets.find(a => a.id === unassignedReport.asset_id);
-      setSelectedReport(unassignedReport);
-      setSelectedAsset(relatedAsset);
+    if (unassignedReports.length === 0) {
+      setErrorMessage(
+        'Belum ada laporan terverifikasi yang siap ditugaskan. Verifikasi laporan terlebih dahulu.'
+      );
+      return;
     }
+
+    const unassignedReport = unassignedReports[0];
+
+    const relatedAsset = assets.find((asset) => asset.id === unassignedReport.asset_id);
+    setSelectedReport(unassignedReport);
+    setSelectedAsset(relatedAsset || null);
 
     setIsModalOpen(true);
   }
@@ -144,7 +157,10 @@ export default function MaintenanceTaskPage() {
 
     try {
       if (!selectedReport) {
-        throw new Error('Laporan tidak ditemukan');
+        setErrorMessage(
+          'Tidak ada laporan yang dipilih untuk ditugaskan. Klik "Buat Penugasan" lagi untuk memilih laporan yang tersedia.'
+        );
+        return;
       }
 
       await createMaintenanceTask(

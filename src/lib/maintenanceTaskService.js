@@ -203,28 +203,28 @@ export async function getMaintenanceTasksByOfficer(officerId) {
 export async function getActiveFieldOfficers() {
   try {
     const { data, error } = await supabase
-      .from('users')
-      .select(`
-        id,
-        name,
-        email,
-        user_profiles(specialization, work_area)
-      `)
-      .eq('role', 'field_officer')
-      .eq('is_active', true)
+      .from('field_officers_view')
+      .select('id, name, email, specialization, work_area')
       .order('name', { ascending: true });
 
     if (error) throw new Error(error.message);
-    
-    // Flatten the response to make specialization & work_area accessible
-    return (data || []).map(officer => ({
+
+    return (data || []).map((officer) => ({
       id: officer.id,
       name: officer.name,
       email: officer.email,
-      specialization: officer.user_profiles?.[0]?.specialization || '',
-      work_area: officer.user_profiles?.[0]?.work_area || '',
+      specialization: officer.specialization || '',
+      work_area: officer.work_area || '',
     }));
   } catch (error) {
+    const rawMessage = String(error.message || '');
+
+    if (rawMessage.toLowerCase().includes('permission denied')) {
+      throw new Error(
+        'Gagal memuat petugas: akses database belum dikonfigurasi. Jalankan script supabase/fix_pbi04_permissions.sql di Supabase SQL Editor.'
+      );
+    }
+
     throw new Error(`Failed to fetch field officers: ${error.message}`);
   }
 }

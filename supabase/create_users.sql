@@ -74,6 +74,19 @@ create index if not exists user_profiles_user_id_idx on public.user_profiles(use
 alter table public.users enable row level security;
 alter table public.user_profiles enable row level security;
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
+
+grant execute on function public.is_admin() to anon, authenticated;
+
+grant select on public.users to anon, authenticated;
+grant select on public.user_profiles to anon, authenticated;
+
 -- Insert test data for field officers
 insert into public.users (name, email, role, is_active) values
 ('Ahmad Sutrisno', 'ahmad.sutrisno@example.com', 'field_officer', true),
@@ -114,3 +127,47 @@ select
 from public.users u
 left join public.user_profiles up on u.id = up.user_id
 where u.role = 'field_officer' and u.is_active = true;
+
+grant select on public.field_officers_view to anon, authenticated;
+
+drop policy if exists "Public read active field officers users" on public.users;
+create policy "Public read active field officers users"
+  on public.users
+  for select
+  to anon, authenticated
+  using (
+    (role = 'field_officer' and is_active = true)
+    or public.is_admin()
+  );
+
+drop policy if exists "Admin manage users" on public.users;
+create policy "Admin manage users"
+  on public.users
+  for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "Public read active field officer profiles" on public.user_profiles;
+create policy "Public read active field officer profiles"
+  on public.user_profiles
+  for select
+  to anon, authenticated
+  using (
+    exists (
+      select 1
+      from public.users u
+      where u.id = public.user_profiles.user_id
+        and u.role = 'field_officer'
+        and u.is_active = true
+    )
+    or public.is_admin()
+  );
+
+drop policy if exists "Admin manage user profiles" on public.user_profiles;
+create policy "Admin manage user profiles"
+  on public.user_profiles
+  for all
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());

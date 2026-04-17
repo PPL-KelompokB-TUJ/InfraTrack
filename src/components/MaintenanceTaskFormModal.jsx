@@ -139,7 +139,8 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
                 Aset: <span className="font-medium">{asset.name}</span>
               </p>
               <p className="text-sm text-emerald-800">
-                Lokasi: <span className="font-mono">{asset.latitude}, {asset.longitude}</span>
+                Lokasi:{' '}
+                <span className="font-mono">{asset.lat ?? asset.latitude}, {asset.lng ?? asset.longitude}</span>
               </p>
             </div>
           )}
