@@ -2,16 +2,18 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapPin, Upload } from 'lucide-react';
 import MapPicker from './MapPicker';
 
-const CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Fasum'];
+const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Fasum'];
 const CONDITION_OPTIONS = ['baik', 'rusak ringan', 'rusak berat'];
 
 const currentYear = new Date().getFullYear();
 const DEFAULT_POSITION = { lat: -6.2, lng: 106.816666 };
 
-function buildDefaultForm() {
+function buildDefaultForm(categoryOptions) {
+  const firstCategory = categoryOptions[0] || '';
+
   return {
     name: '',
-    category: CATEGORY_OPTIONS[0],
+    category: firstCategory,
     condition: CONDITION_OPTIONS[0],
     year_built: currentYear,
     lat: DEFAULT_POSITION.lat,
@@ -24,10 +26,24 @@ export default function AssetFormModal({
   isOpen,
   isSubmitting,
   initialAsset,
+  categoryOptions,
   onClose,
   onSubmit,
 }) {
-  const [form, setForm] = useState(buildDefaultForm);
+  const resolvedCategoryOptions = useMemo(() => {
+    const options =
+      Array.isArray(categoryOptions) && categoryOptions.length > 0
+        ? categoryOptions
+        : FALLBACK_CATEGORY_OPTIONS;
+
+    if (initialAsset?.category && !options.includes(initialAsset.category)) {
+      return [initialAsset.category, ...options];
+    }
+
+    return options;
+  }, [categoryOptions, initialAsset]);
+
+  const [form, setForm] = useState(() => buildDefaultForm(resolvedCategoryOptions));
   const [photoFile, setPhotoFile] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -47,12 +63,12 @@ export default function AssetFormModal({
         photo_url: initialAsset.photo_url || '',
       });
     } else {
-      setForm(buildDefaultForm());
+      setForm(buildDefaultForm(resolvedCategoryOptions));
     }
 
     setPhotoFile(null);
     setErrorMessage('');
-  }, [isOpen, initialAsset]);
+  }, [isOpen, initialAsset, resolvedCategoryOptions]);
 
   const photoPreview = useMemo(() => {
     if (photoFile) {
@@ -148,7 +164,7 @@ export default function AssetFormModal({
               }
               className="rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-400"
             >
-              {CATEGORY_OPTIONS.map((category) => (
+              {resolvedCategoryOptions.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
