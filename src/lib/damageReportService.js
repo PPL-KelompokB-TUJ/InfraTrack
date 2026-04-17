@@ -157,8 +157,8 @@ export const submitDamageReport = async ({
 export const getDamageReportByTicket = async (ticketCode) => {
   try {
     const { data, error } = await supabase
-      .from('damage_reports')
-      .select('*, damage_types(name)')
+      .from('damage_reports_public')
+      .select('*')
       .eq('ticket_code', ticketCode)
       .single();
 
@@ -168,10 +168,7 @@ export const getDamageReportByTicket = async (ticketCode) => {
 
     return {
       success: true,
-      report: {
-        ...data,
-        damage_type: data.damage_types?.name || '-',
-      },
+      report: data,
     };
   } catch (error) {
     console.error('Error fetching damage report:', error);

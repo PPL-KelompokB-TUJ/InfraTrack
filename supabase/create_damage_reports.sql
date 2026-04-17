@@ -138,30 +138,35 @@ create index if not exists damage_reports_damage_type_id_idx on public.damage_re
 -- Enable RLS
 alter table public.damage_reports enable row level security;
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
+
+grant execute on function public.is_admin() to anon, authenticated;
+
 -- Allow anyone to insert damage reports (public form)
 drop policy if exists "Allow anyone to create damage reports" on public.damage_reports;
-create policy "Allow anyone to create damage reports"
+drop policy if exists "Allow anyone create damage reports" on public.damage_reports;
+create policy "Allow anyone create damage reports"
   on public.damage_reports
   for insert
   to anon, authenticated
   with check (true);
 
--- Allow anyone to read damage reports (for tracking with ticket code)
+-- Admin can read/update/delete all reports from base table.
 drop policy if exists "Allow anyone to read damage reports" on public.damage_reports;
-create policy "Allow anyone to read damage reports"
-  on public.damage_reports
-  for select
-  to anon, authenticated
-  using (true);
-
--- Allow authenticated users (admin/staff) to update damage reports
 drop policy if exists "Allow authenticated to update damage reports" on public.damage_reports;
-create policy "Allow authenticated to update damage reports"
+drop policy if exists "Admin full access to damage reports" on public.damage_reports;
+create policy "Admin full access to damage reports"
   on public.damage_reports
-  for update
+  for all
   to authenticated
-  using (true)
-  with check (true);
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Create view for public access (for tracking)
 create or replace view public.damage_reports_public as
@@ -170,6 +175,7 @@ select
   coalesce(types.name, '-') as damage_type,
   reports.urgency_level,
   reports.description,
+  reports.photo_url,
   reports.status,
   reports.ticket_code,
   st_y(reports.location::geometry) as latitude,
@@ -180,5 +186,9 @@ from public.damage_reports reports
 left join public.damage_types types
   on types.id = reports.damage_type_id;
 
+revoke all on public.damage_reports from anon, authenticated;
+grant insert on public.damage_reports to anon, authenticated;
+grant select, update, delete on public.damage_reports to authenticated;
+
+revoke all on public.damage_reports_public from anon, authenticated;
 grant select on public.damage_reports_public to anon, authenticated;
-grant all on public.damage_reports to anon, authenticated;

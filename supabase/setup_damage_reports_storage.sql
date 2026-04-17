@@ -8,32 +8,45 @@ on conflict (id) do update set public = excluded.public;
 
 alter table if exists storage.objects enable row level security;
 
--- Development-friendly policies for public reporting flow.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
+
+grant execute on function public.is_admin() to anon, authenticated;
+
 drop policy if exists "Dev read photos damage-reports" on storage.objects;
-create policy "Dev read photos damage-reports"
+drop policy if exists "Public read photos damage-reports" on storage.objects;
+create policy "Public read photos damage-reports"
   on storage.objects
   for select
   to anon, authenticated
   using (bucket_id = 'damage-reports');
 
 drop policy if exists "Dev upload photos damage-reports" on storage.objects;
-create policy "Dev upload photos damage-reports"
+drop policy if exists "Public upload photos damage-reports" on storage.objects;
+create policy "Public upload photos damage-reports"
   on storage.objects
   for insert
   to anon, authenticated
   with check (bucket_id = 'damage-reports');
 
 drop policy if exists "Dev update photos damage-reports" on storage.objects;
-create policy "Dev update photos damage-reports"
+drop policy if exists "Admin update photos damage-reports" on storage.objects;
+create policy "Admin update photos damage-reports"
   on storage.objects
   for update
-  to anon, authenticated
-  using (bucket_id = 'damage-reports')
-  with check (bucket_id = 'damage-reports');
+  to authenticated
+  using (bucket_id = 'damage-reports' and public.is_admin())
+  with check (bucket_id = 'damage-reports' and public.is_admin());
 
 drop policy if exists "Dev delete photos damage-reports" on storage.objects;
-create policy "Dev delete photos damage-reports"
+drop policy if exists "Admin delete photos damage-reports" on storage.objects;
+create policy "Admin delete photos damage-reports"
   on storage.objects
   for delete
-  to anon, authenticated
-  using (bucket_id = 'damage-reports');
+  to authenticated
+  using (bucket_id = 'damage-reports' and public.is_admin());

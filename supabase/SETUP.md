@@ -18,7 +18,16 @@ Run in Supabase SQL Editor:
 4. `supabase/create_damage_reports.sql` (untuk PBI-02)
 5. `supabase/setup_damage_reports_storage.sql` (untuk upload foto laporan kerusakan)
 
-## 3) Setup Storage Buckets
+Catatan RBAC:
+- Script di atas sudah menerapkan kebijakan role-based access control (RBAC).
+- Modul admin (manajemen aset dan master data) hanya bisa diakses akun dengan role `admin` pada `app_metadata`.
+
+## 3) Buat Akun Admin
+1. Daftarkan user admin dulu via Supabase Auth (email + password).
+2. Jalankan `supabase/setup_admin_role.sql` lalu ganti nilai `v_admin_email` sesuai email admin.
+3. Login ulang akun tersebut agar JWT terbaru memuat role `admin`.
+
+## 4) Setup Storage Buckets
 In Supabase Dashboard > Storage:
 
 ### Create two buckets:
@@ -32,7 +41,7 @@ In Supabase Dashboard > Storage:
    - Allowed file types: jpg, jpeg, png, gif, webp
    - Max file size: 5MB
 
-## 4) Query Patterns (lat/lng)
+## 5) Query Patterns (lat/lng)
 Read assets from the view:
 
 ```sql
@@ -112,7 +121,7 @@ set location = st_setsrid(st_makepoint(106.82, -6.21), 4326)::geography
 where id = '00000000-0000-0000-0000-000000000000';
 ```
 
-## 5) JS Insert Tip
+## 6) JS Insert Tip
 For Supabase JS insert/update, send `location` as EWKT string:
 
 ```js
@@ -122,7 +131,7 @@ const location = `SRID=4326;POINT(${lng} ${lat})`;
 Then insert into `public.infrastructure_assets` or `public.damage_reports` dengan kolom FK (`infrastructure_category_id`, `damage_type_id`).
 For reading, query `public.infrastructure_assets_view` or `public.damage_reports` to get `lat` and `lng` directly.
 
-## 6) PBI-02 Features (Damage Report)
+## 7) PBI-02 Features (Damage Report)
 Features implemented:
 - Form pelaporan kerusakan publik (tidak perlu login)
 - GPS browser geolocation untuk deteksi lokasi otomatis
@@ -131,7 +140,7 @@ Features implemented:
 - Validasi input form
 - Halaman tracking untuk masyarakat melacak status laporan dengan kode tiket
 
-## 7) Troubleshooting Upload Foto
+## 8) Troubleshooting Upload Foto
 Jika muncul error seperti:
 
 `new row violates row-level security policy`

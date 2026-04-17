@@ -49,7 +49,8 @@ begin
       and column_name = 'infrastructure_category_id'
   ) then
     execute $view$
-      create or replace view public.infrastructure_assets_view as
+      create or replace view public.infrastructure_assets_view
+      with (security_invoker = true) as
       select
         assets.id,
         assets.name,
@@ -67,7 +68,8 @@ begin
     $view$;
   else
     execute $view$
-      create or replace view public.infrastructure_assets_view as
+      create or replace view public.infrastructure_assets_view
+      with (security_invoker = true) as
       select
         id,
         name,
@@ -87,19 +89,30 @@ $$;
 
 alter table public.infrastructure_assets enable row level security;
 
-grant select on public.infrastructure_assets_view to anon, authenticated;
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
 
--- Development-only policy so frontend can work before auth is implemented.
--- Replace with stricter policies in production.
+grant execute on function public.is_admin() to anon, authenticated;
+
+grant select on public.infrastructure_assets_view to authenticated;
+
 drop policy if exists "Dev full access to infrastructure assets"
   on public.infrastructure_assets;
 
 drop policy if exists "Allow authenticated full access to infrastructure assets"
   on public.infrastructure_assets;
 
-create policy "Dev full access to infrastructure assets"
+drop policy if exists "Admin full access to infrastructure assets"
+  on public.infrastructure_assets;
+
+create policy "Admin full access to infrastructure assets"
   on public.infrastructure_assets
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());

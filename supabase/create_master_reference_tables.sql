@@ -82,35 +82,75 @@ alter table public.infrastructure_categories enable row level security;
 alter table public.damage_types enable row level security;
 alter table public.priority_scales enable row level security;
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
+
+grant execute on function public.is_admin() to anon, authenticated;
+
 drop policy if exists "Dev full access to infrastructure categories"
   on public.infrastructure_categories;
+drop policy if exists "Public read active infrastructure categories"
+  on public.infrastructure_categories;
+drop policy if exists "Admin full access to infrastructure categories"
+  on public.infrastructure_categories;
 
-create policy "Dev full access to infrastructure categories"
+create policy "Public read active infrastructure categories"
+  on public.infrastructure_categories
+  for select
+  to anon, authenticated
+  using (is_active = true);
+
+create policy "Admin full access to infrastructure categories"
   on public.infrastructure_categories
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
 
 drop policy if exists "Dev full access to damage types"
   on public.damage_types;
+drop policy if exists "Public read active damage types"
+  on public.damage_types;
+drop policy if exists "Admin full access to damage types"
+  on public.damage_types;
 
-create policy "Dev full access to damage types"
+create policy "Public read active damage types"
+  on public.damage_types
+  for select
+  to anon, authenticated
+  using (is_active = true);
+
+create policy "Admin full access to damage types"
   on public.damage_types
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
 
 drop policy if exists "Dev full access to priority scales"
   on public.priority_scales;
+drop policy if exists "Public read active priority scales"
+  on public.priority_scales;
+drop policy if exists "Admin full access to priority scales"
+  on public.priority_scales;
 
-create policy "Dev full access to priority scales"
+create policy "Public read active priority scales"
+  on public.priority_scales
+  for select
+  to anon, authenticated
+  using (is_active = true);
+
+create policy "Admin full access to priority scales"
   on public.priority_scales
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
 
 insert into public.infrastructure_categories (name, is_default, is_active)
 values
@@ -261,7 +301,8 @@ $$;
 create index if not exists infrastructure_assets_infrastructure_category_id_idx
   on public.infrastructure_assets(infrastructure_category_id);
 
-create or replace view public.infrastructure_assets_view as
+create or replace view public.infrastructure_assets_view
+with (security_invoker = true) as
 select
   assets.id,
   assets.name,
@@ -277,4 +318,4 @@ from public.infrastructure_assets assets
 left join public.infrastructure_categories categories
   on categories.id = assets.infrastructure_category_id;
 
-grant select on public.infrastructure_assets_view to anon, authenticated;
+grant select on public.infrastructure_assets_view to authenticated;
