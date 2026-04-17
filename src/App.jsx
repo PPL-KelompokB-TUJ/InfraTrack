@@ -1,72 +1,56 @@
-import React, { useState } from 'react';
-import { Navigation } from 'lucide-react';
+import { useState } from 'react';
 import AssetManagementPage from './pages/AssetManagementPage';
+import MasterDataPage from './pages/MasterDataPage';
 import ReportDamagePage from './pages/ReportDamagePage';
 import TrackDamageReportPage from './pages/TrackDamageReportPage';
 
+const modules = [
+  { key: 'asset-management', label: 'Manajemen Aset' },
+  { key: 'master-data', label: 'Master Data Referensi' },
+  { key: 'report-damage', label: 'Lapor Kerusakan' },
+  { key: 'track-damage', label: 'Lacak Laporan' },
+];
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('assets');
+  const [activeModule, setActiveModule] = useState('asset-management');
 
   const renderPage = () => {
-    switch (currentPage) {
-      case 'report':
+    switch (activeModule) {
+      case 'master-data':
+        return <MasterDataPage />;
+      case 'report-damage':
         return <ReportDamagePage />;
-      case 'track':
+      case 'track-damage':
         return <TrackDamageReportPage />;
-      case 'assets':
+      case 'asset-management':
       default:
         return <AssetManagementPage />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
-      <nav className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setCurrentPage('assets')}>
-              <Navigation className="w-6 h-6 text-blue-600" />
-              <h1 className="text-2xl font-bold text-blue-600">InfraTrack</h1>
-            </div>
-
-            <div className="flex gap-4">
+    <div>
+      <header className="mx-auto w-full max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+        <div className="glass-panel rounded-2xl p-2">
+          <div className="flex flex-wrap gap-2">
+            {modules.map((module) => (
               <button
-                onClick={() => setCurrentPage('assets')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
-                  currentPage === 'assets'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                key={module.key}
+                type="button"
+                onClick={() => setActiveModule(module.key)}
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                  activeModule === module.key
+                    ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-glow'
+                    : 'border border-cyan-100 bg-white text-cyan-800 hover:bg-cyan-50'
                 }`}
               >
-                Manajemen Aset
+                {module.label}
               </button>
-              <button
-                onClick={() => setCurrentPage('report')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
-                  currentPage === 'report'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Lapor Kerusakan
-              </button>
-              <button
-                onClick={() => setCurrentPage('track')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
-                  currentPage === 'track'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Lacak Laporan
-              </button>
-            </div>
+            ))}
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Page Content */}
       {renderPage()}
     </div>
   );
