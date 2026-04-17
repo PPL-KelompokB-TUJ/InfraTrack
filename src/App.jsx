@@ -3,6 +3,7 @@ import { Navigation } from 'lucide-react';
 import AssetManagementPage from './pages/AssetManagementPage';
 import ReportDamagePage from './pages/ReportDamagePage';
 import TrackDamageReportPage from './pages/TrackDamageReportPage';
+import MaintenanceTaskPage from './pages/MaintenanceTaskPage';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('assets');
@@ -13,6 +14,8 @@ export default function App() {
         return <ReportDamagePage />;
       case 'track':
         return <TrackDamageReportPage />;
+      case 'maintenance':
+        return <MaintenanceTaskPage />;
       case 'assets':
       default:
         return <AssetManagementPage />;
@@ -60,6 +63,16 @@ export default function App() {
                 }`}
               >
                 Lacak Laporan
+              </button>
+              <button
+                onClick={() => setCurrentPage('maintenance')}
+                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                  currentPage === 'maintenance'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Penugasan Pemeliharaan
               </button>
             </div>
           </div>

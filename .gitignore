@@ -3,3 +3,9 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Setup scripts dengan credentials (local only)
+setup-supabase.js
+run-migrations.js
+setup-users.js
+check-tables.js
