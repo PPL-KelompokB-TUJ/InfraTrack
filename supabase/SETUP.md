@@ -15,6 +15,7 @@ Run in Supabase SQL Editor:
 1. `supabase/create_infrastructure_assets.sql`
 2. `supabase/setup_assets_photos_storage.sql`
 3. `supabase/create_damage_reports.sql` (untuk PBI-02)
+4. `supabase/setup_damage_reports_storage.sql` (untuk upload foto laporan kerusakan)
 
 ## 3) Setup Storage Buckets
 In Supabase Dashboard > Storage:
@@ -117,4 +118,14 @@ Features implemented:
 - Generate kode tiket unik untuk setiap laporan
 - Validasi input form
 - Halaman tracking untuk masyarakat melacak status laporan dengan kode tiket
+
+## 7) Troubleshooting Upload Foto
+Jika muncul error seperti:
+
+`new row violates row-level security policy`
+
+Pastikan script berikut sudah dijalankan di SQL Editor:
+- `supabase/setup_damage_reports_storage.sql`
+
+Lalu cek bucket `damage-reports` ada di Supabase Storage dan statusnya Public.
 

@@ -4,7 +4,7 @@
 create table if not exists public.damage_reports (
   id uuid primary key default gen_random_uuid(),
   asset_id uuid references public.infrastructure_assets(id) on delete set null,
-  reporter_id uuid references public.users(id) on delete set null,
+  reporter_id uuid references auth.users(id) on delete set null,
   reporter_name text,
   reporter_email text,
   reporter_phone text,
