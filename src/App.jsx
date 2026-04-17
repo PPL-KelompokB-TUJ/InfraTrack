@@ -5,6 +5,7 @@ import MaintenanceTaskPage from './pages/MaintenanceTaskPage';
 import MasterDataPage from './pages/MasterDataPage';
 import ReportDamagePage from './pages/ReportDamagePage';
 import TrackDamageReportPage from './pages/TrackDamageReportPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import {
   getCurrentSession,
   isAdminUser,
@@ -14,6 +15,11 @@ import {
 } from './lib/authService';
 
 const modules = [
+  {
+    key: 'admin-dashboard',
+    label: 'Dashboard Admin',
+    requiresAdmin: true,
+  },
   {
     key: 'report-damage',
     label: 'Lapor Kerusakan',
@@ -270,6 +276,12 @@ export default function App() {
 
   const renderPage = () => {
     switch (activeModule) {
+      case 'admin-dashboard':
+        return isAdmin ? (
+          <AdminDashboardPage />
+        ) : (
+          <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />
+        );
       case 'master-data':
         return isAdmin ? <MasterDataPage /> : <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />;
       case 'report-damage':
