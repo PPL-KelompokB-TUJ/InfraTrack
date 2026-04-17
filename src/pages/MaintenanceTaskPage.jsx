@@ -326,7 +326,7 @@ export default function MaintenanceTaskPage() {
                           <td className="px-6 py-4">
                             <div>
                               <p className="font-mono text-blue-600">{task.report?.ticket_code}</p>
-                              <p className="text-xs text-gray-500">{task.report?.damage_type}</p>
+                              <p className="text-xs text-gray-500">{task.report?.urgency_level || 'N/A'}</p>
                             </div>
                           </td>
                           <td className="px-6 py-4">{task.asset?.name}</td>

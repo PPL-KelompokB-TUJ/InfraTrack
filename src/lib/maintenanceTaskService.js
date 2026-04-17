@@ -9,7 +9,7 @@ export async function getMaintenanceTasks(filters = {}) {
       .from('maintenance_tasks')
       .select(`
         *,
-        report:report_id(id, ticket_code, damage_type, urgency_level),
+        report:report_id(id, ticket_code, urgency_level, description),
         asset:asset_id(id, name),
         assigned_officer:assigned_to(id, name, email),
         assigned_by_user:assigned_by(id, name)
@@ -48,7 +48,7 @@ export async function getMaintenanceTaskById(id) {
       .from('maintenance_tasks')
       .select(`
         *,
-        report:report_id(id, ticket_code, damage_type, urgency_level, status, description),
+        report:report_id(id, ticket_code, urgency_level, status, description),
         asset:asset_id(id, name, latitude, longitude),
         assigned_officer:assigned_to(id, name, email),
         assigned_by_user:assigned_by(id, name)
@@ -182,7 +182,7 @@ export async function getMaintenanceTasksByOfficer(officerId) {
       .from('maintenance_tasks')
       .select(`
         *,
-        report:report_id(id, ticket_code, damage_type, urgency_level),
+        report:report_id(id, ticket_code, urgency_level),
         asset:asset_id(id, name, latitude, longitude),
         assigned_by_user:assigned_by(id, name)
       `)
