@@ -39,35 +39,80 @@ create index if not exists infrastructure_assets_location_gix
   on public.infrastructure_assets
   using gist (location);
 
-create or replace view public.infrastructure_assets_view as
-select
-  id,
-  name,
-  category,
-  st_y(location::geometry) as lat,
-  st_x(location::geometry) as lng,
-  condition,
-  year_built,
-  photo_url,
-  created_at,
-  updated_at
-from public.infrastructure_assets;
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'infrastructure_assets'
+      and column_name = 'infrastructure_category_id'
+  ) then
+    execute $view$
+      create or replace view public.infrastructure_assets_view
+      with (security_invoker = true) as
+      select
+        assets.id,
+        assets.name,
+        coalesce(categories.name, '-') as category,
+        st_y(assets.location::geometry) as lat,
+        st_x(assets.location::geometry) as lng,
+        assets.condition,
+        assets.year_built,
+        assets.photo_url,
+        assets.created_at,
+        assets.updated_at
+      from public.infrastructure_assets assets
+      left join public.infrastructure_categories categories
+        on categories.id = assets.infrastructure_category_id
+    $view$;
+  else
+    execute $view$
+      create or replace view public.infrastructure_assets_view
+      with (security_invoker = true) as
+      select
+        id,
+        name,
+        category,
+        st_y(location::geometry) as lat,
+        st_x(location::geometry) as lng,
+        condition,
+        year_built,
+        photo_url,
+        created_at,
+        updated_at
+      from public.infrastructure_assets
+    $view$;
+  end if;
+end
+$$;
 
 alter table public.infrastructure_assets enable row level security;
 
-grant select on public.infrastructure_assets_view to anon, authenticated;
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
 
--- Development-only policy so frontend can work before auth is implemented.
--- Replace with stricter policies in production.
+grant execute on function public.is_admin() to anon, authenticated;
+
+grant select on public.infrastructure_assets_view to authenticated;
+
 drop policy if exists "Dev full access to infrastructure assets"
   on public.infrastructure_assets;
 
 drop policy if exists "Allow authenticated full access to infrastructure assets"
   on public.infrastructure_assets;
 
-create policy "Dev full access to infrastructure assets"
+drop policy if exists "Admin full access to infrastructure assets"
+  on public.infrastructure_assets;
+
+create policy "Admin full access to infrastructure assets"
   on public.infrastructure_assets
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());

@@ -49,7 +49,7 @@ export async function getMaintenanceTaskById(id) {
       .select(`
         *,
         report:report_id(id, ticket_code, urgency_level, status, description),
-        asset:asset_id(id, name, latitude, longitude),
+        asset:asset_id(id, name),
         assigned_officer:assigned_to(id, name, email),
         assigned_by_user:assigned_by(id, name)
       `)
@@ -72,7 +72,7 @@ export async function createMaintenanceTask(taskData, userId) {
       report_id: taskData.report_id,
       asset_id: taskData.asset_id,
       assigned_to: taskData.assigned_to,
-      assigned_by: userId,
+      assigned_by: userId || null,
       scheduled_date: taskData.scheduled_date,
       estimated_cost: taskData.estimated_cost || null,
       status: 'assigned',
@@ -183,7 +183,7 @@ export async function getMaintenanceTasksByOfficer(officerId) {
       .select(`
         *,
         report:report_id(id, ticket_code, urgency_level),
-        asset:asset_id(id, name, latitude, longitude),
+        asset:asset_id(id, name),
         assigned_by_user:assigned_by(id, name)
       `)
       .eq('assigned_to', officerId)

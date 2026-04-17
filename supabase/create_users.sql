@@ -8,13 +8,15 @@ create table if not exists public.users (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   email text not null unique,
-  password text,
   role text not null check (role in ('admin', 'field_officer', 'citizen')),
   is_active boolean not null default true,
   profile_photo text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.users
+  drop column if exists password;
 
 -- Create user_profiles table for additional info
 create table if not exists public.user_profiles (
@@ -82,10 +84,10 @@ as $$
   select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
 $$;
 
-grant execute on function public.is_admin() to anon, authenticated;
+grant execute on function public.is_admin() to authenticated;
 
-grant select on public.users to anon, authenticated;
-grant select on public.user_profiles to anon, authenticated;
+grant select on public.users to authenticated;
+grant select on public.user_profiles to authenticated;
 
 -- Insert test data for field officers
 insert into public.users (name, email, role, is_active) values
@@ -128,17 +130,15 @@ from public.users u
 left join public.user_profiles up on u.id = up.user_id
 where u.role = 'field_officer' and u.is_active = true;
 
-grant select on public.field_officers_view to anon, authenticated;
+grant select on public.field_officers_view to authenticated;
 
 drop policy if exists "Public read active field officers users" on public.users;
-create policy "Public read active field officers users"
+drop policy if exists "Admin read active field officers users" on public.users;
+create policy "Admin read active field officers users"
   on public.users
   for select
-  to anon, authenticated
-  using (
-    (role = 'field_officer' and is_active = true)
-    or public.is_admin()
-  );
+  to authenticated
+  using (public.is_admin() and role = 'field_officer' and is_active = true);
 
 drop policy if exists "Admin manage users" on public.users;
 create policy "Admin manage users"
@@ -149,11 +149,13 @@ create policy "Admin manage users"
   with check (public.is_admin());
 
 drop policy if exists "Public read active field officer profiles" on public.user_profiles;
-create policy "Public read active field officer profiles"
+drop policy if exists "Admin read active field officer profiles" on public.user_profiles;
+create policy "Admin read active field officer profiles"
   on public.user_profiles
   for select
-  to anon, authenticated
+  to authenticated
   using (
+    public.is_admin() and
     exists (
       select 1
       from public.users u
@@ -161,7 +163,6 @@ create policy "Public read active field officer profiles"
         and u.role = 'field_officer'
         and u.is_active = true
     )
-    or public.is_admin()
   );
 
 drop policy if exists "Admin manage user profiles" on public.user_profiles;

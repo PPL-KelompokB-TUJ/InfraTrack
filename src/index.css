@@ -5,6 +5,13 @@
 @tailwind utilities;
 
 :root {
+  --surface-plain: #ffffff;
+  --surface-soft: #f7fdff;
+  --ink-primary: #0f172a;
+  --ink-secondary: #334155;
+  --brand-cyan: #06b6d4;
+  --brand-teal: #14b8a6;
+  --brand-navy: #0f3a52;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
 }
 
@@ -12,10 +19,23 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 10% 10%, rgba(103, 232, 249, 0.2), transparent 35%),
-    radial-gradient(circle at 90% 20%, rgba(45, 212, 191, 0.18), transparent 35%),
-    linear-gradient(160deg, #f6feff 0%, #ecfeff 30%, #f8fafc 100%);
-  color: #0f172a;
+    radial-gradient(circle at 8% 12%, rgba(34, 211, 238, 0.2), transparent 36%),
+    radial-gradient(circle at 88% 18%, rgba(45, 212, 191, 0.22), transparent 34%),
+    linear-gradient(160deg, #f3fcff 0%, #ecfeff 38%, #f8fafc 100%);
+  color: var(--ink-primary);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(rgba(8, 145, 178, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(8, 145, 178, 0.04) 1px, transparent 1px);
+  background-size: 72px 72px;
 }
 
 #root {
@@ -29,8 +49,47 @@ body {
   backdrop-filter: blur(6px);
 }
 
+.surface-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 252, 255, 0.92));
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  box-shadow: 0 16px 34px rgba(15, 58, 82, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.surface-card {
+  background: var(--surface-plain);
+  border: 1px solid rgba(148, 223, 238, 0.55);
+  box-shadow: 0 10px 24px rgba(15, 58, 82, 0.08);
+}
+
 .fade-slide-in {
   animation: fade-slide-in 260ms ease-out;
+}
+
+.hero-rise {
+  animation: hero-rise 420ms ease-out;
+}
+
+.stagger-fade > * {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fade-slide-in 320ms ease-out forwards;
+}
+
+.stagger-fade > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+
+.stagger-fade > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.stagger-fade > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.stagger-fade > *:nth-child(4) {
+  animation-delay: 190ms;
 }
 
 @keyframes fade-slide-in {
@@ -42,5 +101,17 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

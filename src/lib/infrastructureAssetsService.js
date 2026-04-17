@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient';
 const TABLE_NAME = 'infrastructure_assets';
 const VIEW_NAME = 'infrastructure_assets_view';
 const BUCKET_NAME = 'assets-photos';
+const CATEGORY_TABLE = 'infrastructure_categories';
 
 function toPoint(lat, lng) {
   const safeLat = Number(lat);
@@ -34,6 +35,34 @@ function buildPhotoPath(file) {
       : Math.random().toString(36).slice(2);
 
   return `assets/${Date.now()}-${randomPart}.${extension}`;
+}
+
+async function resolveInfrastructureCategoryIdByName(categoryName) {
+  const normalizedCategoryName = String(categoryName || '').trim();
+
+  if (!normalizedCategoryName) {
+    throw new Error('Kategori infrastruktur tidak boleh kosong.');
+  }
+
+  const { data, error } = await supabase
+    .from(CATEGORY_TABLE)
+    .select('id')
+    .eq('name', normalizedCategoryName)
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.id) {
+    throw new Error(
+      `Kategori "${normalizedCategoryName}" tidak ditemukan pada master data aktif.`
+    );
+  }
+
+  return data.id;
 }
 
 export async function getInfrastructureAssets() {
@@ -71,9 +100,13 @@ export async function uploadInfrastructureAssetPhoto(file) {
 }
 
 export async function createInfrastructureAsset(input) {
+  const infrastructureCategoryId = await resolveInfrastructureCategoryIdByName(
+    input.category
+  );
+
   const payload = {
     name: input.name.trim(),
-    category: input.category,
+    infrastructure_category_id: infrastructureCategoryId,
     location: toPoint(input.lat, input.lng),
     condition: input.condition,
     year_built: Number(input.year_built),
@@ -88,9 +121,13 @@ export async function createInfrastructureAsset(input) {
 }
 
 export async function updateInfrastructureAsset(id, input) {
+  const infrastructureCategoryId = await resolveInfrastructureCategoryIdByName(
+    input.category
+  );
+
   const payload = {
     name: input.name.trim(),
-    category: input.category,
+    infrastructure_category_id: infrastructureCategoryId,
     location: toPoint(input.lat, input.lng),
     condition: input.condition,
     year_built: Number(input.year_built),

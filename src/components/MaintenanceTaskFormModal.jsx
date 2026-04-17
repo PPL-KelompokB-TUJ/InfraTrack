@@ -17,13 +17,15 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
   useEffect(() => {
     if (isOpen) {
       loadFieldOfficers();
-      // Set default scheduled_date ke esok hari
+
+      // Set default scheduled_date ke esok hari.
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         scheduled_date: tomorrow.toISOString().split('T')[0],
       }));
+      setErrorMessage('');
     }
   }, [isOpen]);
 
@@ -33,6 +35,13 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
     try {
       const officers = await getActiveFieldOfficers();
       setFieldOfficers(officers);
+
+      if (officers.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          assigned_to: prev.assigned_to || officers[0].id,
+        }));
+      }
     } catch (error) {
       setErrorMessage(error.message || 'Gagal memuat daftar petugas');
     } finally {
@@ -42,7 +51,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
 
   function handleInputChange(e) {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -88,66 +97,72 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
     });
   }
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
-  const selectedOfficer = fieldOfficers.find(o => o.id === formData.assigned_to);
+  const selectedOfficer = fieldOfficers.find((officer) => officer.id === formData.assigned_to);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8">
+      <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-2xl overflow-auto rounded-3xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Buat Penugasan Pemeliharaan</h2>
+        <div className="flex items-center justify-between border-b border-cyan-100 px-6 py-5">
+          <h2 className="text-xl font-extrabold text-slate-800">Buat Penugasan Pemeliharaan</h2>
           <button
             onClick={onClose}
             disabled={isSaving}
-            className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            className="rounded-lg p-1 text-slate-400 transition hover:bg-cyan-50 hover:text-slate-600 disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form id="maintenance-task-form" onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
           {/* Error Message */}
           {errorMessage && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+              <div className="flex gap-3">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700">{errorMessage}</p>
+                <p>{errorMessage}</p>
+              </div>
             </div>
           )}
 
           {/* Report Info */}
           {report && (
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <p className="text-sm font-medium text-blue-900">
-                Laporan: <span className="font-mono text-blue-700">{report.ticket_code}</span>
+            <div className="rounded-xl border border-cyan-200 bg-cyan-50/80 p-4">
+              <p className="text-sm font-semibold text-cyan-900">
+                Laporan: <span className="font-mono text-cyan-700">{report.ticket_code}</span>
               </p>
-              <p className="text-sm text-blue-800 mt-1">
+              <p className="mt-1 text-sm text-cyan-800">
                 Jenis: <span className="font-medium">{report.damage_type}</span>
               </p>
-              <p className="text-sm text-blue-800">
-                Urgensi: <span className="font-medium text-amber-600">{report.urgency_level}</span>
+              <p className="text-sm text-cyan-800">
+                Urgensi: <span className="font-medium capitalize text-amber-700">{report.urgency_level}</span>
               </p>
             </div>
           )}
 
           {/* Asset Info */}
           {asset && (
-            <div className="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-              <p className="text-sm font-medium text-emerald-900">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/90 p-4">
+              <p className="text-sm font-semibold text-emerald-900">
                 Aset: <span className="font-medium">{asset.name}</span>
               </p>
               <p className="text-sm text-emerald-800">
                 Lokasi:{' '}
-                <span className="font-mono">{asset.lat ?? asset.latitude}, {asset.lng ?? asset.longitude}</span>
+                <span className="font-mono text-xs">
+                  {asset.lat ?? asset.latitude}, {asset.lng ?? asset.longitude}
+                </span>
               </p>
             </div>
           )}
 
           {/* Assigned Officer */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Petugas Lapangan *
@@ -158,17 +173,17 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               value={formData.assigned_to}
               onChange={handleInputChange}
               disabled={isLoadingOfficers || isSaving}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-xl border border-cyan-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 disabled:bg-slate-100"
             >
               <option value="">-- Pilih Petugas --</option>
-              {fieldOfficers.map(officer => (
+              {fieldOfficers.map((officer) => (
                 <option key={officer.id} value={officer.id}>
                   {officer.name} {officer.specialization ? `(${officer.specialization})` : ''}
                 </option>
               ))}
             </select>
             {selectedOfficer && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="mt-1 text-xs text-slate-500">
                 Email: {selectedOfficer.email}
               </p>
             )}
@@ -176,7 +191,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
 
           {/* Scheduled Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 Tanggal Terjadwal *
@@ -189,13 +204,13 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               onChange={handleInputChange}
               disabled={isSaving}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-xl border border-cyan-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 disabled:bg-slate-100"
             />
           </div>
 
           {/* Estimated Cost */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 Estimasi Biaya (Opsional)
@@ -210,14 +225,14 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               disabled={isSaving}
               min="0"
               step="1000"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-xl border border-cyan-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 disabled:bg-slate-100"
             />
-            <p className="text-xs text-gray-500 mt-1">Dalam Rupiah</p>
+            <p className="mt-1 text-xs text-slate-500">Dalam Rupiah</p>
           </div>
 
           {/* Instructions */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 Instruksi Kerja *
@@ -230,27 +245,29 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               disabled={isSaving}
               placeholder="Jelaskan detail pekerjaan yang harus dilakukan petugas..."
               rows="4"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 resize-none"
+              maxLength={500}
+              className="w-full resize-none rounded-xl border border-cyan-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 disabled:bg-slate-100"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="mt-1 text-xs text-slate-500">
               {formData.instructions.length}/500 karakter
             </p>
           </div>
         </form>
 
         {/* Footer */}
-        <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <div className="flex gap-3 border-t border-cyan-100 bg-white/80 px-6 py-5">
           <button
             onClick={onClose}
             disabled={isSaving}
-            className="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium transition"
+            className="flex-1 rounded-xl border border-cyan-200 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50 disabled:opacity-50"
           >
             Batal
           </button>
           <button
-            onClick={handleSubmit}
+            type="submit"
+            form="maintenance-task-form"
             disabled={isSaving}
-            className="flex-1 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 font-medium transition"
+            className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
           >
             {isSaving ? 'Menyimpan...' : 'Buat Penugasan'}
           </button>

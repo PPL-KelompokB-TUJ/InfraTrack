@@ -1,30 +1,52 @@
--- Run this in Supabase SQL Editor to setup storage policies for damage-reports
+-- Run this script in Supabase SQL Editor
 
--- Create the damage-reports bucket if not exists
--- This should be done via Supabase Dashboard > Storage > Create New Bucket
--- Name: damage-reports
--- Public: true
--- File size limit: 5240880 bytes (5MB)
--- Allowed MIME types: image/jpeg, image/png, image/gif, image/webp
+-- Create bucket if it does not exist.
+-- Keep this bucket public for MVP so uploaded photos can be displayed directly.
+insert into storage.buckets (id, name, public)
+values ('damage-reports', 'damage-reports', true)
+on conflict (id) do update set public = excluded.public;
 
--- Enable RLS on storage
 alter table if exists storage.objects enable row level security;
 
--- Policy to allow anyone to upload damage report photos
-drop policy if exists "Enable damage report photo uploads" on storage.objects;
-create policy "Enable damage report photo uploads"
-  on storage.objects
-  for insert
-  to anon, authenticated
-  with check (
-    bucket_id = 'damage-reports'
-    and (storage.filename(name))::text ~ '\.jpg$|\.jpeg$|\.png$|\.gif$|\.webp$'::text
-  );
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
 
--- Policy to allow anyone to read damage report photos
-drop policy if exists "Enable damage report photo reads" on storage.objects;
-create policy "Enable damage report photo reads"
+grant execute on function public.is_admin() to anon, authenticated;
+
+drop policy if exists "Dev read photos damage-reports" on storage.objects;
+drop policy if exists "Public read photos damage-reports" on storage.objects;
+create policy "Public read photos damage-reports"
   on storage.objects
   for select
   to anon, authenticated
   using (bucket_id = 'damage-reports');
+
+drop policy if exists "Dev upload photos damage-reports" on storage.objects;
+drop policy if exists "Public upload photos damage-reports" on storage.objects;
+create policy "Public upload photos damage-reports"
+  on storage.objects
+  for insert
+  to anon, authenticated
+  with check (bucket_id = 'damage-reports');
+
+drop policy if exists "Dev update photos damage-reports" on storage.objects;
+drop policy if exists "Admin update photos damage-reports" on storage.objects;
+create policy "Admin update photos damage-reports"
+  on storage.objects
+  for update
+  to authenticated
+  using (bucket_id = 'damage-reports' and public.is_admin())
+  with check (bucket_id = 'damage-reports' and public.is_admin());
+
+drop policy if exists "Dev delete photos damage-reports" on storage.objects;
+drop policy if exists "Admin delete photos damage-reports" on storage.objects;
+create policy "Admin delete photos damage-reports"
+  on storage.objects
+  for delete
+  to authenticated
+  using (bucket_id = 'damage-reports' and public.is_admin());

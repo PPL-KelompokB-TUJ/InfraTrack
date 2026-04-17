@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Search, Filter, CheckCircle, Clock, AlertCircle, Trash2, Eye, X } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  Filter,
+  Plus,
+  Search,
+  Trash2,
+  X,
+} from 'lucide-react';
 import MaintenanceTaskFormModal from '../components/MaintenanceTaskFormModal';
 import {
   getMaintenanceTasks,
@@ -11,18 +21,26 @@ import { getAllDamageReports } from '../lib/damageReportService';
 import { getInfrastructureAssets } from '../lib/infrastructureAssetsService';
 
 const statusLabelStyles = {
-  pending: 'bg-gray-100 text-gray-700 border-gray-200',
-  assigned: 'bg-blue-100 text-blue-700 border-blue-200',
-  in_progress: 'bg-amber-100 text-amber-700 border-amber-200',
-  completed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  cancelled: 'bg-rose-100 text-rose-700 border-rose-200',
+  pending: 'border-slate-200 bg-slate-100 text-slate-700',
+  assigned: 'border-cyan-200 bg-cyan-100 text-cyan-700',
+  in_progress: 'border-amber-200 bg-amber-100 text-amber-700',
+  completed: 'border-emerald-200 bg-emerald-100 text-emerald-700',
+  cancelled: 'border-rose-200 bg-rose-100 text-rose-700',
+};
+
+const statusLabels = {
+  pending: 'Pending',
+  assigned: 'Ditugaskan',
+  in_progress: 'Sedang Dikerjakan',
+  completed: 'Selesai',
+  cancelled: 'Dibatalkan',
 };
 
 const statusIcons = {
   pending: AlertCircle,
-  assigned: Clock,
-  in_progress: Clock,
-  completed: CheckCircle,
+  assigned: Clock3,
+  in_progress: Clock3,
+  completed: CheckCircle2,
   cancelled: AlertCircle,
 };
 
@@ -35,7 +53,10 @@ function formatDate(dateString) {
 }
 
 function formatCurrency(value) {
-  if (!value) return '-';
+  if (!value) {
+    return '-';
+  }
+
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -94,7 +115,7 @@ export default function MaintenanceTaskPage() {
 
   // Filter tasks
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
+    return tasks.filter((task) => {
       const matchesSearch =
         task.report?.ticket_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.asset?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,12 +131,16 @@ export default function MaintenanceTaskPage() {
   const stats = useMemo(() => {
     return {
       total: tasks.length,
-      pending: tasks.filter(t => t.status === 'pending').length,
-      assigned: tasks.filter(t => t.status === 'assigned').length,
-      in_progress: tasks.filter(t => t.status === 'in_progress').length,
-      completed: tasks.filter(t => t.status === 'completed').length,
+      pending: tasks.filter((task) => task.status === 'pending').length,
+      assigned: tasks.filter((task) => task.status === 'assigned').length,
+      in_progress: tasks.filter((task) => task.status === 'in_progress').length,
+      completed: tasks.filter((task) => task.status === 'completed').length,
     };
   }, [tasks]);
+
+  const availableReportsCount = useMemo(() => {
+    return reports.filter((report) => !tasks.some((task) => task.report_id === report.id)).length;
+  }, [reports, tasks]);
 
   // Handle modal open for creating new task
   function handleOpenCreateModal() {
@@ -143,7 +168,9 @@ export default function MaintenanceTaskPage() {
   }
 
   function handleCloseModal() {
-    if (isSaving) return;
+    if (isSaving) {
+      return;
+    }
 
     setIsModalOpen(false);
     setSelectedReport(null);
@@ -192,7 +219,9 @@ export default function MaintenanceTaskPage() {
 
   // Handle delete
   async function handleDeleteTask(taskId) {
-    if (!confirm('Yakin ingin menghapus penugasan ini?')) return;
+    if (!window.confirm('Hapus penugasan ini? Data yang dihapus tidak dapat dikembalikan.')) {
+      return;
+    }
 
     setErrorMessage('');
     try {
@@ -216,75 +245,82 @@ export default function MaintenanceTaskPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Penugasan Pemeliharaan</h1>
-          <p className="text-gray-600 mt-1">Kelola penugasan pekerjaan pemeliharaan ke petugas lapangan</p>
-        </div>
+    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+              InfraTrack / Administrator
+            </p>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-800">
+              Penugasan Pemeliharaan
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-600">
+              Tetapkan petugas lapangan, jadwal, serta instruksi kerja untuk laporan kerusakan
+              yang sudah terverifikasi.
+            </p>
+          </div>
 
-        {/* Messages */}
-        {errorMessage && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 flex gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <p>{errorMessage}</p>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-4 bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-emerald-700 flex gap-3">
-            <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <p>{successMessage}</p>
-          </div>
-        )}
-
-        {/* Statistics */}
-        <div className="grid grid-cols-5 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-gray-400">
-            <p className="text-gray-600 text-sm font-medium">Total</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-gray-400">
-            <p className="text-gray-600 text-sm font-medium">Pending</p>
-            <p className="text-2xl font-bold text-gray-600 mt-1">{stats.pending}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-400">
-            <p className="text-blue-600 text-sm font-medium">Ditugaskan</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">{stats.assigned}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-amber-400">
-            <p className="text-amber-600 text-sm font-medium">Sedang Dikerjakan</p>
-            <p className="text-2xl font-bold text-amber-600 mt-1">{stats.in_progress}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-emerald-400">
-            <p className="text-emerald-600 text-sm font-medium">Selesai</p>
-            <p className="text-2xl font-bold text-emerald-600 mt-1">{stats.completed}</p>
+          <div className="rounded-2xl border border-cyan-100 bg-cyan-50/80 px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-cyan-700">Laporan Siap Ditugaskan</p>
+            <p className="text-2xl font-bold text-cyan-900">{availableReportsCount}</p>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="bg-white rounded-lg shadow mb-6 p-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+        {errorMessage ? (
+          <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {errorMessage}
+          </div>
+        ) : null}
+
+        {successMessage ? (
+          <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {successMessage}
+          </div>
+        ) : null}
+
+        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Total</p>
+            <p className="mt-1 text-2xl font-bold text-slate-800">{stats.total}</p>
+          </div>
+          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Pending</p>
+            <p className="mt-1 text-2xl font-bold text-slate-800">{stats.pending}</p>
+          </div>
+          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Ditugaskan</p>
+            <p className="mt-1 text-2xl font-bold text-cyan-700">{stats.assigned}</p>
+          </div>
+          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Sedang Dikerjakan</p>
+            <p className="mt-1 text-2xl font-bold text-amber-700">{stats.in_progress}</p>
+          </div>
+          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
+            <p className="text-xs uppercase tracking-wide text-slate-500">Selesai</p>
+            <p className="mt-1 text-2xl font-bold text-emerald-700">{stats.completed}</p>
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-2xl border border-cyan-100 bg-white p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Cari laporan, aset, atau petugas..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="w-full rounded-xl border border-cyan-100 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-cyan-400"
               />
             </div>
 
-            {/* Filter */}
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-400" />
+              <Filter className="h-4 w-4 text-slate-400" />
               <select
                 value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(event) => setStatusFilter(event.target.value)}
+                className="rounded-xl border border-cyan-100 px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400"
               >
                 <option value="">Semua Status</option>
                 <option value="pending">Pending</option>
@@ -295,88 +331,89 @@ export default function MaintenanceTaskPage() {
               </select>
             </div>
 
-            {/* Create Button */}
             <button
+              type="button"
               onClick={handleOpenCreateModal}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="h-4 w-4" />
               Buat Penugasan
             </button>
           </div>
         </div>
 
-        {/* Loading */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Memuat data penugasan...</p>
+          <div className="rounded-2xl border border-cyan-100 bg-white px-4 py-10 text-center text-sm text-slate-500">
+            Memuat data penugasan...
           </div>
         ) : (
-          /* Tasks List */
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-hidden rounded-2xl border border-cyan-100 bg-white">
             {filteredTasks.length === 0 ? (
-              <div className="text-center py-12">
-                <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-600 font-medium">Belum ada penugasan</p>
-                <p className="text-gray-500 text-sm mt-1">Mulai dengan membuat penugasan baru</p>
+              <div className="px-4 py-10 text-center">
+                <AlertCircle className="mx-auto h-10 w-10 text-slate-300" />
+                <p className="mt-3 text-sm font-semibold text-slate-700">Belum ada penugasan</p>
+                <p className="mt-1 text-sm text-slate-500">Mulai dengan membuat penugasan baru.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                <table className="min-w-full divide-y divide-cyan-100 text-sm">
+                  <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
                     <tr>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Laporan</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Aset</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Petugas</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Tgl Terjadwal</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Biaya</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
-                      <th className="px-6 py-3 text-left font-semibold text-gray-700">Aksi</th>
+                      <th className="px-4 py-3">Laporan</th>
+                      <th className="px-4 py-3">Aset</th>
+                      <th className="px-4 py-3">Petugas</th>
+                      <th className="px-4 py-3">Tanggal</th>
+                      <th className="px-4 py-3">Biaya</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3 text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filteredTasks.map(task => {
+                  <tbody className="divide-y divide-cyan-50">
+                    {filteredTasks.map((task) => {
                       const StatusIcon = statusIcons[task.status] || AlertCircle;
+
                       return (
-                        <tr key={task.id} className="border-b border-gray-200 hover:bg-gray-50">
-                          <td className="px-6 py-4">
-                            <div>
-                              <p className="font-mono text-blue-600">{task.report?.ticket_code}</p>
-                              <p className="text-xs text-gray-500">{task.report?.urgency_level || 'N/A'}</p>
-                            </div>
+                        <tr key={task.id} className="transition hover:bg-cyan-50/30">
+                          <td className="px-4 py-3">
+                            <p className="font-mono text-xs font-semibold text-cyan-700">
+                              {task.report?.ticket_code || '-'}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500 capitalize">
+                              {task.report?.urgency_level || '-'}
+                            </p>
                           </td>
-                          <td className="px-6 py-4">{task.asset?.name}</td>
-                          <td className="px-6 py-4">
-                            <p className="font-medium">{task.assigned_officer?.name}</p>
-                            <p className="text-xs text-gray-500">{task.assigned_officer?.email}</p>
+                          <td className="px-4 py-3 text-slate-700">{task.asset?.name || '-'}</td>
+                          <td className="px-4 py-3">
+                            <p className="font-semibold text-slate-700">{task.assigned_officer?.name || '-'}</p>
+                            <p className="text-xs text-slate-500">{task.assigned_officer?.email || '-'}</p>
                           </td>
-                          <td className="px-6 py-4">{formatDate(task.scheduled_date)}</td>
-                          <td className="px-6 py-4">{formatCurrency(task.estimated_cost)}</td>
-                          <td className="px-6 py-4">
-                            <div
-                              className={`flex items-center gap-2 w-fit px-3 py-1 rounded-full border ${statusLabelStyles[task.status]}`}
+                          <td className="px-4 py-3 text-slate-700">{formatDate(task.scheduled_date)}</td>
+                          <td className="px-4 py-3 text-slate-700">{formatCurrency(task.estimated_cost)}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusLabelStyles[task.status]}`}
                             >
-                              <StatusIcon className="w-4 h-4" />
-                              <span className="text-xs font-medium capitalize">
-                                {task.status.replace('_', ' ')}
-                              </span>
-                            </div>
+                              <StatusIcon className="h-3.5 w-3.5" />
+                              {statusLabels[task.status] || task.status}
+                            </span>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex gap-2">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-2">
                               <button
+                                type="button"
                                 onClick={() => handleViewDetail(task.id)}
-                                className="p-2 hover:bg-blue-50 rounded text-blue-600 transition"
-                                title="Lihat Detail"
+                                className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2.5 py-1.5 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50"
                               >
-                                <Eye className="w-4 h-4" />
+                                <Eye className="h-3.5 w-3.5" />
+                                Detail
                               </button>
                               <button
+                                type="button"
                                 onClick={() => handleDeleteTask(task.id)}
-                                className="p-2 hover:bg-red-50 rounded text-red-600 transition"
-                                title="Hapus"
+                                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
+                                Hapus
                               </button>
                             </div>
                           </td>
@@ -389,9 +426,8 @@ export default function MaintenanceTaskPage() {
             )}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Modals */}
       <MaintenanceTaskFormModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -401,71 +437,72 @@ export default function MaintenanceTaskPage() {
         isSaving={isSaving}
       />
 
-      {/* Detail Modal */}
-      {detailModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold">Detail Penugasan</h2>
+      {detailModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8">
+          <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-xl overflow-auto rounded-3xl">
+            <div className="flex items-center justify-between border-b border-cyan-100 px-6 py-5">
+              <h2 className="text-xl font-extrabold text-slate-800">Detail Penugasan</h2>
               <button
+                type="button"
                 onClick={() => setDetailModal(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="rounded-lg p-1 text-slate-400 transition hover:bg-cyan-50 hover:text-slate-600"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
+            <div className="space-y-4 px-6 py-5 text-sm">
               <div>
-                <p className="text-xs text-gray-500 font-medium">Laporan</p>
-                <p className="font-mono text-blue-600 mt-1">{detailModal.report?.ticket_code}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Laporan</p>
+                <p className="mt-1 font-mono text-cyan-700">{detailModal.report?.ticket_code || '-'}</p>
               </div>
 
               <div>
-                <p className="text-xs text-gray-500 font-medium">Aset</p>
-                <p className="mt-1">{detailModal.asset?.name}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Aset</p>
+                <p className="mt-1 text-slate-700">{detailModal.asset?.name || '-'}</p>
               </div>
 
               <div>
-                <p className="text-xs text-gray-500 font-medium">Petugas</p>
-                <p className="mt-1">{detailModal.assigned_officer?.name}</p>
-                <p className="text-sm text-gray-600">{detailModal.assigned_officer?.email}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Petugas</p>
+                <p className="mt-1 text-slate-700">{detailModal.assigned_officer?.name || '-'}</p>
+                <p className="text-xs text-slate-500">{detailModal.assigned_officer?.email || '-'}</p>
               </div>
 
               <div>
-                <p className="text-xs text-gray-500 font-medium">Tanggal Terjadwal</p>
-                <p className="mt-1">{formatDate(detailModal.scheduled_date)}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Terjadwal</p>
+                <p className="mt-1 text-slate-700">{formatDate(detailModal.scheduled_date)}</p>
               </div>
 
               <div>
-                <p className="text-xs text-gray-500 font-medium">Biaya</p>
-                <p className="mt-1">{formatCurrency(detailModal.estimated_cost)}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Biaya Estimasi</p>
+                <p className="mt-1 text-slate-700">{formatCurrency(detailModal.estimated_cost)}</p>
               </div>
 
               <div>
-                <p className="text-xs text-gray-500 font-medium">Instruksi</p>
-                <p className="mt-1 text-sm whitespace-pre-wrap">{detailModal.instructions}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Instruksi</p>
+                <p className="mt-1 whitespace-pre-wrap text-slate-700">{detailModal.instructions || '-'}</p>
               </div>
 
-              {detailModal.notes && (
+              {detailModal.notes ? (
                 <div>
-                  <p className="text-xs text-gray-500 font-medium">Catatan</p>
-                  <p className="mt-1 text-sm whitespace-pre-wrap">{detailModal.notes}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Catatan</p>
+                  <p className="mt-1 whitespace-pre-wrap text-slate-700">{detailModal.notes}</p>
                 </div>
-              )}
+              ) : null}
             </div>
 
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
+            <div className="border-t border-cyan-100 px-6 py-5">
               <button
+                type="button"
                 onClick={() => setDetailModal(null)}
-                className="w-full px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 font-medium"
+                className="w-full rounded-xl border border-cyan-200 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
               >
                 Tutup
               </button>
             </div>
           </div>
         </div>
-      )}
-    </div>
+      ) : null}
+    </main>
   );
 }

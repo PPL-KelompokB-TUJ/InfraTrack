@@ -5,7 +5,19 @@
 do $$
 declare
   v_report_id uuid;
+  v_damage_type_id uuid;
 begin
+  select dt.id
+  into v_damage_type_id
+  from public.damage_types dt
+  where dt.is_active = true
+  order by dt.is_default desc, dt.created_at asc
+  limit 1;
+
+  if v_damage_type_id is null then
+    raise exception 'Tidak ada damage_types aktif. Jalankan create_master_reference_tables.sql terlebih dahulu.';
+  end if;
+
   -- 1) Prefer promoting an existing pending report that has not been assigned yet.
   select dr.id
   into v_report_id
@@ -30,7 +42,7 @@ begin
       reporter_name,
       reporter_email,
       reporter_phone,
-      damage_type,
+      damage_type_id,
       urgency_level,
       description,
       location,
@@ -43,7 +55,7 @@ begin
       'Tester InfraTrack',
       'tester.infratrack@example.com',
       '081234567890',
-      'Jalan berlubang',
+      v_damage_type_id,
       'sedang',
       'Laporan dummy untuk pengujian fitur penugasan pemeliharaan (PBI-04).',
       st_setsrid(st_makepoint(106.816666, -6.200000), 4326)::geography,

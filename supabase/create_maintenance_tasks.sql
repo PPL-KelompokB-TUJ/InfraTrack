@@ -52,18 +52,18 @@ as $$
   select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
 $$;
 
-grant execute on function public.is_admin() to anon, authenticated;
+grant execute on function public.is_admin() to authenticated;
 
-grant select, insert, update, delete on public.maintenance_tasks to anon, authenticated;
+grant select, insert, update, delete on public.maintenance_tasks to authenticated;
 
 drop policy if exists "Admin full access maintenance tasks" on public.maintenance_tasks;
 drop policy if exists "Dev full access maintenance tasks" on public.maintenance_tasks;
-create policy "Dev full access maintenance tasks"
+create policy "Admin full access maintenance tasks"
   on public.maintenance_tasks
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Create notifications table if not exists
 create table if not exists public.notifications (
@@ -104,13 +104,13 @@ create index if not exists notifications_created_at_idx on public.notifications(
 -- Enable RLS
 alter table public.notifications enable row level security;
 
-grant select, insert, update, delete on public.notifications to anon, authenticated;
+grant select, insert, update, delete on public.notifications to authenticated;
 
 drop policy if exists "Admin full access notifications" on public.notifications;
 drop policy if exists "Dev full access notifications" on public.notifications;
-create policy "Dev full access notifications"
+create policy "Admin full access notifications"
   on public.notifications
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());

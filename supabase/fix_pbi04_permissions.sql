@@ -9,28 +9,26 @@ as $$
   select coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
 $$;
 
-grant execute on function public.is_admin() to anon, authenticated;
+grant execute on function public.is_admin() to authenticated;
 
 -- Minimal table privileges for PostgREST roles.
-grant select on public.users to anon, authenticated;
-grant select on public.user_profiles to anon, authenticated;
-grant select on public.field_officers_view to anon, authenticated;
+grant select on public.users to authenticated;
+grant select on public.user_profiles to authenticated;
+grant select on public.field_officers_view to authenticated;
 
-grant select, insert, update, delete on public.maintenance_tasks to anon, authenticated;
-grant select, insert, update, delete on public.notifications to anon, authenticated;
+grant select, insert, update, delete on public.maintenance_tasks to authenticated;
+grant select, insert, update, delete on public.notifications to authenticated;
 
 -- Users table policies.
 alter table public.users enable row level security;
 
 drop policy if exists "Public read active field officers users" on public.users;
-create policy "Public read active field officers users"
+drop policy if exists "Admin read active field officers users" on public.users;
+create policy "Admin read active field officers users"
   on public.users
   for select
-  to anon, authenticated
-  using (
-    (role = 'field_officer' and is_active = true)
-    or public.is_admin()
-  );
+  to authenticated
+  using (public.is_admin() and role = 'field_officer' and is_active = true);
 
 drop policy if exists "Admin manage users" on public.users;
 create policy "Admin manage users"
@@ -44,11 +42,13 @@ create policy "Admin manage users"
 alter table public.user_profiles enable row level security;
 
 drop policy if exists "Public read active field officer profiles" on public.user_profiles;
-create policy "Public read active field officer profiles"
+drop policy if exists "Admin read active field officer profiles" on public.user_profiles;
+create policy "Admin read active field officer profiles"
   on public.user_profiles
   for select
-  to anon, authenticated
+  to authenticated
   using (
+    public.is_admin() and
     exists (
       select 1
       from public.users u
@@ -56,7 +56,6 @@ create policy "Public read active field officer profiles"
         and u.role = 'field_officer'
         and u.is_active = true
     )
-    or public.is_admin()
   );
 
 drop policy if exists "Admin manage user profiles" on public.user_profiles;
@@ -72,21 +71,21 @@ alter table public.maintenance_tasks enable row level security;
 
 drop policy if exists "Admin full access maintenance tasks" on public.maintenance_tasks;
 drop policy if exists "Dev full access maintenance tasks" on public.maintenance_tasks;
-create policy "Dev full access maintenance tasks"
+create policy "Admin full access maintenance tasks"
   on public.maintenance_tasks
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- Notifications policies.
 alter table public.notifications enable row level security;
 
 drop policy if exists "Admin full access notifications" on public.notifications;
 drop policy if exists "Dev full access notifications" on public.notifications;
-create policy "Dev full access notifications"
+create policy "Admin full access notifications"
   on public.notifications
   for all
-  to anon, authenticated
-  using (true)
-  with check (true);
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
