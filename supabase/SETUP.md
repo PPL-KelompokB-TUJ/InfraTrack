@@ -12,15 +12,17 @@ Do not put secret key in `.env` frontend.
 ## 2) Run SQL for Table + View + RLS
 Run in Supabase SQL Editor:
 
-1. `supabase/create_infrastructure_assets.sql`
-2. `supabase/create_master_reference_tables.sql`
-3. `supabase/setup_assets_photos_storage.sql`
-4. `supabase/create_damage_reports.sql` (untuk PBI-02)
-5. `supabase/setup_damage_reports_storage.sql` (untuk upload foto laporan kerusakan)
+1. `supabase/create_master_reference_tables.sql`
+2. `supabase/create_infrastructure_assets.sql`
+3. `supabase/create_damage_reports.sql` (untuk PBI-02)
+4. `supabase/create_users.sql` (tabel users + field officers view)
+5. `supabase/create_maintenance_tasks.sql` (untuk PBI-04)
+6. `supabase/setup_assets_photos_storage.sql`
+7. `supabase/setup_damage_reports_storage.sql` (untuk upload foto laporan kerusakan)
 
 Catatan RBAC:
 - Script di atas sudah menerapkan kebijakan role-based access control (RBAC).
-- Modul admin (manajemen aset dan master data) hanya bisa diakses akun dengan role `admin` pada `app_metadata`.
+- Modul admin (manajemen aset, master data, dan penugasan pemeliharaan) hanya bisa diakses akun dengan role `admin` pada `app_metadata`.
 
 ## 3) Buat Akun Admin
 1. Daftarkan user admin dulu via Supabase Auth (email + password).
@@ -149,4 +151,9 @@ Pastikan script berikut sudah dijalankan di SQL Editor:
 - `supabase/setup_damage_reports_storage.sql`
 
 Lalu cek bucket `damage-reports` ada di Supabase Storage dan statusnya Public.
+
+## 9) PBI-04 Notes (Maintenance Assignment)
+- Untuk patch permission cepat di environment lama, jalankan `supabase/fix_pbi04_permissions.sql`.
+- Untuk data uji laporan terverifikasi, jalankan `supabase/seed_dummy_verified_report.sql`.
+- Fitur penugasan pemeliharaan hanya untuk admin, jadi pastikan akun sudah mendapat role `admin` dan login ulang setelah update role.
 

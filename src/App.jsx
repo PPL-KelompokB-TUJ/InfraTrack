@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LogOut, Lock, ShieldCheck } from 'lucide-react';
 import AssetManagementPage from './pages/AssetManagementPage';
+import MaintenanceTaskPage from './pages/MaintenanceTaskPage';
 import MasterDataPage from './pages/MasterDataPage';
 import ReportDamagePage from './pages/ReportDamagePage';
 import TrackDamageReportPage from './pages/TrackDamageReportPage';
@@ -31,6 +32,11 @@ const modules = [
   {
     key: 'master-data',
     label: 'Master Data Referensi',
+    requiresAdmin: true,
+  },
+  {
+    key: 'maintenance-task',
+    label: 'Penugasan Pemeliharaan',
     requiresAdmin: true,
   },
 ];
@@ -270,6 +276,12 @@ export default function App() {
         return <ReportDamagePage />;
       case 'track-damage':
         return <TrackDamageReportPage />;
+      case 'maintenance-task':
+        return isAdmin ? (
+          <MaintenanceTaskPage />
+        ) : (
+          <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />
+        );
       case 'asset-management':
       default:
         return isAdmin ? (
