@@ -9,7 +9,7 @@ import {
   uploadMaintenanceProgressPhoto,
   getMaintenanceTaskById,
 } from '../lib/maintenanceTaskService';
-import { authService } from '../lib/authService';
+import { getCurrentSession } from '../lib/authService';
 
 const statusLabelStyles = {
   assigned: 'border-cyan-200 bg-cyan-100 text-cyan-700',
@@ -59,8 +59,9 @@ export default function FieldOfficerTasksPage() {
     setErrorMessage('');
 
     try {
-      // Get current user
-      const user = await authService.getCurrentUser();
+      // Get current authenticated user session
+      const session = await getCurrentSession();
+      const user = session?.user;
       if (!user) {
         throw new Error('Tidak dapat memuat informasi pengguna');
       }
