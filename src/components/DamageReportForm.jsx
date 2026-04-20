@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, Loader, MapPin, Camera } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader, MapPin, Camera, Copy, Check } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
 import { submitDamageReport } from '../lib/damageReportService';
 import { getActiveDamageTypeNames } from '../lib/masterDataService';
+import MapPicker from './MapPicker';
 
 const urgency_levels = [
   { value: 'rendah', label: 'Rendah' },
@@ -11,6 +13,7 @@ const urgency_levels = [
 ];
 
 export default function DamageReportForm() {
+  const { addNotification } = useNotification();
   const [formData, setFormData] = useState({
     reporterName: '',
     reporterEmail: '',
@@ -31,6 +34,7 @@ export default function DamageReportForm() {
   const [locationStatus, setLocationStatus] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
   const [damageTypeOptions, setDamageTypeOptions] = useState([]);
+  const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
   // Get GPS location on component mount
   useEffect(() => {
@@ -103,13 +107,13 @@ export default function DamageReportForm() {
     if (file) {
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Ukuran foto tidak boleh lebih dari 5MB');
+        addNotification('Ukuran foto tidak boleh lebih dari 5MB', 'error', 3000);
         return;
       }
 
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        setError('File harus berupa gambar');
+        addNotification('File harus berupa gambar', 'error', 3000);
         return;
       }
 
@@ -138,6 +142,16 @@ export default function DamageReportForm() {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(ticketCode).then(() => {
+      setCopiedToClipboard(true);
+      // Reset after 2 seconds
+      setTimeout(() => setCopiedToClipboard(false), 2000);
+    }).catch(() => {
+      addNotification('Gagal menyalin kode. Silakan coba lagi.', 'error', 3000);
+    });
   };
 
   const validateForm = () => {
@@ -217,8 +231,9 @@ export default function DamageReportForm() {
     setLoading(false);
 
     if (result.success) {
-      setSuccess(true);
       setTicketCode(result.ticketCode);
+      addNotification(`Laporan berhasil dikirim! Kode: ${result.ticketCode}`, 'success', 5000);
+      
       // Reset form
       setFormData({
         reporterName: '',
@@ -232,10 +247,11 @@ export default function DamageReportForm() {
       });
       setPhotoFile(null);
       setPhotoPreview(null);
+      setSuccess(true);
       // Reset GPS
       getGPSLocation();
     } else {
-      setError(result.error || 'Terjadi kesalahan saat mengirim laporan');
+      addNotification(result.error || 'Terjadi kesalahan saat mengirim laporan', 'error', 3000);
     }
   };
 
@@ -254,10 +270,32 @@ export default function DamageReportForm() {
             </p>
             <div className="mb-6 rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
               <p className="text-xs uppercase tracking-wide text-slate-500">Kode Tiket Laporan</p>
-              <p className="mt-1 text-2xl font-bold text-cyan-700">{ticketCode}</p>
+              <p className="mt-1 text-2xl font-bold text-cyan-700 font-mono">{ticketCode}</p>
               <p className="mt-2 text-xs text-slate-500">
                 Simpan kode ini untuk melacak status laporan Anda
               </p>
+              
+              {/* Copy Button */}
+              <button
+                onClick={handleCopyToClipboard}
+                className={`mt-4 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                  copiedToClipboard
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+                }`}
+              >
+                {copiedToClipboard ? (
+                  <>
+                    <Check size={18} />
+                    Kode Sudah Disalin!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={18} />
+                    Salin Kode
+                  </>
+                )}
+              </button>
             </div>
             <button
               onClick={() => setSuccess(false)}
@@ -336,7 +374,7 @@ export default function DamageReportForm() {
           <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
             <MapPin className="w-4 h-4" /> Lokasi (GPS) *
           </label>
-          <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4">
+          <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4 space-y-4">
             {gpsLoading ? (
               <div className="flex items-center gap-2 text-cyan-700">
                 <Loader className="w-4 h-4 animate-spin" />
@@ -344,7 +382,25 @@ export default function DamageReportForm() {
               </div>
             ) : (
               <>
-                <p className="mb-3 text-sm text-slate-600">{locationStatus || 'Belum ada koordinat.'}</p>
+                <p className="text-sm text-slate-600">{locationStatus || 'Belum ada koordinat.'}</p>
+
+                {/* Map Display */}
+                <div className="w-full">
+                  <MapPicker
+                    value={
+                      formData.latitude && formData.longitude
+                        ? {
+                            lat: Number(formData.latitude),
+                            lng: Number(formData.longitude),
+                          }
+                        : null
+                    }
+                    onChange={(coords) => {
+                      handleCoordinateChange('latitude', coords.lat);
+                      handleCoordinateChange('longitude', coords.lng);
+                    }}
+                  />
+                </div>
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>

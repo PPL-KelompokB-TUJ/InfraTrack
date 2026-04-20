@@ -5,6 +5,7 @@ import {
   TileLayer,
   useMap,
   useMapEvents,
+  Popup,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -32,7 +33,15 @@ function ClickPositionMarker({ value, onChange }) {
       center={[value.lat, value.lng]}
       radius={8}
       pathOptions={{ color: '#0e7490', fillColor: '#22d3ee', fillOpacity: 0.7 }}
-    />
+    >
+      <Popup>
+        <div className="text-xs text-center">
+          <p className="font-semibold">Lokasi Dipilih</p>
+          <p>{value.lat.toFixed(6)}, {value.lng.toFixed(6)}</p>
+          <p className="text-slate-500 mt-1">Klik di peta untuk mengubah</p>
+        </div>
+      </Popup>
+    </CircleMarker>
   );
 }
 
@@ -54,7 +63,7 @@ export default function MapPicker({ value, onChange }) {
   const center = value || DEFAULT_COORDINATE;
 
   return (
-    <div className="h-64 w-full overflow-hidden rounded-2xl border border-cyan-100 shadow-sm">
+    <div className="w-full overflow-hidden rounded-2xl border border-cyan-100 shadow-sm" style={{ height: '300px' }}>
       <MapContainer center={[center.lat, center.lng]} zoom={13} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

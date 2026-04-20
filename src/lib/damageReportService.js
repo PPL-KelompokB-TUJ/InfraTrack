@@ -249,3 +249,85 @@ export const updateDamageReportStatus = async (reportId, status, notes = null) =
     };
   }
 };
+
+/**
+ * Get recent damage reports for dashboard (with damage type, asset info)
+ * Fetches latest reports with full details
+ */
+export const getRecentDamageReports = async (limit = 10) => {
+  try {
+    // Get recent reports
+    const { data: reports, error: reportsError } = await supabase
+      .from('damage_reports')
+      .select(
+        'id, ticket_code, damage_type_id, urgency_level, status, description, latitude, longitude, created_at, reporter_name, asset_id'
+      )
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (reportsError) {
+      throw reportsError;
+    }
+
+    if (!reports || reports.length === 0) {
+      return {
+        success: true,
+        reports: [],
+      };
+    }
+
+    // Fetch damage types
+    const damageTypeIds = [...new Set(reports.map((r) => r.damage_type_id))];
+    const { data: damageTypes, error: damageTypesError } = await supabase
+      .from('damage_types')
+      .select('id, name')
+      .in('id', damageTypeIds);
+
+    if (damageTypesError) {
+      console.warn('Warning: Could not fetch damage types:', damageTypesError);
+    }
+
+    const damageTypeMap = {};
+    (damageTypes || []).forEach((dt) => {
+      damageTypeMap[dt.id] = dt.name;
+    });
+
+    // Fetch asset info
+    const assetIds = [...new Set(reports.map((r) => r.asset_id).filter(Boolean))];
+    const { data: assets, error: assetsError } = await supabase
+      .from('infrastructure_assets')
+      .select('id, name, location')
+      .in('id', assetIds);
+
+    if (assetsError) {
+      console.warn('Warning: Could not fetch assets:', assetsError);
+    }
+
+    const assetMap = {};
+    (assets || []).forEach((asset) => {
+      assetMap[asset.id] = asset;
+    });
+
+    // Enrich reports with damage type and asset info
+    const enrichedReports = reports.map((report) => ({
+      ...report,
+      damage_type_name: damageTypeMap[report.damage_type_id] || '-',
+      asset_name: report.asset_id ? assetMap[report.asset_id]?.name || '-' : '-',
+      location_description:
+        report.latitude && report.longitude
+          ? `${report.latitude.toFixed(4)}, ${report.longitude.toFixed(4)}`
+          : '-',
+    }));
+
+    return {
+      success: true,
+      reports: enrichedReports,
+    };
+  } catch (error) {
+    console.error('Error fetching recent damage reports:', error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};

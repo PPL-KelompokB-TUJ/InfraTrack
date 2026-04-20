@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ImageOff, Pencil, Plus, Trash2 } from 'lucide-react';
 import AssetFormModal from '../components/AssetFormModal';
+import ConfirmationModal from '../components/ConfirmationModal';
+import { useNotification } from '../context/NotificationContext';
 import {
   createInfrastructureAsset,
   deleteInfrastructureAsset,
@@ -21,27 +23,33 @@ function formatCoordinate(lat, lng) {
 }
 
 export default function AssetManagementPage() {
+  const { addNotification } = useNotification();
   const [categoryOptions, setCategoryOptions] = useState(['Jalan', 'Jembatan', 'Fasum']);
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState(null);
+  
+  // Confirmation modal state
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    assetId: null,
+    assetName: '',
+  });
 
   const loadAssets = useCallback(async () => {
     setIsLoading(true);
-    setErrorMessage('');
 
     try {
       const data = await getInfrastructureAssets();
       setAssets(data);
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal memuat data aset.');
+      addNotification(error.message || 'Gagal memuat data aset.', 'error', 3000);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addNotification]);
 
   useEffect(() => {
     loadAssets();
@@ -55,7 +63,7 @@ export default function AssetManagementPage() {
           setCategoryOptions(options);
         }
       } catch (error) {
-        setErrorMessage((prev) => prev || error.message || 'Gagal memuat kategori referensi.');
+        addNotification(error.message || 'Gagal memuat kategori referensi.', 'error', 3000);
       }
     }
 
@@ -85,7 +93,6 @@ export default function AssetManagementPage() {
 
   async function handleSubmitAsset(formValues, photoFile) {
     setIsSaving(true);
-    setErrorMessage('');
 
     try {
       let photoUrl = formValues.photo_url || null;
@@ -109,28 +116,29 @@ export default function AssetManagementPage() {
       setEditingAsset(null);
       await loadAssets();
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal menyimpan aset.');
+      addNotification(error.message || 'Gagal menyimpan aset.', 'error', 3000);
     } finally {
       setIsSaving(false);
     }
   }
 
   async function handleDeleteAsset(asset) {
-    const canDelete = window.confirm(
-      `Hapus aset "${asset.name}"? Data yang dihapus tidak bisa dikembalikan.`
-    );
+    setConfirmationModal({
+      isOpen: true,
+      assetId: asset.id,
+      assetName: asset.name,
+    });
+  }
 
-    if (!canDelete) {
-      return;
-    }
-
-    setErrorMessage('');
+  async function confirmDeleteAsset() {
+    setConfirmationModal((prev) => ({ ...prev, isOpen: false }));
 
     try {
-      await deleteInfrastructureAsset(asset.id);
+      await deleteInfrastructureAsset(confirmationModal.assetId);
+      addNotification(`Aset "${confirmationModal.assetName}" berhasil dihapus`, 'success', 3000);
       await loadAssets();
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal menghapus aset.');
+      addNotification(error.message || 'Gagal menghapus aset.', 'error', 3000);
     }
   }
 
@@ -166,12 +174,6 @@ export default function AssetManagementPage() {
             </button>
           </div>
         </div>
-
-        {errorMessage ? (
-          <div className="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {errorMessage}
-          </div>
-        ) : null}
 
         <div className="overflow-hidden rounded-2xl border border-cyan-100 bg-white">
           <div className="overflow-x-auto">
@@ -266,6 +268,14 @@ export default function AssetManagementPage() {
         categoryOptions={categoryOptions}
         onClose={handleCloseModal}
         onSubmit={handleSubmitAsset}
+      />
+
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        title="Hapus Aset?"
+        message={`Hapus aset "${confirmationModal.assetName}"? Data yang dihapus tidak bisa dikembalikan.`}
+        onConfirm={confirmDeleteAsset}
+        onCancel={() => setConfirmationModal((prev) => ({ ...prev, isOpen: false }))}
       />
     </main>
   );

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CheckCircle2, Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-react';
+import { useNotification } from '../context/NotificationContext';
+import ConfirmationModal from '../components/ConfirmationModal';
 import {
   createDamageType,
   createInfrastructureCategory,
@@ -47,13 +49,20 @@ function DefaultBadge({ isDefault }) {
 }
 
 export default function MasterDataPage() {
+  const { addNotification } = useNotification();
   const [categories, setCategories] = useState([]);
   const [damageTypes, setDamageTypes] = useState([]);
   const [priorityScales, setPriorityScales] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [busyAction, setBusyAction] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+
+  // Confirmation modal state
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    type: '', // 'category', 'damage_type', 'priority_scale'
+    itemId: null,
+    itemName: '',
+  });
 
   const [newCategory, setNewCategory] = useState({ name: '', is_default: false, is_active: true });
   const [newDamageType, setNewDamageType] = useState({
@@ -79,7 +88,6 @@ export default function MasterDataPage() {
 
   const loadMasterData = useCallback(async () => {
     setIsLoading(true);
-    setErrorMessage('');
 
     try {
       const [categoryRows, damageRows, priorityRows] = await Promise.all([
@@ -100,20 +108,15 @@ export default function MasterDataPage() {
         }));
       }
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal memuat master data.');
+      addNotification(error.message || 'Gagal memuat master data.', 'error', 3000);
     } finally {
       setIsLoading(false);
     }
-  }, [newDamageType.infrastructure_category_id]);
+  }, [newDamageType.infrastructure_category_id, addNotification]);
 
   useEffect(() => {
     loadMasterData();
   }, [loadMasterData]);
-
-  function clearNotices() {
-    setErrorMessage('');
-    setSuccessMessage('');
-  }
 
   function hasCategoryNameConflict(name, excludedId = '') {
     const normalized = normalizeText(name);
@@ -146,18 +149,49 @@ export default function MasterDataPage() {
     );
   }
 
-  async function runAction(actionKey, action, successText) {
-    clearNotices();
+  async function runAction(actionKey, action) {
     setBusyAction(actionKey);
 
     try {
       await action();
       await loadMasterData();
-      setSuccessMessage(successText);
     } catch (error) {
-      setErrorMessage(error.message || 'Operasi gagal dilakukan.');
+      addNotification(error.message || 'Operasi gagal dilakukan.', 'error', 3000);
     } finally {
       setBusyAction('');
+    }
+  }
+
+  // Handle confirmation deletion for all types
+  async function confirmDeletion() {
+    const { type, itemId, itemName } = confirmationModal;
+    setConfirmationModal((prev) => ({ ...prev, isOpen: false }));
+
+    try {
+      if (type === 'category') {
+        await runAction(
+          `delete-category-${itemId}`,
+          () => deleteInfrastructureCategory(itemId),
+          `Kategori "${itemName}" berhasil dihapus.`
+        );
+        addNotification(`Kategori "${itemName}" berhasil dihapus`, 'success', 3000);
+      } else if (type === 'damage_type') {
+        await runAction(
+          `delete-damage-type-${itemId}`,
+          () => deleteDamageType(itemId),
+          `Jenis kerusakan "${itemName}" berhasil dihapus.`
+        );
+        addNotification(`Jenis kerusakan "${itemName}" berhasil dihapus`, 'success', 3000);
+      } else if (type === 'priority_scale') {
+        await runAction(
+          `delete-priority-${itemId}`,
+          () => deletePriorityScale(itemId),
+          `Skala prioritas "${itemName}" berhasil dihapus.`
+        );
+        addNotification(`Skala prioritas "${itemName}" berhasil dihapus`, 'success', 3000);
+      }
+    } catch (error) {
+      addNotification(error.message || 'Gagal menghapus item', 'error', 3000);
     }
   }
 
@@ -165,19 +199,18 @@ export default function MasterDataPage() {
     event.preventDefault();
 
     if (!newCategory.name.trim()) {
-      setErrorMessage('Nama kategori wajib diisi.');
+      addNotification('Nama kategori wajib diisi.', 'error', 3000);
       return;
     }
 
     if (hasCategoryNameConflict(newCategory.name)) {
-      setErrorMessage('Nama kategori sudah digunakan.');
+      addNotification('Nama kategori sudah digunakan.', 'error', 3000);
       return;
     }
 
     await runAction(
       'create-category',
-      () => createInfrastructureCategory(newCategory),
-      'Kategori berhasil ditambahkan.'
+      () => createInfrastructureCategory(newCategory)
     );
 
     setNewCategory({ name: '', is_default: false, is_active: true });
@@ -187,12 +220,12 @@ export default function MasterDataPage() {
     event.preventDefault();
 
     if (!newDamageType.name.trim()) {
-      setErrorMessage('Nama jenis kerusakan wajib diisi.');
+      addNotification('Nama jenis kerusakan wajib diisi.', 'error', 3000);
       return;
     }
 
     if (!newDamageType.infrastructure_category_id) {
-      setErrorMessage('Pilih kategori infrastruktur terlebih dahulu.');
+      addNotification('Pilih kategori infrastruktur terlebih dahulu.', 'error', 3000);
       return;
     }
 
@@ -202,14 +235,13 @@ export default function MasterDataPage() {
         newDamageType.infrastructure_category_id
       )
     ) {
-      setErrorMessage('Nama jenis kerusakan sudah ada untuk kategori tersebut.');
+      addNotification('Nama jenis kerusakan sudah ada untuk kategori tersebut.', 'error', 3000);
       return;
     }
 
     await runAction(
       'create-damage-type',
-      () => createDamageType(newDamageType),
-      'Jenis kerusakan berhasil ditambahkan.'
+      () => createDamageType(newDamageType)
     );
 
     setNewDamageType((prev) => ({
@@ -224,24 +256,23 @@ export default function MasterDataPage() {
     event.preventDefault();
 
     if (!newPriorityScale.name.trim()) {
-      setErrorMessage('Nama skala prioritas wajib diisi.');
+      addNotification('Nama skala prioritas wajib diisi.', 'error', 3000);
       return;
     }
 
     if (hasPriorityScaleNameConflict(newPriorityScale.name)) {
-      setErrorMessage('Nama skala prioritas sudah digunakan.');
+      addNotification('Nama skala prioritas sudah digunakan.', 'error', 3000);
       return;
     }
 
     if (hasPriorityLevelConflict(newPriorityScale.level)) {
-      setErrorMessage('Level prioritas sudah dipakai.');
+      addNotification('Level prioritas sudah dipakai.', 'error', 3000);
       return;
     }
 
     await runAction(
       'create-priority-scale',
-      () => createPriorityScale(newPriorityScale),
-      'Skala prioritas berhasil ditambahkan.'
+      () => createPriorityScale(newPriorityScale)
     );
 
     setNewPriorityScale({ name: '', level: 2, is_default: false, is_active: true });
@@ -278,19 +309,18 @@ export default function MasterDataPage() {
 
   async function handleSaveCategory(itemId) {
     if (!categoryDraft || !categoryDraft.name.trim()) {
-      setErrorMessage('Nama kategori wajib diisi.');
+      addNotification('Nama kategori wajib diisi.', 'error', 3000);
       return;
     }
 
     if (hasCategoryNameConflict(categoryDraft.name, itemId)) {
-      setErrorMessage('Nama kategori sudah digunakan.');
+      addNotification('Nama kategori sudah digunakan.', 'error', 3000);
       return;
     }
 
     await runAction(
       `update-category-${itemId}`,
-      () => updateInfrastructureCategory(itemId, categoryDraft),
-      'Kategori berhasil diperbarui.'
+      () => updateInfrastructureCategory(itemId, categoryDraft)
     );
 
     setEditingCategoryId('');
@@ -299,7 +329,7 @@ export default function MasterDataPage() {
 
   async function handleSaveDamageType(itemId) {
     if (!damageTypeDraft || !damageTypeDraft.name.trim()) {
-      setErrorMessage('Nama jenis kerusakan wajib diisi.');
+      addNotification('Nama jenis kerusakan wajib diisi.', 'error', 3000);
       return;
     }
 
@@ -310,14 +340,13 @@ export default function MasterDataPage() {
         itemId
       )
     ) {
-      setErrorMessage('Nama jenis kerusakan sudah ada untuk kategori tersebut.');
+      addNotification('Nama jenis kerusakan sudah ada untuk kategori tersebut.', 'error', 3000);
       return;
     }
 
     await runAction(
       `update-damage-type-${itemId}`,
-      () => updateDamageType(itemId, damageTypeDraft),
-      'Jenis kerusakan berhasil diperbarui.'
+      () => updateDamageType(itemId, damageTypeDraft)
     );
 
     setEditingDamageTypeId('');
@@ -326,24 +355,23 @@ export default function MasterDataPage() {
 
   async function handleSavePriorityScale(itemId) {
     if (!priorityScaleDraft || !priorityScaleDraft.name.trim()) {
-      setErrorMessage('Nama skala prioritas wajib diisi.');
+      addNotification('Nama skala prioritas wajib diisi.', 'error', 3000);
       return;
     }
 
     if (hasPriorityScaleNameConflict(priorityScaleDraft.name, itemId)) {
-      setErrorMessage('Nama skala prioritas sudah digunakan.');
+      addNotification('Nama skala prioritas sudah digunakan.', 'error', 3000);
       return;
     }
 
     if (hasPriorityLevelConflict(priorityScaleDraft.level, itemId)) {
-      setErrorMessage('Level prioritas sudah dipakai.');
+      addNotification('Level prioritas sudah dipakai.', 'error', 3000);
       return;
     }
 
     await runAction(
       `update-priority-scale-${itemId}`,
-      () => updatePriorityScale(itemId, priorityScaleDraft),
-      'Skala prioritas berhasil diperbarui.'
+      () => updatePriorityScale(itemId, priorityScaleDraft)
     );
 
     setEditingPriorityScaleId('');
@@ -367,17 +395,7 @@ export default function MasterDataPage() {
           </p>
         </div>
 
-        {errorMessage ? (
-          <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {errorMessage}
-          </div>
-        ) : null}
 
-        {successMessage ? (
-          <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {successMessage}
-          </div>
-        ) : null}
 
         {isLoading ? (
           <p className="rounded-xl border border-cyan-100 bg-white px-4 py-6 text-sm text-slate-500">
@@ -531,15 +549,12 @@ export default function MasterDataPage() {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      if (!window.confirm(`Hapus kategori "${item.name}"?`)) {
-                                        return;
-                                      }
-
-                                      runAction(
-                                        `delete-category-${item.id}`,
-                                        () => deleteInfrastructureCategory(item.id),
-                                        'Kategori berhasil dihapus.'
-                                      );
+                                      setConfirmationModal({
+                                        isOpen: true,
+                                        type: 'category',
+                                        itemId: item.id,
+                                        itemName: item.name,
+                                      });
                                     }}
                                     className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2 py-1 text-xs font-semibold text-rose-700"
                                   >
@@ -746,15 +761,12 @@ export default function MasterDataPage() {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      if (!window.confirm(`Hapus jenis kerusakan "${item.name}"?`)) {
-                                        return;
-                                      }
-
-                                      runAction(
-                                        `delete-damage-type-${item.id}`,
-                                        () => deleteDamageType(item.id),
-                                        'Jenis kerusakan berhasil dihapus.'
-                                      );
+                                      setConfirmationModal({
+                                        isOpen: true,
+                                        type: 'damage_type',
+                                        itemId: item.id,
+                                        itemName: item.name,
+                                      });
                                     }}
                                     className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2 py-1 text-xs font-semibold text-rose-700"
                                   >
@@ -955,15 +967,12 @@ export default function MasterDataPage() {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      if (!window.confirm(`Hapus skala prioritas "${item.name}"?`)) {
-                                        return;
-                                      }
-
-                                      runAction(
-                                        `delete-priority-scale-${item.id}`,
-                                        () => deletePriorityScale(item.id),
-                                        'Skala prioritas berhasil dihapus.'
-                                      );
+                                      setConfirmationModal({
+                                        isOpen: true,
+                                        type: 'priority_scale',
+                                        itemId: item.id,
+                                        itemName: item.name,
+                                      });
                                     }}
                                     className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2 py-1 text-xs font-semibold text-rose-700"
                                   >
@@ -998,6 +1007,14 @@ export default function MasterDataPage() {
           </div>
         )}
       </section>
+
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        title="Hapus Item?"
+        message={`Hapus "${confirmationModal.itemName}"? Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={confirmDeletion}
+        onCancel={() => setConfirmationModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </main>
   );
 }

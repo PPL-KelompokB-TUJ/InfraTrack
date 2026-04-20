@@ -6,6 +6,9 @@ import MasterDataPage from './pages/MasterDataPage';
 import ReportDamagePage from './pages/ReportDamagePage';
 import TrackDamageReportPage from './pages/TrackDamageReportPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import FieldOfficersPage from './pages/FieldOfficersPage';
+import NotificationContainer from './components/NotificationContainer';
+import { NotificationProvider } from './context/NotificationContext';
 import {
   getCurrentSession,
   isAdminUser,
@@ -38,6 +41,11 @@ const modules = [
   {
     key: 'master-data',
     label: 'Master Data Referensi',
+    requiresAdmin: true,
+  },
+  {
+    key: 'field-officers',
+    label: 'Manajemen Petugas',
     requiresAdmin: true,
   },
   {
@@ -284,6 +292,8 @@ export default function App() {
         );
       case 'master-data':
         return isAdmin ? <MasterDataPage /> : <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />;
+      case 'field-officers':
+        return isAdmin ? <FieldOfficersPage /> : <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />;
       case 'report-damage':
         return <ReportDamagePage />;
       case 'track-damage':
@@ -305,8 +315,9 @@ export default function App() {
   };
 
   return (
-    <div>
-      <header className="mx-auto w-full max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+    <NotificationProvider>
+      <div>
+        <header className="mx-auto w-full max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
         <div className="glass-panel rounded-2xl p-3">
           <div className="mb-3 flex flex-col gap-3 border-b border-cyan-100 pb-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -394,6 +405,9 @@ export default function App() {
         }
         onSubmit={handleAdminLogin}
       />
+
+      <NotificationContainer />
     </div>
+    </NotificationProvider>
   );
 }
