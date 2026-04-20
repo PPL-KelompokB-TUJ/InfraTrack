@@ -6,6 +6,7 @@ import MasterDataPage from './pages/MasterDataPage';
 import ReportDamagePage from './pages/ReportDamagePage';
 import TrackDamageReportPage from './pages/TrackDamageReportPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import FieldOfficerTasksPage from './pages/FieldOfficerTasksPage';
 import {
   getCurrentSession,
   isAdminUser,
@@ -44,6 +45,11 @@ const modules = [
     key: 'maintenance-task',
     label: 'Penugasan Pemeliharaan',
     requiresAdmin: true,
+  },
+  {
+    key: 'field-officer-tasks',
+    label: 'Penugasan Saya',
+    requiresAdmin: false,
   },
 ];
 
@@ -294,6 +300,8 @@ export default function App() {
         ) : (
           <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />
         );
+      case 'field-officer-tasks':
+        return <FieldOfficerTasksPage />;
       case 'asset-management':
       default:
         return isAdmin ? (

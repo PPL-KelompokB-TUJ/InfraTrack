@@ -284,3 +284,137 @@ export async function markNotificationAsRead(notificationId) {
     throw new Error(`Failed to mark notification as read: ${error.message}`);
   }
 }
+
+/**
+ * Get maintenance logs for a specific task
+ */
+export async function getMaintenanceLogsForTask(taskId) {
+  try {
+    const { data, error } = await supabase
+      .from('maintenance_logs')
+      .select(`
+        *,
+        officer:officer_id(id, name, email)
+      `)
+      .eq('task_id', taskId)
+      .order('logged_at', { ascending: true });
+
+    if (error) throw new Error(error.message);
+    return data || [];
+  } catch (error) {
+    throw new Error(`Failed to fetch maintenance logs: ${error.message}`);
+  }
+}
+
+/**
+ * Create a maintenance log entry when officer updates task status
+ */
+export async function createMaintenanceLog(logData) {
+  try {
+    const payload = {
+      task_id: logData.task_id,
+      officer_id: logData.officer_id,
+      status: logData.status, // 'started', 'in_progress', 'completed'
+      notes: logData.notes || '',
+      photo_url: logData.photo_url || null,
+      logged_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
+      .from('maintenance_logs')
+      .insert([payload])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to create maintenance log: ${error.message}`);
+  }
+}
+
+/**
+ * Upload maintenance progress photo to storage
+ */
+export async function uploadMaintenanceProgressPhoto(file, taskId, userId) {
+  try {
+    if (!file || !taskId || !userId) {
+      throw new Error('File, task ID, and user ID are required');
+    }
+
+    // Generate unique filename
+    const timestamp = Date.now();
+    const filename = `${userId}/${taskId}/${timestamp}_${file.name}`;
+
+    // Upload file to storage
+    const { data, error } = await supabase.storage
+      .from('maintenance-progress-photos')
+      .upload(filename, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (error) throw new Error(error.message);
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('maintenance-progress-photos')
+      .getPublicUrl(filename);
+
+    return urlData.publicUrl;
+  } catch (error) {
+    throw new Error(`Failed to upload maintenance progress photo: ${error.message}`);
+  }
+}
+
+/**
+ * Update maintenance task status and create log in one operation
+ */
+export async function updateTaskStatusWithLog(taskId, newStatus, officerId, logData) {
+  try {
+    // First, update the task status
+    const taskUpdateData = {
+      status: newStatus,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: updatedTask, error: taskError } = await supabase
+      .from('maintenance_tasks')
+      .update(taskUpdateData)
+      .eq('id', taskId)
+      .select()
+      .single();
+
+    if (taskError) throw new Error(`Task update error: ${taskError.message}`);
+
+    // Then create a maintenance log
+    const maintenanceLog = await createMaintenanceLog({
+      task_id: taskId,
+      officer_id: officerId,
+      status: logData.logStatus || 'in_progress',
+      notes: logData.notes || '',
+      photo_url: logData.photo_url || null,
+    });
+
+    // If task is completed, create notification for admin
+    if (newStatus === 'completed') {
+      const taskDetails = await getMaintenanceTaskById(taskId);
+      if (taskDetails?.assigned_by_user?.id) {
+        await createNotification({
+          user_id: taskDetails.assigned_by_user.id,
+          type: 'task_completed',
+          title: 'Pekerjaan Pemeliharaan Selesai',
+          message: `Pekerjaan pemeliharaan untuk aset ${taskDetails.asset?.name} telah selesai`,
+          related_id: taskId,
+        });
+      }
+    }
+
+    return {
+      task: updatedTask,
+      log: maintenanceLog,
+    };
+  } catch (error) {
+    throw new Error(`Failed to update task status with log: ${error.message}`);
+  }
+}
