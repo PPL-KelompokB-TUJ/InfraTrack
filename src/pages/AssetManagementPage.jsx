@@ -24,7 +24,7 @@ function formatCoordinate(lat, lng) {
 
 export default function AssetManagementPage() {
   const { addNotification } = useNotification();
-  const [categoryOptions, setCategoryOptions] = useState(['Jalan', 'Jembatan', 'Fasum']);
+  const [categoryOptions, setCategoryOptions] = useState(['Jalan', 'Jembatan', 'Saluran Drainase', 'Air Bersih', 'Listrik']);
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

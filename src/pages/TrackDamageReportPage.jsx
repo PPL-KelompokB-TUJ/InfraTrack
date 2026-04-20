@@ -2,6 +2,26 @@ import React, { useState } from 'react';
 import { Search, AlertCircle, CheckCircle, Clock, MapPin } from 'lucide-react';
 import { getDamageReportByTicket } from '../lib/damageReportService';
 
+const getUrgencyColor = (level) => {
+  const colors = {
+    rendah: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+    sedang: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+    tinggi: 'bg-orange-100 text-orange-800 border border-orange-300',
+    sangat_tinggi: 'bg-red-100 text-red-800 border border-red-300',
+  };
+  return colors[level] || 'bg-slate-100 text-slate-800 border border-slate-300';
+};
+
+const getUrgencyLabel = (level) => {
+  const labels = {
+    rendah: 'Rendah',
+    sedang: 'Sedang',
+    tinggi: 'Tinggi',
+    sangat_tinggi: 'Sangat Tinggi',
+  };
+  return labels[level] || level;
+};
+
 const statusColors = {
   pending: 'border-amber-200 bg-amber-50 text-amber-800',
   terverifikasi: 'border-cyan-200 bg-cyan-50 text-cyan-800',
@@ -151,14 +171,16 @@ export default function TrackDamageReportPage() {
 
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Jenis Kerusakan</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-800">{report.damage_type}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-800">{report.damage_type_name}</p>
                 </div>
 
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500">Tingkat Urgensi</p>
-                  <p className="mt-1 text-sm font-semibold capitalize text-slate-800">
-                    {report.urgency_level}
-                  </p>
+                  <div className="mt-1">
+                    <span className={`inline-block rounded-lg px-3 py-1 text-sm font-semibold ${getUrgencyColor(report.urgency_level)}`}>
+                      {getUrgencyLabel(report.urgency_level)}
+                    </span>
+                  </div>
                 </div>
 
                 <div>

@@ -156,7 +156,9 @@ insert into public.infrastructure_categories (name, is_default, is_active)
 values
   ('Jalan', false, true),
   ('Jembatan', false, true),
-  ('Fasum', false, true)
+  ('Saluran Drainase', false, true),
+  ('Air Bersih', false, true),
+  ('Listrik', false, true)
 on conflict (name) do update
 set is_active = excluded.is_active;
 
@@ -177,7 +179,7 @@ and not exists (
 insert into public.damage_types (name, infrastructure_category_id, is_default, is_active)
 select 'Lainnya', id, false, true
 from public.infrastructure_categories
-where name in ('Jalan', 'Jembatan', 'Fasum')
+where name in ('Jalan', 'Jembatan', 'Saluran Drainase', 'Air Bersih', 'Listrik')
 on conflict (infrastructure_category_id, name) do update
 set is_active = excluded.is_active;
 

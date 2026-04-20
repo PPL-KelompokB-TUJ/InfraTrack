@@ -32,13 +32,13 @@ function ClickPositionMarker({ value, onChange }) {
     <CircleMarker
       center={[value.lat, value.lng]}
       radius={8}
-      pathOptions={{ color: '#0e7490', fillColor: '#22d3ee', fillOpacity: 0.7 }}
+      pathOptions={{ color: '#0e7490', fillColor: '#22d3ee', fillOpacity: 0.8 }}
     >
       <Popup>
-        <div className="text-xs text-center">
-          <p className="font-semibold">Lokasi Dipilih</p>
-          <p>{value.lat.toFixed(6)}, {value.lng.toFixed(6)}</p>
-          <p className="text-slate-500 mt-1">Klik di peta untuk mengubah</p>
+        <div className="text-center p-2">
+          <p className="font-bold text-slate-900 text-sm">📍 Lokasi Dipilih</p>
+          <p className="text-xs text-slate-700 font-mono mt-1.5">{value.lat.toFixed(6)}, {value.lng.toFixed(6)}</p>
+          <p className="text-xs text-slate-500 mt-2">Klik di peta untuk mengubah</p>
         </div>
       </Popup>
     </CircleMarker>
@@ -63,10 +63,10 @@ export default function MapPicker({ value, onChange }) {
   const center = value || DEFAULT_COORDINATE;
 
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-cyan-100 shadow-sm" style={{ height: '300px' }}>
-      <MapContainer center={[center.lat, center.lng]} zoom={13} className="h-full w-full">
+    <div className="w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white" style={{ height: '350px' }}>
+      <MapContainer center={[center.lat, center.lng]} zoom={13} className="h-full w-full z-0">
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <RecenterMap value={value} />

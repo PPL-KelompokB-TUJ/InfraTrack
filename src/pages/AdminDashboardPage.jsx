@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BarChart3, Building2, FileText, Users, AlertCircle, Clock, MapPin, Eye, X } from 'lucide-react';
+import { Building2, FileText, CheckCircle2, AlertCircle, Eye, X, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { getRecentDamageReports } from '../lib/damageReportService';
+import { getRecentDamageReports, getPendingDamageReports, verifyDamageReport, rejectDamageReport } from '../lib/damageReportService';
 import { useNotification } from '../context/NotificationContext';
+import DamageReportVerificationPanel from '../components/DamageReportVerificationPanel';
 
-export default function AdminDashboardPage() {
+export default function AdminDashboardPage({ onNavigateToModule }) {
   const { addNotification } = useNotification();
   const [stats, setStats] = useState({
     totalAssets: 0,
     totalReports: 0,
-    pendingReports: 0,
+    reportsResolved: 0,
     completedTasks: 0,
   });
   const [recentReports, setRecentReports] = useState([]);
@@ -35,13 +36,13 @@ export default function AdminDashboardPage() {
 
       if (reportsError) throw reportsError;
 
-      // Get pending reports (status not 'selesai')
-      const { count: pendingReports, error: pendingError } = await supabase
+      // Get resolved reports (status = 'selesai')
+      const { count: reportsResolved, error: resolvedError } = await supabase
         .from('damage_reports')
         .select('*', { count: 'exact', head: true })
-        .neq('status', 'selesai');
+        .eq('status', 'selesai');
 
-      if (pendingError) throw pendingError;
+      if (resolvedError) throw resolvedError;
 
       // Get completed maintenance tasks
       const { count: completedTasks, error: tasksError } = await supabase
@@ -57,7 +58,7 @@ export default function AdminDashboardPage() {
       setStats({
         totalAssets: totalAssets || 0,
         totalReports: totalReports || 0,
-        pendingReports: pendingReports || 0,
+        reportsResolved: reportsResolved || 0,
         completedTasks: completedTasks || 0,
       });
 
@@ -96,86 +97,90 @@ export default function AdminDashboardPage() {
     );
   }
 
-
-
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-800">Dashboard Admin</h1>
-        <p className="mt-2 text-slate-600">
-          Ringkasan aktivitas dan statistik sistem InfraTrack
-        </p>
+        <h1 className="text-3xl font-extrabold text-slate-900">Dashboard</h1>
+        <p className="mt-2 text-slate-600">Ringkasan aktivitas dan statistik sistem InfraTrack</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Verification Panel - High Priority */}
+      <div className="mb-8">
+        <DamageReportVerificationPanel />
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {/* Total Assets */}
-        <div className="glass-panel rounded-3xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700">
-              <Building2 size={24} />
-            </div>
+        <div className="glass-panel rounded-lg p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-2xl font-bold text-slate-800">{stats.totalAssets}</p>
-              <p className="text-sm text-slate-600">Total Aset</p>
+              <p className="text-sm font-medium text-slate-600">Total Aset</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.totalAssets}</p>
+            </div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-cyan-100">
+              <Building2 size={28} className="text-cyan-700" />
             </div>
           </div>
         </div>
 
-        {/* Total Reports */}
-        <div className="glass-panel rounded-3xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-              <FileText size={24} />
+        {/* Total Reports - Clickable */}
+        <button
+          onClick={() => onNavigateToModule?.('active-reports')}
+          className="glass-panel rounded-lg p-6 hover:bg-orange-50 transition-colors cursor-pointer border border-transparent hover:border-orange-200"
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-sm font-medium text-slate-600">Laporan Aktif</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.totalReports}</p>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{stats.totalReports}</p>
-              <p className="text-sm text-slate-600">Total Laporan</p>
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-orange-100">
+              <FileText size={28} className="text-orange-700" />
             </div>
           </div>
-        </div>
+        </button>
 
-        {/* Pending Reports */}
-        <div className="glass-panel rounded-3xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-700">
-              <BarChart3 size={24} />
-            </div>
+        {/* Resolved Reports */}
+        <div className="glass-panel rounded-lg p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-2xl font-bold text-slate-800">{stats.pendingReports}</p>
-              <p className="text-sm text-slate-600">Laporan Pending</p>
+              <p className="text-sm font-medium text-slate-600">Laporan Selesai</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.reportsResolved}</p>
+            </div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-emerald-100">
+              <CheckCircle2 size={28} className="text-emerald-700" />
             </div>
           </div>
         </div>
 
         {/* Completed Tasks */}
-        <div className="glass-panel rounded-3xl p-6">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-              <Users size={24} />
-            </div>
+        <div className="glass-panel rounded-lg p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-2xl font-bold text-slate-800">{stats.completedTasks}</p>
-              <p className="text-sm text-slate-600">Tugas Selesai</p>
+              <p className="text-sm font-medium text-slate-600">Tugas Selesai</p>
+              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.completedTasks}</p>
+            </div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-purple-100">
+              <AlertCircle size={28} className="text-purple-700" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Placeholder for future interactive elements */}
-      <div className="mt-8 glass-panel rounded-3xl p-6">
-        <h2 className="text-xl font-bold text-slate-800 mb-4">Aktivitas Terbaru</h2>
+      {/* Recent Reports Table */}
+      <div className="glass-panel rounded-lg p-6">
+        <h2 className="text-xl font-bold text-slate-900 mb-6">Laporan Terbaru</h2>
+        
         {recentReports.length === 0 ? (
-          <p className="text-slate-600">Belum ada laporan kerusakan terbaru</p>
+          <p className="text-center text-slate-600 py-8">Belum ada laporan kerusakan terbaru</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-200">
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Tiket</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Pelapor</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Jenis Kerusakan</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Lokasi</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Urgensi</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Tanggal</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Aksi</th>
@@ -187,28 +192,13 @@ export default function AdminDashboardPage() {
                     <td className="py-3 px-4">
                       <span className="font-mono font-semibold text-cyan-700">{report.ticket_code}</span>
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="text-slate-700">{report.reporter_name || '-'}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-slate-700">{report.damage_type_name}</span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-1 text-slate-600">
-                        <MapPin size={14} className="flex-shrink-0" />
-                        <span className="truncate text-xs">{report.location_description}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <UrgencyBadge level={report.urgency_level} />
-                    </td>
+                    <td className="py-3 px-4 text-slate-700">{report.damage_type_name}</td>
+                    <td className="py-3 px-4 text-slate-600 truncate max-w-xs">{report.location_description}</td>
                     <td className="py-3 px-4">
                       <StatusBadge status={report.status} />
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="text-xs text-slate-600">
-                        {new Date(report.created_at).toLocaleDateString('id-ID')}
-                      </span>
+                    <td className="py-3 px-4 text-slate-600 text-xs">
+                      {new Date(report.created_at).toLocaleDateString('id-ID')}
                     </td>
                     <td className="py-3 px-4">
                       <button
@@ -216,7 +206,7 @@ export default function AdminDashboardPage() {
                         className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 hover:bg-cyan-200 font-semibold text-sm transition-colors"
                       >
                         <Eye size={16} />
-                        Lihat Detail
+                        Detail
                       </button>
                     </td>
                   </tr>
@@ -235,27 +225,6 @@ export default function AdminDashboardPage() {
         />
       )}
     </main>
-  );
-}
-
-/**
- * Badge untuk menampilkan tingkat urgensi dengan warna berbeda
- */
-function UrgencyBadge({ level }) {
-  const urgencyConfig = {
-    rendah: { bg: 'bg-green-100', text: 'text-green-800', label: 'Rendah' },
-    sedang: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Sedang' },
-    tinggi: { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Tinggi' },
-    'sangat tinggi': { bg: 'bg-red-100', text: 'text-red-800', label: 'Sangat Tinggi' },
-  };
-
-  const config = urgencyConfig[level] || urgencyConfig.sedang;
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${config.bg} ${config.text}`}>
-      <AlertCircle size={14} />
-      {config.label}
-    </span>
   );
 }
 
@@ -282,9 +251,76 @@ function StatusBadge({ status }) {
 }
 
 /**
- * Modal untuk menampilkan detail laporan kerusakan
+ * Modal untuk menampilkan detail laporan kerusakan dengan verifikasi
  */
 function ReportDetailModal({ report, onClose }) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showVerificationForm, setShowVerificationForm] = useState(false);
+  const [verificationNotes, setVerificationNotes] = useState('');
+  const [priorityLevel, setPriorityLevel] = useState('sedang');
+  const [verificationAction, setVerificationAction] = useState(null); // 'approve' or 'reject'
+  const { addNotification } = useNotification();
+
+  const handleVerificationClick = (action) => {
+    setVerificationAction(action);
+    setShowVerificationForm(true);
+  };
+
+  const handleVerificationSubmit = async () => {
+    if (verificationAction === 'approve' && !priorityLevel) {
+      addNotification('Pilih tingkat prioritas untuk persetujuan', 'error');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        addNotification('Unauthorized: User tidak ditemukan', 'error');
+        setIsProcessing(false);
+        return;
+      }
+
+      let result;
+      if (verificationAction === 'approve') {
+        result = await verifyDamageReport({
+          reportId: report.id,
+          verificationNotes: verificationNotes || null,
+          priorityLevel,
+          adminId: user.id,
+        });
+      } else {
+        result = await rejectDamageReport({
+          reportId: report.id,
+          verificationNotes: verificationNotes || null,
+          adminId: user.id,
+        });
+      }
+
+      setIsProcessing(false);
+
+      if (result.success) {
+        const action = verificationAction === 'approve' ? 'disetujui' : 'ditolak';
+        addNotification(`Laporan ${report.ticket_code} berhasil ${action} ✓`, 'success');
+        setShowVerificationForm(false);
+        onClose();
+      } else {
+        addNotification(`Gagal ${verificationAction === 'approve' ? 'menyetujui' : 'menolak'}: ${result.error}`, 'error');
+      }
+    } catch (error) {
+      addNotification(`Error: ${error.message}`, 'error');
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowVerificationForm(false);
+    setVerificationNotes('');
+    setPriorityLevel('sedang');
+    setVerificationAction(null);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -310,11 +346,24 @@ function ReportDetailModal({ report, onClose }) {
               <p className="text-sm font-semibold text-slate-600 mb-2">Status</p>
               <StatusBadge status={report.status} />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-600 mb-2">Tingkat Urgensi</p>
-              <UrgencyBadge level={report.urgency_level} />
-            </div>
           </div>
+
+          {/* Foto Laporan */}
+          {report.photo_url && (
+            <div>
+              <p className="text-sm font-semibold text-slate-600 mb-3">Foto Laporan</p>
+              <div className="w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50">
+                <img 
+                  src={report.photo_url} 
+                  alt="Foto laporan" 
+                  className="w-full h-auto max-h-96 object-contain"
+                  onError={(e) => {
+                    e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23e2e8f0" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" font-family="Arial" font-size="14" fill="%2364748b" text-anchor="middle" dy=".3em"%3EGambar tidak dapat ditampilkan%3C/text%3E%3C/svg%3E';
+                  }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Informasi Pelapor */}
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
@@ -381,13 +430,93 @@ function ReportDetailModal({ report, onClose }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-slate-200">
-            <button
-              onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 text-slate-800 font-semibold hover:bg-slate-300 transition-colors"
-            >
-              Tutup
-            </button>
+          <div className="pt-4 border-t border-slate-200 space-y-4">
+            {!showVerificationForm ? (
+              <div className="flex gap-3">
+                {report.status === 'pending' && (
+                  <>
+                    <button
+                      onClick={() => handleVerificationClick('approve')}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition-colors"
+                    >
+                      ✓ Setuju
+                    </button>
+                    <button
+                      onClick={() => handleVerificationClick('reject')}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors"
+                    >
+                      ✗ Tolak
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={onClose}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 text-slate-800 font-semibold hover:bg-slate-300 transition-colors"
+                >
+                  Tutup
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm font-semibold text-blue-900">
+                    {verificationAction === 'approve' ? 'Proses Persetujuan Laporan' : 'Proses Penolakan Laporan'}
+                  </p>
+                </div>
+
+                {verificationAction === 'approve' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Tingkat Prioritas *
+                    </label>
+                    <select
+                      value={priorityLevel}
+                      onChange={(e) => setPriorityLevel(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                    >
+                      <option value="rendah">Rendah</option>
+                      <option value="sedang">Sedang</option>
+                      <option value="tinggi">Tinggi</option>
+                      <option value="sangat_tinggi">Sangat Tinggi</option>
+                    </select>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Catatan {verificationAction === 'approve' ? 'Persetujuan' : 'Penolakan'} (Opsional)
+                  </label>
+                  <textarea
+                    value={verificationNotes}
+                    onChange={(e) => setVerificationNotes(e.target.value)}
+                    placeholder={`Masukkan catatan ${verificationAction === 'approve' ? 'persetujuan' : 'penolakan'}...`}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 resize-none"
+                    rows="3"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleVerificationSubmit}
+                    disabled={isProcessing}
+                    className={`flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors ${
+                      verificationAction === 'approve'
+                        ? 'bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50'
+                        : 'bg-red-500 hover:bg-red-600 disabled:opacity-50'
+                    }`}
+                  >
+                    {isProcessing ? 'Memproses...' : (verificationAction === 'approve' ? 'Konfirmasi Persetujuan' : 'Konfirmasi Penolakan')}
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    disabled={isProcessing}
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 text-slate-800 font-semibold hover:bg-slate-300 disabled:opacity-50 transition-colors"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
