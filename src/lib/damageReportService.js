@@ -1,21 +1,57 @@
 import { supabase } from './supabaseClient';
 
-async function resolveDamageTypeIdByName(damageTypeName) {
+async function resolveInfrastructureCategoryIdByName(categoryName) {
+  const normalizedCategoryName = String(categoryName || '').trim();
+
+  if (!normalizedCategoryName) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('infrastructure_categories')
+    .select('id')
+    .eq('name', normalizedCategoryName)
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.id) {
+    throw new Error(
+      `Kategori infrastruktur "${normalizedCategoryName}" tidak ditemukan pada master data aktif.`
+    );
+  }
+
+  return data.id;
+}
+
+async function resolveDamageTypeIdByName(damageTypeName, infrastructureCategoryName = '') {
   const normalizedDamageTypeName = String(damageTypeName || '').trim();
+  const infrastructureCategoryId = await resolveInfrastructureCategoryIdByName(
+    infrastructureCategoryName
+  );
 
   if (!normalizedDamageTypeName) {
     throw new Error('Jenis kerusakan tidak boleh kosong.');
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('damage_types')
     .select('id, is_default, created_at')
     .eq('name', normalizedDamageTypeName)
     .eq('is_active', true)
     .order('is_default', { ascending: false })
     .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  if (infrastructureCategoryId) {
+    query = query.eq('infrastructure_category_id', infrastructureCategoryId);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -53,6 +89,7 @@ export const submitDamageReport = async ({
   reporterName,
   reporterEmail,
   reporterPhone,
+  infrastructureCategory,
   damageType,
   urgencyLevel,
   description,
@@ -61,7 +98,7 @@ export const submitDamageReport = async ({
   photoFile,
 }) => {
   try {
-    const damageTypeId = await resolveDamageTypeIdByName(damageType);
+    const damageTypeId = await resolveDamageTypeIdByName(damageType, infrastructureCategory);
     let photoUrl = null;
 
     // Upload photo if provided

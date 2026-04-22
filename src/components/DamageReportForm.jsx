@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle, Loader, MapPin, Camera } from 'lucide-react';
 import { submitDamageReport } from '../lib/damageReportService';
-import { getActiveDamageTypeNames } from '../lib/masterDataService';
+import {
+  getActiveDamageTypeNames,
+  getActiveInfrastructureCategories,
+} from '../lib/masterDataService';
 
 const urgency_levels = [
   { value: 'rendah', label: 'Rendah' },
@@ -15,6 +18,7 @@ export default function DamageReportForm() {
     reporterName: '',
     reporterEmail: '',
     reporterPhone: '',
+    infrastructureCategory: '',
     damageType: '',
     urgencyLevel: '',
     description: '',
@@ -31,6 +35,7 @@ export default function DamageReportForm() {
   const [locationStatus, setLocationStatus] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
   const [damageTypeOptions, setDamageTypeOptions] = useState([]);
+  const [infrastructureCategoryOptions, setInfrastructureCategoryOptions] = useState([]);
 
   // Get GPS location on component mount
   useEffect(() => {
@@ -40,12 +45,57 @@ export default function DamageReportForm() {
   useEffect(() => {
     let isMounted = true;
 
+    async function loadInfrastructureCategories() {
+      try {
+        const options = await getActiveInfrastructureCategories();
+
+        if (isMounted) {
+          setInfrastructureCategoryOptions(options);
+          setFormData((prev) => {
+            if (prev.infrastructureCategory) {
+              return prev;
+            }
+
+            const preferredCategory = options.find((item) => item.is_default) || options[0];
+            return {
+              ...prev,
+              infrastructureCategory: preferredCategory?.name || '',
+            };
+          });
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || 'Gagal memuat kategori infrastruktur referensi');
+        }
+      }
+    }
+
+    loadInfrastructureCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
     async function loadDamageTypeOptions() {
       try {
-        const options = await getActiveDamageTypeNames();
+        const options = await getActiveDamageTypeNames(formData.infrastructureCategory);
 
         if (isMounted) {
           setDamageTypeOptions(options);
+          setFormData((prev) => {
+            if (!prev.damageType || options.includes(prev.damageType)) {
+              return prev;
+            }
+
+            return {
+              ...prev,
+              damageType: '',
+            };
+          });
         }
       } catch (err) {
         if (isMounted) {
@@ -59,7 +109,7 @@ export default function DamageReportForm() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [formData.infrastructureCategory]);
 
   const getGPSLocation = () => {
     setGpsLoading(true);
@@ -161,6 +211,11 @@ export default function DamageReportForm() {
       return false;
     }
 
+    if (!formData.infrastructureCategory) {
+      setError('Kategori infrastruktur harus dipilih');
+      return false;
+    }
+
     if (!formData.urgencyLevel) {
       setError('Tingkat urgensi harus dipilih');
       return false;
@@ -206,6 +261,7 @@ export default function DamageReportForm() {
       reporterName: formData.reporterName,
       reporterEmail: formData.reporterEmail,
       reporterPhone: formData.reporterPhone,
+      infrastructureCategory: formData.infrastructureCategory,
       damageType: formData.damageType,
       urgencyLevel: formData.urgencyLevel,
       description: formData.description,
@@ -224,6 +280,10 @@ export default function DamageReportForm() {
         reporterName: '',
         reporterEmail: '',
         reporterPhone: '',
+        infrastructureCategory:
+          infrastructureCategoryOptions.find((item) => item.is_default)?.name ||
+          infrastructureCategoryOptions[0]?.name ||
+          '',
         damageType: '',
         urgencyLevel: '',
         description: '',
@@ -385,6 +445,27 @@ export default function DamageReportForm() {
               Perbarui Lokasi
             </button>
           </div>
+        </div>
+
+        {/* Kategori Infrastruktur */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Kategori Infrastruktur *
+          </label>
+          <select
+            name="infrastructureCategory"
+            value={formData.infrastructureCategory}
+            onChange={handleInputChange}
+            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            required
+          >
+            <option value="">-- Pilih Kategori Infrastruktur --</option>
+            {infrastructureCategoryOptions.map((category) => (
+              <option key={category.id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Jenis Kerusakan */}
