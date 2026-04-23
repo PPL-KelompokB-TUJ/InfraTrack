@@ -1,0 +1,139 @@
+◇ injected env (3) from .env // tip: ⌘ suppress logs { quiet: true }
+📊 Task Progress Tracking Setup
+
+⚠️  MANUAL SETUP REQUIRED
+
+📋 SQL Script Generated. Please:
+
+1. Open Supabase Dashboard
+2. Go to SQL Editor
+3. Create new query
+4. Paste the SQL below
+5. Click "Run"
+
+════════════════════════════════════════════════════════
+
+-- ============================================
+-- PBI-05: Field Officer Task Progress Tracking
+-- ============================================
+
+-- 1. Create task_progress table to track status updates
+CREATE TABLE IF NOT EXISTS public.task_progress (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id uuid NOT NULL REFERENCES public.maintenance_tasks(id) ON DELETE CASCADE,
+  officer_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  status text NOT NULL CHECK (status IN ('pending', 'assigned', 'in_progress', 'completed', 'cancelled')),
+  notes text,
+  photo_url text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- 2. Create indexes
+CREATE INDEX IF NOT EXISTS task_progress_task_id_idx ON public.task_progress(task_id);
+CREATE INDEX IF NOT EXISTS task_progress_officer_id_idx ON public.task_progress(officer_id);
+CREATE INDEX IF NOT EXISTS task_progress_created_at_idx ON public.task_progress(created_at DESC);
+
+-- 3. Enable RLS
+ALTER TABLE public.task_progress ENABLE ROW LEVEL SECURITY;
+
+-- 4. RLS Policies
+DROP POLICY IF EXISTS "Officers can view their task progress" ON public.task_progress;
+DROP POLICY IF EXISTS "Officers can insert their task progress" ON public.task_progress;
+DROP POLICY IF EXISTS "Admin can view all task progress" ON public.task_progress;
+
+CREATE POLICY "Officers can view their task progress"
+  ON public.task_progress
+  FOR SELECT
+  TO authenticated
+  USING (
+    officer_id = auth.uid() OR
+    (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+  );
+
+CREATE POLICY "Officers can insert their task progress"
+  ON public.task_progress
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (officer_id = auth.uid());
+
+CREATE POLICY "Admin can view all task progress"
+  ON public.task_progress
+  FOR ALL
+  TO authenticated
+  USING ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
+  WITH CHECK ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
+
+-- 5. Grants
+GRANT SELECT, INSERT ON public.task_progress TO authenticated;
+
+-- 6. Update maintenance_tasks table to add last_status and last_notes columns
+ALTER TABLE public.maintenance_tasks ADD COLUMN IF NOT EXISTS last_status_update timestamptz;
+ALTER TABLE public.maintenance_tasks ADD COLUMN IF NOT EXISTS last_officer_notes text;
+
+-- 7. Create function to update maintenance task status
+CREATE OR REPLACE FUNCTION public.update_maintenance_task_status(
+  p_task_id uuid,
+  p_status text,
+  p_notes text,
+  p_photo_url text DEFAULT NULL
+)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_officer_id uuid;
+  v_task RECORD;
+  v_result json;
+BEGIN
+  -- Get current user (officer)
+  v_officer_id := auth.uid();
+  
+  -- Verify task exists and belongs to this officer
+  SELECT * INTO v_task FROM public.maintenance_tasks 
+  WHERE id = p_task_id AND assigned_to = v_officer_id;
+  
+  IF v_task IS NULL THEN
+    RETURN json_build_object('success', false, 'error', 'Task not found or not assigned to you');
+  END IF;
+  
+  -- Insert progress record
+  INSERT INTO public.task_progress (task_id, officer_id, status, notes, photo_url)
+  VALUES (p_task_id, v_officer_id, p_status, p_notes, p_photo_url);
+  
+  -- Update maintenance task
+  UPDATE public.maintenance_tasks
+  SET 
+    status = p_status,
+    notes = COALESCE(p_notes, notes),
+    last_status_update = now(),
+    last_officer_notes = COALESCE(p_notes, last_officer_notes),
+    updated_at = now()
+  WHERE id = p_task_id;
+  
+  v_result := json_build_object(
+    'success', true,
+    'task_id', p_task_id,
+    'status', p_status,
+    'timestamp', now()
+  );
+  
+  RETURN v_result;
+END;
+$$;
+
+-- 8. Grant execute on function
+GRANT EXECUTE ON FUNCTION public.update_maintenance_task_status(uuid, text, text, text) TO authenticated;
+
+SELECT 'Task progress tracking setup complete!' as status;
+
+
+════════════════════════════════════════════════════════
+
+✅ After running SQL in Supabase:
+   ✅ public.task_progress table created
+   ✅ RLS policies enabled
+   ✅ Storage bucket ready for photos
+
+📝 SQL also saved to: TASK_PROGRESS_SETUP.sql
+

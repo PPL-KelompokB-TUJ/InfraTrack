@@ -4,7 +4,7 @@ const CATEGORY_TABLE = 'infrastructure_categories';
 const DAMAGE_TYPE_TABLE = 'damage_types';
 const PRIORITY_SCALE_TABLE = 'priority_scales';
 
-const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Fasum'];
+const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Saluran Drainase', 'Air Bersih', 'Listrik'];
 const FALLBACK_DAMAGE_TYPE_OPTIONS = [
   'Jalan berlubang',
   'Jembatan rusak',
