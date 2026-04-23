@@ -60,13 +60,11 @@ const modules = [
     key: 'report-damage',
     label: 'Lapor Kerusakan',
     requiresAdmin: false,
-    disabled: true,
   },
   {
     key: 'track-damage',
     label: 'Lacak Laporan',
     requiresAdmin: false,
-    disabled: true,
   },
   {
     key: 'master-data',

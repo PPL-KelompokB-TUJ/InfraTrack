@@ -251,6 +251,7 @@ export async function getActiveFieldOfficers() {
       id: officer.id,
       name: officer.name,
       email: officer.email,
+      phone: officer.phone || '',
       specialization: officer.specialization || '',
       work_area: officer.work_area || '',
     }));
@@ -264,6 +265,142 @@ export async function getActiveFieldOfficers() {
     }
 
     throw new Error(`Failed to fetch field officers: ${error.message}`);
+  }
+}
+
+function generateTemporaryPassword(length = 10) {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  return Array.from({ length }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+}
+
+/**
+ * Create field officer user + profile.
+ */
+export async function createFieldOfficer(formData) {
+  try {
+    const name = String(formData?.name || '').trim();
+    const email = String(formData?.email || '').trim().toLowerCase();
+
+    if (!name || !email) {
+      throw new Error('Nama dan email petugas wajib diisi.');
+    }
+
+    const { data: userRow, error: userError } = await supabase
+      .from('users')
+      .insert([
+        {
+          name,
+          email,
+          role: 'field_officer',
+          is_active: true,
+        },
+      ])
+      .select('id, name, email, role, is_active')
+      .single();
+
+    if (userError) {
+      throw new Error(userError.message);
+    }
+
+    const profilePayload = {
+      user_id: userRow.id,
+      specialization: formData?.specialization || null,
+      work_area: formData?.work_area || null,
+      phone: formData?.phone || null,
+    };
+
+    const { error: profileError } = await supabase.from('user_profiles').upsert([profilePayload], {
+      onConflict: 'user_id',
+    });
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    return {
+      user: userRow,
+      temporaryPassword: generateTemporaryPassword(),
+    };
+  } catch (error) {
+    throw new Error(`Failed to create field officer: ${error.message}`);
+  }
+}
+
+/**
+ * Update field officer user + profile.
+ */
+export async function updateFieldOfficer(id, formData) {
+  try {
+    const officerId = String(id || '').trim();
+    if (!officerId) {
+      throw new Error('ID petugas tidak valid.');
+    }
+
+    const userUpdate = {
+      name: String(formData?.name || '').trim(),
+      email: String(formData?.email || '').trim().toLowerCase(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: updatedUser, error: userError } = await supabase
+      .from('users')
+      .update(userUpdate)
+      .eq('id', officerId)
+      .eq('role', 'field_officer')
+      .select('id, name, email, role, is_active')
+      .single();
+
+    if (userError) {
+      throw new Error(userError.message);
+    }
+
+    const profilePayload = {
+      user_id: officerId,
+      specialization: formData?.specialization || null,
+      work_area: formData?.work_area || null,
+      phone: formData?.phone || null,
+    };
+
+    const { error: profileError } = await supabase.from('user_profiles').upsert([profilePayload], {
+      onConflict: 'user_id',
+    });
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    return updatedUser;
+  } catch (error) {
+    throw new Error(`Failed to update field officer: ${error.message}`);
+  }
+}
+
+/**
+ * Soft-delete field officer by deactivating account.
+ */
+export async function deleteFieldOfficer(id) {
+  try {
+    const officerId = String(id || '').trim();
+    if (!officerId) {
+      throw new Error('ID petugas tidak valid.');
+    }
+
+    const { error } = await supabase
+      .from('users')
+      .update({
+        is_active: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', officerId)
+      .eq('role', 'field_officer');
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { success: true };
+  } catch (error) {
+    throw new Error(`Failed to delete field officer: ${error.message}`);
   }
 }
 
