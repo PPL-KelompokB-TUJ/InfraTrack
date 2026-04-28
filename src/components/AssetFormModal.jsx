@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapPin, Upload } from 'lucide-react';
 import MapPicker from './MapPicker';
 
-const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Fasum'];
+const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Saluran Drainase', 'Air Bersih', 'Listrik'];
 const CONDITION_OPTIONS = ['baik', 'rusak ringan', 'rusak berat'];
 
 const currentYear = new Date().getFullYear();

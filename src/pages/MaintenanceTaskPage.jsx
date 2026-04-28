@@ -11,6 +11,8 @@ import {
   X,
 } from 'lucide-react';
 import MaintenanceTaskFormModal from '../components/MaintenanceTaskFormModal';
+import ConfirmationModal from '../components/ConfirmationModal';
+import { useNotification } from '../context/NotificationContext';
 import {
   getMaintenanceTasks,
   createMaintenanceTask,
@@ -65,13 +67,12 @@ function formatCurrency(value) {
 }
 
 export default function MaintenanceTaskPage() {
+  const { addNotification } = useNotification();
   const [tasks, setTasks] = useState([]);
   const [reports, setReports] = useState([]);
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
 
   // Modal & Form states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,10 +84,15 @@ export default function MaintenanceTaskPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [detailModal, setDetailModal] = useState(null);
 
+  // Confirmation modal state
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    taskId: null,
+  });
+
   // Load data
   const loadData = useCallback(async () => {
     setIsLoading(true);
-    setErrorMessage('');
 
     try {
       const [tasksData, reportsResponse, assetsData] = await Promise.all([
@@ -103,11 +109,11 @@ export default function MaintenanceTaskPage() {
       setReports(reportsResponse.reports || []);
       setAssets(assetsData);
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal memuat data penugasan');
+      addNotification(error.message || 'Gagal memuat data', 'error', 3000);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addNotification]);
 
   useEffect(() => {
     loadData();
@@ -144,16 +150,16 @@ export default function MaintenanceTaskPage() {
 
   // Handle modal open for creating new task
   function handleOpenCreateModal() {
-    setErrorMessage('');
-
     // Cari report yang belum memiliki penugasan
     const unassignedReports = reports.filter(
       (report) => !tasks.some((task) => task.report_id === report.id)
     );
 
     if (unassignedReports.length === 0) {
-      setErrorMessage(
-        'Belum ada laporan terverifikasi yang siap ditugaskan. Verifikasi laporan terlebih dahulu.'
+      addNotification(
+        'Belum ada laporan terverifikasi yang siap ditugaskan. Verifikasi laporan terlebih dahulu.',
+        'warning',
+        3000
       );
       return;
     }
@@ -180,12 +186,13 @@ export default function MaintenanceTaskPage() {
   // Handle form submit
   async function handleSubmitTask(formValues) {
     setIsSaving(true);
-    setErrorMessage('');
 
     try {
       if (!selectedReport) {
-        setErrorMessage(
-          'Tidak ada laporan yang dipilih untuk ditugaskan. Klik "Buat Penugasan" lagi untuk memilih laporan yang tersedia.'
+        addNotification(
+          'Tidak ada laporan yang dipilih untuk ditugaskan. Klik "Buat Penugasan" lagi untuk memilih laporan yang tersedia.',
+          'error',
+          3000
         );
         return;
       }
@@ -200,37 +207,37 @@ export default function MaintenanceTaskPage() {
         null
       );
 
-      setSuccessMessage('Penugasan berhasil dibuat dan notifikasi telah dikirim ke petugas');
+      addNotification('Penugasan berhasil dibuat dan notifikasi telah dikirim ke petugas', 'success', 3000);
       setIsModalOpen(false);
       setSelectedReport(null);
       setSelectedAsset(null);
 
       // Reload data
       await loadData();
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal membuat penugasan');
+      addNotification(error.message || 'Gagal membuat penugasan', 'error', 3000);
     } finally {
       setIsSaving(false);
     }
   }
 
   // Handle delete
-  async function handleDeleteTask(taskId) {
-    if (!window.confirm('Hapus penugasan ini? Data yang dihapus tidak dapat dikembalikan.')) {
-      return;
-    }
+  function handleDeleteTask(taskId) {
+    setConfirmationModal({
+      isOpen: true,
+      taskId: taskId,
+    });
+  }
 
-    setErrorMessage('');
+  async function confirmDeleteTask() {
+    setConfirmationModal((prev) => ({ ...prev, isOpen: false }));
+
     try {
-      await deleteMaintenanceTask(taskId);
-      setSuccessMessage('Penugasan berhasil dihapus');
+      await deleteMaintenanceTask(confirmationModal.taskId);
+      addNotification('Penugasan berhasil dihapus', 'success', 3000);
       await loadData();
-      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal menghapus penugasan');
+      addNotification(error.message || 'Gagal menghapus penugasan', 'error', 3000);
     }
   }
 
@@ -240,7 +247,7 @@ export default function MaintenanceTaskPage() {
       const detail = await getMaintenanceTaskById(taskId);
       setDetailModal(detail);
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal memuat detail penugasan');
+      addNotification(error.message || 'Gagal memuat detail penugasan', 'error', 3000);
     }
   }
 
@@ -266,18 +273,6 @@ export default function MaintenanceTaskPage() {
             <p className="text-2xl font-bold text-cyan-900">{availableReportsCount}</p>
           </div>
         </div>
-
-        {errorMessage ? (
-          <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {errorMessage}
-          </div>
-        ) : null}
-
-        {successMessage ? (
-          <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {successMessage}
-          </div>
-        ) : null}
 
         <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
@@ -503,6 +498,14 @@ export default function MaintenanceTaskPage() {
           </div>
         </div>
       ) : null}
+
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        title="Hapus Penugasan?"
+        message="Hapus penugasan ini? Data yang dihapus tidak dapat dikembalikan."
+        onConfirm={confirmDeleteTask}
+        onCancel={() => setConfirmationModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </main>
   );
 }

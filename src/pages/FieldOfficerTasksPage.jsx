@@ -1,407 +1,455 @@
-import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, CheckCircle2, Clock3, Eye, Loader2, RefreshCw } from 'lucide-react';
-import UpdateTaskStatusModal from '../components/UpdateTaskStatusModal';
-import MaintenanceLogsTimeline from '../components/MaintenanceLogsTimeline';
+import { useEffect, useState, useCallback } from 'react';
 import {
-  getMaintenanceTasksByOfficer,
-  getMaintenanceLogsForTask,
-  updateTaskStatusWithLog,
-  uploadMaintenanceProgressPhoto,
-  getMaintenanceTaskById,
-} from '../lib/maintenanceTaskService';
-import { getCurrentSession } from '../lib/authService';
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Play,
+  Loader,
+  Upload,
+  ChevronDown,
+  Calendar,
+  MapPin,
+  FileText,
+  Image as ImageIcon,
+  X,
+} from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
+import {
+  getOfficerTasks,
+  getTaskDetails,
+  updateTaskStatus,
+  uploadProgressPhoto,
+  getOfficerTaskStats,
+} from '../lib/fieldOfficerTaskService';
+import { useNotification } from '../context/NotificationContext';
 
-const statusLabelStyles = {
-  assigned: 'border-cyan-200 bg-cyan-100 text-cyan-700',
-  in_progress: 'border-amber-200 bg-amber-100 text-amber-700',
-  completed: 'border-emerald-200 bg-emerald-100 text-emerald-700',
-};
-
-const statusLabels = {
-  assigned: 'Ditugaskan',
-  in_progress: 'Sedang Dikerjakan',
-  completed: 'Selesai',
-};
-
-const statusIcons = {
-  assigned: Clock3,
-  in_progress: Clock3,
-  completed: CheckCircle2,
-};
-
-function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
+const statusOptions = [
+  { value: 'pending', label: 'Menunggu', color: 'slate', icon: AlertCircle },
+  { value: 'assigned', label: 'Ditugaskan', color: 'blue', icon: Clock },
+  { value: 'in_progress', label: 'Sedang Dikerjakan', color: 'amber', icon: Play },
+  { value: 'completed', label: 'Selesai', color: 'emerald', icon: CheckCircle },
+];
 
 export default function FieldOfficerTasksPage() {
   const [tasks, setTasks] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [currentUser, setCurrentUser] = useState(null);
-
-  // Modal states
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedTaskDetails, setSelectedTaskDetails] = useState(null);
-  const [taskLogs, setTaskLogs] = useState([]);
-  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [taskDetails, setTaskDetails] = useState(null);
 
-  // Load current user and tasks
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage('');
+  const [updateStatus, setUpdateStatus] = useState('');
+  const [updateNotes, setUpdateNotes] = useState('');
+  const [updatePhoto, setUpdatePhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-    try {
-      // Get current authenticated user session
-      const session = await getCurrentSession();
-      const user = session?.user;
-      if (!user) {
-        throw new Error('Tidak dapat memuat informasi pengguna');
-      }
-      setCurrentUser(user);
+  const { showNotification } = useNotification();
 
-      // Get tasks assigned to this officer
-      const tasksData = await getMaintenanceTasksByOfficer(user.id);
-      setTasks(tasksData);
-    } catch (error) {
-      setErrorMessage(error.message || 'Gagal memuat penugasan');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // Load tasks on mount
   useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  // Load logs for selected task
-  const loadTaskLogs = useCallback(async (taskId) => {
-    setIsLoadingLogs(true);
-    try {
-      const logs = await getMaintenanceLogsForTask(taskId);
-      setTaskLogs(logs);
-    } catch (error) {
-      setErrorMessage(error.message || 'Gagal memuat log aktivitas');
-    } finally {
-      setIsLoadingLogs(false);
-    }
+    loadTasks();
   }, []);
 
-  // Open detail modal for a task
-  const handleOpenDetailModal = async (task) => {
-    setSelectedTaskDetails(task);
-    setDetailModalOpen(true);
-    await loadTaskLogs(task.id);
+  const loadTasks = async () => {
+    try {
+      setLoading(true);
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) throw new Error('Not authenticated');
+
+      const officerId = sessionData.session.user.id;
+
+      const [tasksData, statsData] = await Promise.all([
+        getOfficerTasks(officerId),
+        getOfficerTaskStats(officerId),
+      ]);
+
+      setTasks(tasksData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      showNotification('Gagal memuat penugasan', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Open update status modal
-  const handleOpenUpdateModal = (task) => {
-    setSelectedTask(task);
-    setIsUpdateModalOpen(true);
+  const handleTaskClick = async (task) => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const officerId = sessionData.session.user.id;
+
+      const details = await getTaskDetails(task.id, officerId);
+      setTaskDetails(details);
+      setSelectedTask(task);
+      setUpdateStatus(task.status);
+      setShowDetailModal(true);
+    } catch (error) {
+      console.error('Error loading task details:', error);
+      showNotification('Gagal memuat detail penugasan', 'error');
+    }
   };
 
-  // Handle status update
-  const handleUpdateStatus = async (updateData) => {
-    if (!selectedTask) return;
+  const handlePhotoSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUpdatePhoto(file);
+      const reader = new FileReader();
+      reader.onload = (evt) => setPhotoPreview(evt.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
 
+  const handleUpdateStatus = async (e) => {
+    e.preventDefault();
     setIsUpdating(true);
-    setErrorMessage('');
-    setSuccessMessage('');
 
     try {
       let photoUrl = null;
 
       // Upload photo if provided
-      if (updateData.photo && currentUser) {
-        photoUrl = await uploadMaintenanceProgressPhoto(
-          updateData.photo,
-          selectedTask.id,
-          currentUser.id
-        );
+      if (updatePhoto) {
+        const uploadResult = await uploadProgressPhoto(selectedTask.id, updatePhoto);
+        photoUrl = uploadResult.url;
       }
 
-      // Map status for log: radio button values to log status values
-      const logStatusMap = {
-        started: 'started',
-        in_progress: 'in_progress',
-        completed: 'completed',
-      };
+      // Update status
+      await updateTaskStatus(selectedTask.id, updateStatus, updateNotes, photoUrl);
 
-      // Update task status and create log
-      const result = await updateTaskStatusWithLog(
-        selectedTask.id,
-        updateData.status,
-        currentUser.id,
-        {
-          logStatus: logStatusMap[updateData.status],
-          notes: updateData.notes,
-          photo_url: photoUrl,
-        }
-      );
+      showNotification('Penugasan berhasil diperbarui', 'success');
 
-      setSuccessMessage('Status pekerjaan berhasil diperbarui');
+      // Reset form
+      setUpdateNotes('');
+      setUpdatePhoto(null);
+      setPhotoPreview(null);
+      setShowDetailModal(false);
 
       // Reload tasks
-      await loadData();
-      setIsUpdateModalOpen(false);
-      setSelectedTask(null);
-
-      // Reload logs if detail modal is open
-      if (detailModalOpen && selectedTaskDetails) {
-        await loadTaskLogs(selectedTaskDetails.id);
-      }
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
+      await loadTasks();
     } catch (error) {
-      setErrorMessage(error.message || 'Gagal memperbarui status pekerjaan');
+      console.error('Error updating task:', error);
+      showNotification('Gagal memperbarui penugasan: ' + error.message, 'error');
     } finally {
       setIsUpdating(false);
     }
   };
 
-  if (isLoading) {
+  const getStatusColor = (status) => {
+    const option = statusOptions.find(s => s.value === status);
+    return option?.color || 'slate';
+  };
+
+  const getStatusLabel = (status) => {
+    const option = statusOptions.find(s => s.value === status);
+    return option?.label || status;
+  };
+
+  const getStatusIcon = (status) => {
+    const option = statusOptions.find(s => s.value === status);
+    return option?.icon || AlertCircle;
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 bg-slate-200 rounded-lg"></div>
-            ))}
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex h-96 items-center justify-center">
+          <div className="text-center">
+            <Loader className="mx-auto mb-4 animate-spin text-cyan-500" size={32} />
+            <p className="text-slate-600">Memuat penugasan...</p>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Penugasan Saya</h1>
-            <p className="text-slate-600 mt-1">
-              {currentUser?.name ? `Selamat datang, ${currentUser.name}` : ''}
-            </p>
-          </div>
-          <button
-            onClick={loadData}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
-          >
-            <RefreshCw size={18} />
-            Refresh
-          </button>
-        </div>
-
-        {/* Messages */}
-        {errorMessage && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-            <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-            <p className="text-red-700">{errorMessage}</p>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-            <CheckCircle2 className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
-            <p className="text-green-700">{successMessage}</p>
-          </div>
-        )}
-
-        {/* Tasks List */}
-        {tasks.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <AlertCircle className="mx-auto text-slate-400 mb-3" size={48} />
-            <p className="text-slate-600 text-lg">Tidak ada penugasan untuk Anda saat ini</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {tasks.map((task) => {
-              const StatusIcon = statusIcons[task.status] || Clock3;
-
-              return (
-                <div
-                  key={task.id}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-                >
-                  <div className="p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      {/* Task Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
-                          <StatusIcon
-                            size={20}
-                            className={
-                              task.status === 'completed'
-                                ? 'text-emerald-600'
-                                : task.status === 'in_progress'
-                                  ? 'text-amber-600'
-                                  : 'text-cyan-600'
-                            }
-                          />
-                          <span
-                            className={`text-sm font-semibold px-3 py-1 rounded-full border ${statusLabelStyles[task.status] || 'border-slate-200 bg-slate-100 text-slate-700'}`}
-                          >
-                            {statusLabels[task.status] || task.status}
-                          </span>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                          {task.asset?.name || 'Aset Tidak Ditemukan'}
-                        </h3>
-
-                        <div className="grid grid-cols-2 gap-4 text-sm text-slate-600">
-                          <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wide">
-                              Tiket
-                            </p>
-                            <p className="font-medium text-slate-900">
-                              {task.report?.ticket_code || '-'}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-slate-500 uppercase tracking-wide">
-                              Jadwal
-                            </p>
-                            <p className="font-medium text-slate-900">
-                              {formatDate(task.scheduled_date)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {task.report?.description && (
-                          <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">
-                              Deskripsi Kerusakan
-                            </p>
-                            <p className="text-sm text-slate-700">{task.report.description}</p>
-                          </div>
-                        )}
-
-                        {task.instructions && (
-                          <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <p className="text-xs text-blue-700 uppercase tracking-wide mb-1 font-semibold">
-                              Instruksi Pekerjaan
-                            </p>
-                            <p className="text-sm text-blue-900">{task.instructions}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-2 flex-shrink-0">
-                        <button
-                          onClick={() => handleOpenDetailModal(task)}
-                          className="flex items-center gap-2 px-4 py-2 text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                        >
-                          <Eye size={18} />
-                          <span className="hidden sm:inline">Detail</span>
-                        </button>
-
-                        {task.status !== 'completed' && (
-                          <button
-                            onClick={() => handleOpenUpdateModal(task)}
-                            disabled={isUpdating}
-                            className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
-                          >
-                            {isUpdating ? (
-                              <>
-                                <Loader2 size={18} className="animate-spin" />
-                                <span className="hidden sm:inline">Updating...</span>
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle2 size={18} />
-                                <span className="hidden sm:inline">Update Status</span>
-                              </>
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold text-slate-800">Penugasan Saya</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Kelola dan perbarui status pekerjaan Anda
+        </p>
       </div>
 
-      {/* Update Status Modal */}
-      {isUpdateModalOpen && selectedTask && (
-        <UpdateTaskStatusModal
-          task={selectedTask}
-          onClose={() => {
-            setIsUpdateModalOpen(false);
-            setSelectedTask(null);
-          }}
-          onSubmit={handleUpdateStatus}
-          isLoading={isUpdating}
-        />
+      {/* Stats Cards */}
+      {stats && (
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-5">
+          {[
+            { label: 'Total', value: stats.total, color: 'slate' },
+            { label: 'Ditugaskan', value: stats.assigned, color: 'blue' },
+            { label: 'Sedang Dikerjakan', value: stats.in_progress, color: 'amber' },
+            { label: 'Selesai', value: stats.completed, color: 'emerald' },
+            { label: 'Dibatalkan', value: stats.cancelled, color: 'rose' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className={`rounded-2xl bg-${stat.color}-50 px-4 py-6 border border-${stat.color}-100`}
+            >
+              <p className={`text-xs font-semibold text-${stat.color}-700 uppercase tracking-wide`}>
+                {stat.label}
+              </p>
+              <p className={`mt-2 text-2xl font-bold text-${stat.color}-900`}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
       )}
 
-      {/* Task Detail Modal with Logs */}
-      {detailModalOpen && selectedTaskDetails && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white">
-              <h2 className="text-xl font-semibold text-slate-900">Detail Penugasan</h2>
+      {/* Tasks List */}
+      {tasks.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-12 text-center">
+          <AlertCircle size={32} className="mx-auto mb-4 text-slate-400" />
+          <p className="text-slate-600">Tidak ada penugasan untuk Anda saat ini</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {tasks.map((task) => {
+            const StatusIcon = getStatusIcon(task.status);
+            const statusColor = getStatusColor(task.status);
+
+            return (
               <button
-                onClick={() => setDetailModalOpen(false)}
-                className="text-slate-500 hover:text-slate-700"
+                key={task.id}
+                onClick={() => handleTaskClick(task)}
+                className="w-full rounded-2xl border-2 border-slate-100 bg-white p-4 text-left transition hover:border-cyan-300 hover:shadow-md sm:p-6"
               >
-                ✕
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  {/* Left side - Task info */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className={`rounded-xl bg-${statusColor}-100 p-2`}>
+                        <StatusIcon size={18} className={`text-${statusColor}-600`} />
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-800">
+                        {task.report?.ticket_code || 'Task ' + task.id.slice(0, 8)}
+                      </h3>
+                    </div>
+                    
+                    <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+                      {task.instructions || 'No instructions'}
+                    </p>
+
+                    <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
+                      {task.scheduled_date && (
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          {new Date(task.scheduled_date).toLocaleDateString('id-ID')}
+                        </div>
+                      )}
+                      {task.asset?.name && (
+                        <div className="flex items-center gap-1">
+                          <MapPin size={14} />
+                          {task.asset.name}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right side - Status badge */}
+                  <div className="flex items-center gap-3">
+                    <div className={`rounded-xl bg-${statusColor}-100 px-3 py-1.5 text-sm font-semibold text-${statusColor}-700`}>
+                      {getStatusLabel(task.status)}
+                    </div>
+                    <ChevronDown size={18} className="text-slate-400" />
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && taskDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 sm:p-8">
+            {/* Modal Header */}
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-slate-800">
+                {taskDetails.report?.ticket_code || 'Detail Penugasan'}
+              </h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="rounded-lg p-2 hover:bg-slate-100"
+              >
+                <X size={20} className="text-slate-600" />
               </button>
             </div>
 
-            {/* Content */}
-            <div className="p-6 space-y-6">
-              {/* Task Summary */}
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                <h3 className="font-semibold text-slate-900 mb-3">Ringkasan Pekerjaan</h3>
-                <div className="space-y-2 text-sm text-slate-700">
-                  <div>
-                    <span className="text-slate-600">Aset:</span>{' '}
-                    <span className="font-medium">{selectedTaskDetails.asset?.name}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-600">Tiket:</span>{' '}
-                    <span className="font-medium">{selectedTaskDetails.report?.ticket_code}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-600">Status:</span>{' '}
-                    <span className="font-medium">
-                      {statusLabels[selectedTaskDetails.status] || selectedTaskDetails.status}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-600">Jadwal:</span>{' '}
-                    <span className="font-medium">
-                      {formatDate(selectedTaskDetails.scheduled_date)}
-                    </span>
-                  </div>
+            {/* Task Info */}
+            <div className="mb-6 rounded-2xl bg-slate-50 p-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase">Aset</p>
+                  <p className="mt-1 font-medium text-slate-800">{taskDetails.asset?.name || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase">Jadwal</p>
+                  <p className="mt-1 font-medium text-slate-800">
+                    {new Date(taskDetails.scheduled_date).toLocaleDateString('id-ID')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase">Status Laporan</p>
+                  <p className="mt-1 font-medium text-slate-800">{taskDetails.report?.urgency_level || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase">Estimasi Biaya</p>
+                  <p className="mt-1 font-medium text-slate-800">
+                    Rp {(taskDetails.estimated_cost || 0).toLocaleString('id-ID')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            {taskDetails.instructions && (
+              <div className="mb-6">
+                <p className="text-sm font-semibold text-slate-700">Instruksi Kerja</p>
+                <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm text-slate-700">{taskDetails.instructions}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Report Photos */}
+            {taskDetails.report?.photo_url && (
+              <div className="mb-6">
+                <p className="mb-2 text-sm font-semibold text-slate-700">Foto Laporan</p>
+                <img
+                  src={taskDetails.report.photo_url}
+                  alt="Report"
+                  className="max-h-48 rounded-xl object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/300x200?text=Foto+Tidak+Tersedia';
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Update Form */}
+            <form onSubmit={handleUpdateStatus} className="space-y-4">
+              {/* Status Dropdown */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700">Status Pekerjaan</label>
+                <select
+                  value={updateStatus}
+                  onChange={(e) => setUpdateStatus(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                >
+                  {statusOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700">Catatan Lapangan</label>
+                <textarea
+                  value={updateNotes}
+                  onChange={(e) => setUpdateNotes(e.target.value)}
+                  placeholder="Tambahkan catatan tentang progress pekerjaan..."
+                  rows={4}
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                />
+              </div>
+
+              {/* Photo Upload */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700">Foto Progress</label>
+                <div className="mt-2">
+                  {photoPreview ? (
+                    <div className="relative">
+                      <img
+                        src={photoPreview}
+                        alt="Preview"
+                        className="max-h-48 rounded-xl object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUpdatePhoto(null);
+                          setPhotoPreview(null);
+                        }}
+                        className="absolute right-2 top-2 rounded-lg bg-rose-500 p-2 text-white hover:bg-rose-600"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 transition hover:border-cyan-400">
+                      <Upload size={20} className="text-slate-600" />
+                      <span className="text-sm font-medium text-slate-700">Pilih foto</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
 
-              {/* Activity Timeline */}
-              <div>
-                <h3 className="font-semibold text-slate-900 mb-4">Timeline Aktivitas</h3>
-                <MaintenanceLogsTimeline logs={taskLogs} isLoading={isLoadingLogs} />
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDetailModal(false)}
+                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-100"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
+                >
+                  {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
+                </button>
               </div>
-            </div>
+            </form>
+
+            {/* Progress History */}
+            {taskDetails.progressHistory && taskDetails.progressHistory.length > 0 && (
+              <div className="mt-8 border-t border-slate-200 pt-6">
+                <h3 className="text-sm font-semibold text-slate-700">Riwayat Progress</h3>
+                <div className="mt-4 space-y-3">
+                  {taskDetails.progressHistory.map((progress) => (
+                    <div key={progress.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-semibold text-${getStatusColor(progress.status)}-700 uppercase`}>
+                          {getStatusLabel(progress.status)}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {new Date(progress.created_at).toLocaleString('id-ID')}
+                        </span>
+                      </div>
+                      {progress.notes && (
+                        <p className="mt-2 text-sm text-slate-700">{progress.notes}</p>
+                      )}
+                      {progress.photo_url && (
+                        <a
+                          href={progress.photo_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-flex items-center gap-1 text-xs text-cyan-600 hover:underline"
+                        >
+                          <ImageIcon size={12} />
+                          Lihat Foto
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

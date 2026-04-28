@@ -1,5 +1,36 @@
 import { supabase } from './supabaseClient';
 
+async function getUsersMapByIds(userIds = []) {
+  const uniqueIds = [...new Set((userIds || []).filter(Boolean))];
+
+  if (uniqueIds.length === 0) {
+    return new Map();
+  }
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, name, email')
+    .in('id', uniqueIds);
+
+  if (error) {
+    return new Map();
+  }
+
+  return new Map((data || []).map((user) => [user.id, user]));
+}
+
+function hydrateTaskUsers(task, usersMap) {
+  if (!task) {
+    return task;
+  }
+
+  return {
+    ...task,
+    assigned_officer: task.assigned_to ? usersMap.get(task.assigned_to) || null : null,
+    assigned_by_user: task.assigned_by ? usersMap.get(task.assigned_by) || null : null,
+  };
+}
+
 /**
  * Get all maintenance tasks with optional filters
  */
@@ -9,10 +40,8 @@ export async function getMaintenanceTasks(filters = {}) {
       .from('maintenance_tasks')
       .select(`
         *,
-        report:report_id(id, ticket_code, urgency_level, description),
-        asset:asset_id(id, name),
-        assigned_officer:assigned_to(id, name, email),
-        assigned_by_user:assigned_by(id, name)
+        report:damage_reports!maintenance_tasks_report_id_fkey(id, ticket_code, urgency_level, description),
+        asset:infrastructure_assets!maintenance_tasks_asset_id_fkey(id, name)
       `)
       .order('created_at', { ascending: false });
 
@@ -33,7 +62,13 @@ export async function getMaintenanceTasks(filters = {}) {
     const { data, error } = await query;
 
     if (error) throw new Error(error.message);
-    return data || [];
+
+    const rows = data || [];
+    const usersMap = await getUsersMapByIds(
+      rows.flatMap((task) => [task.assigned_to, task.assigned_by])
+    );
+
+    return rows.map((task) => hydrateTaskUsers(task, usersMap));
   } catch (error) {
     throw new Error(`Failed to fetch maintenance tasks: ${error.message}`);
   }
@@ -48,16 +83,16 @@ export async function getMaintenanceTaskById(id) {
       .from('maintenance_tasks')
       .select(`
         *,
-        report:report_id(id, ticket_code, urgency_level, status, description),
-        asset:asset_id(id, name),
-        assigned_officer:assigned_to(id, name, email),
-        assigned_by_user:assigned_by(id, name)
+        report:damage_reports!maintenance_tasks_report_id_fkey(id, ticket_code, urgency_level, status, description),
+        asset:infrastructure_assets!maintenance_tasks_asset_id_fkey(id, name)
       `)
       .eq('id', id)
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+
+    const usersMap = await getUsersMapByIds([data?.assigned_to, data?.assigned_by]);
+    return hydrateTaskUsers(data, usersMap);
   } catch (error) {
     throw new Error(`Failed to fetch maintenance task: ${error.message}`);
   }
@@ -182,16 +217,19 @@ export async function getMaintenanceTasksByOfficer(officerId) {
       .from('maintenance_tasks')
       .select(`
         *,
-        report:report_id(id, ticket_code, urgency_level),
-        asset:asset_id(id, name),
-        assigned_by_user:assigned_by(id, name)
+        report:damage_reports!maintenance_tasks_report_id_fkey(id, ticket_code, urgency_level),
+        asset:infrastructure_assets!maintenance_tasks_asset_id_fkey(id, name)
       `)
       .eq('assigned_to', officerId)
       .in('status', ['assigned', 'in_progress'])
       .order('scheduled_date', { ascending: true });
 
     if (error) throw new Error(error.message);
-    return data || [];
+
+    const rows = data || [];
+    const usersMap = await getUsersMapByIds(rows.map((task) => task.assigned_by));
+
+    return rows.map((task) => hydrateTaskUsers(task, usersMap));
   } catch (error) {
     throw new Error(`Failed to fetch officer tasks: ${error.message}`);
   }
@@ -213,6 +251,7 @@ export async function getActiveFieldOfficers() {
       id: officer.id,
       name: officer.name,
       email: officer.email,
+      phone: officer.phone || '',
       specialization: officer.specialization || '',
       work_area: officer.work_area || '',
     }));
@@ -226,6 +265,142 @@ export async function getActiveFieldOfficers() {
     }
 
     throw new Error(`Failed to fetch field officers: ${error.message}`);
+  }
+}
+
+function generateTemporaryPassword(length = 10) {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  return Array.from({ length }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+}
+
+/**
+ * Create field officer user + profile.
+ */
+export async function createFieldOfficer(formData) {
+  try {
+    const name = String(formData?.name || '').trim();
+    const email = String(formData?.email || '').trim().toLowerCase();
+
+    if (!name || !email) {
+      throw new Error('Nama dan email petugas wajib diisi.');
+    }
+
+    const { data: userRow, error: userError } = await supabase
+      .from('users')
+      .insert([
+        {
+          name,
+          email,
+          role: 'field_officer',
+          is_active: true,
+        },
+      ])
+      .select('id, name, email, role, is_active')
+      .single();
+
+    if (userError) {
+      throw new Error(userError.message);
+    }
+
+    const profilePayload = {
+      user_id: userRow.id,
+      specialization: formData?.specialization || null,
+      work_area: formData?.work_area || null,
+      phone: formData?.phone || null,
+    };
+
+    const { error: profileError } = await supabase.from('user_profiles').upsert([profilePayload], {
+      onConflict: 'user_id',
+    });
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    return {
+      user: userRow,
+      temporaryPassword: generateTemporaryPassword(),
+    };
+  } catch (error) {
+    throw new Error(`Failed to create field officer: ${error.message}`);
+  }
+}
+
+/**
+ * Update field officer user + profile.
+ */
+export async function updateFieldOfficer(id, formData) {
+  try {
+    const officerId = String(id || '').trim();
+    if (!officerId) {
+      throw new Error('ID petugas tidak valid.');
+    }
+
+    const userUpdate = {
+      name: String(formData?.name || '').trim(),
+      email: String(formData?.email || '').trim().toLowerCase(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: updatedUser, error: userError } = await supabase
+      .from('users')
+      .update(userUpdate)
+      .eq('id', officerId)
+      .eq('role', 'field_officer')
+      .select('id, name, email, role, is_active')
+      .single();
+
+    if (userError) {
+      throw new Error(userError.message);
+    }
+
+    const profilePayload = {
+      user_id: officerId,
+      specialization: formData?.specialization || null,
+      work_area: formData?.work_area || null,
+      phone: formData?.phone || null,
+    };
+
+    const { error: profileError } = await supabase.from('user_profiles').upsert([profilePayload], {
+      onConflict: 'user_id',
+    });
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+
+    return updatedUser;
+  } catch (error) {
+    throw new Error(`Failed to update field officer: ${error.message}`);
+  }
+}
+
+/**
+ * Soft-delete field officer by deactivating account.
+ */
+export async function deleteFieldOfficer(id) {
+  try {
+    const officerId = String(id || '').trim();
+    if (!officerId) {
+      throw new Error('ID petugas tidak valid.');
+    }
+
+    const { error } = await supabase
+      .from('users')
+      .update({
+        is_active: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', officerId)
+      .eq('role', 'field_officer');
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { success: true };
+  } catch (error) {
+    throw new Error(`Failed to delete field officer: ${error.message}`);
   }
 }
 

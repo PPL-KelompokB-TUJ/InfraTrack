@@ -4,7 +4,7 @@ const CATEGORY_TABLE = 'infrastructure_categories';
 const DAMAGE_TYPE_TABLE = 'damage_types';
 const PRIORITY_SCALE_TABLE = 'priority_scales';
 
-const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Fasum'];
+const FALLBACK_CATEGORY_OPTIONS = ['Jalan', 'Jembatan', 'Saluran Drainase', 'Air Bersih', 'Listrik'];
 const FALLBACK_DAMAGE_TYPE_OPTIONS = [
   'Jalan berlubang',
   'Jembatan rusak',
@@ -40,6 +40,39 @@ export async function getActiveInfrastructureCategoryNames() {
   return names.length > 0 ? names : FALLBACK_CATEGORY_OPTIONS;
 }
 
+export async function getActiveInfrastructureCategories() {
+  const { data, error } = await supabase
+    .from(CATEGORY_TABLE)
+    .select('id, name, is_default')
+    .eq('is_active', true)
+    .order('is_default', { ascending: false })
+    .order('name', { ascending: true });
+
+  if (error) {
+    if (error.code === '42P01') {
+      return FALLBACK_CATEGORY_OPTIONS.map((name) => ({
+        id: name,
+        name,
+        is_default: false,
+      }));
+    }
+
+    throw new Error(error.message);
+  }
+
+  const rows = data || [];
+
+  if (rows.length === 0) {
+    return FALLBACK_CATEGORY_OPTIONS.map((name) => ({
+      id: name,
+      name,
+      is_default: false,
+    }));
+  }
+
+  return rows;
+}
+
 export async function getInfrastructureCategories() {
   const { data, error } = await supabase
     .from(CATEGORY_TABLE)
@@ -54,13 +87,46 @@ export async function getInfrastructureCategories() {
   return data || [];
 }
 
-export async function getActiveDamageTypeNames() {
-  const { data, error } = await supabase
+export async function getActiveDamageTypeNames(infrastructureCategoryName = '') {
+  const normalizedCategoryName = String(infrastructureCategoryName || '').trim();
+  let categoryId = null;
+
+  if (normalizedCategoryName) {
+    const { data: categoryData, error: categoryError } = await supabase
+      .from(CATEGORY_TABLE)
+      .select('id')
+      .eq('name', normalizedCategoryName)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+
+    if (categoryError) {
+      if (categoryError.code === '42P01') {
+        return FALLBACK_DAMAGE_TYPE_OPTIONS;
+      }
+
+      throw new Error(categoryError.message);
+    }
+
+    if (!categoryData?.id) {
+      return [];
+    }
+
+    categoryId = categoryData.id;
+  }
+
+  let query = supabase
     .from(DAMAGE_TYPE_TABLE)
     .select('name, is_default')
     .eq('is_active', true)
     .order('is_default', { ascending: false })
     .order('name', { ascending: true });
+
+  if (categoryId) {
+    query = query.eq('infrastructure_category_id', categoryId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     if (error.code === '42P01') {

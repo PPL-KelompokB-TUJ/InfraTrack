@@ -1,21 +1,57 @@
 import { supabase } from './supabaseClient';
 
-async function resolveDamageTypeIdByName(damageTypeName) {
+async function resolveInfrastructureCategoryIdByName(categoryName) {
+  const normalizedCategoryName = String(categoryName || '').trim();
+
+  if (!normalizedCategoryName) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('infrastructure_categories')
+    .select('id')
+    .eq('name', normalizedCategoryName)
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data?.id) {
+    throw new Error(
+      `Kategori infrastruktur "${normalizedCategoryName}" tidak ditemukan pada master data aktif.`
+    );
+  }
+
+  return data.id;
+}
+
+async function resolveDamageTypeIdByName(damageTypeName, infrastructureCategoryName = '') {
   const normalizedDamageTypeName = String(damageTypeName || '').trim();
+  const infrastructureCategoryId = await resolveInfrastructureCategoryIdByName(
+    infrastructureCategoryName
+  );
 
   if (!normalizedDamageTypeName) {
     throw new Error('Jenis kerusakan tidak boleh kosong.');
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('damage_types')
     .select('id, is_default, created_at')
     .eq('name', normalizedDamageTypeName)
     .eq('is_active', true)
     .order('is_default', { ascending: false })
     .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  if (infrastructureCategoryId) {
+    query = query.eq('infrastructure_category_id', infrastructureCategoryId);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -53,6 +89,7 @@ export const submitDamageReport = async ({
   reporterName,
   reporterEmail,
   reporterPhone,
+  infrastructureCategory,
   damageType,
   urgencyLevel,
   description,
@@ -61,7 +98,7 @@ export const submitDamageReport = async ({
   photoFile,
 }) => {
   try {
-    const damageTypeId = await resolveDamageTypeIdByName(damageType);
+    const damageTypeId = await resolveDamageTypeIdByName(damageType, infrastructureCategory);
     let photoUrl = null;
 
     // Upload photo if provided
@@ -243,6 +280,185 @@ export const updateDamageReportStatus = async (reportId, status, notes = null) =
     };
   } catch (error) {
     console.error('Error updating damage report:', error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+function mapDamageReportRow(item) {
+  return {
+    ...item,
+    damage_type: item.damage_types?.name || '-',
+    damage_type_name: item.damage_types?.name || '-',
+    location_description:
+      item.latitude != null && item.longitude != null
+        ? `${Number(item.latitude).toFixed(5)}, ${Number(item.longitude).toFixed(5)}`
+        : '-',
+  };
+}
+
+/**
+ * Get latest damage reports for dashboard.
+ */
+export const getRecentDamageReports = async (limit = 10) => {
+  try {
+    const safeLimit = Math.max(1, Number(limit) || 10);
+    const { data, error } = await supabase
+      .from('damage_reports')
+      .select('*, damage_types(name)')
+      .order('created_at', { ascending: false })
+      .limit(safeLimit);
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      success: true,
+      reports: (data || []).map(mapDamageReportRow),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      reports: [],
+    };
+  }
+};
+
+/**
+ * Get pending damage reports for verification workflow.
+ */
+export const getPendingDamageReports = async ({ limit = 50, offset = 0 } = {}) => {
+  try {
+    const safeLimit = Math.max(1, Number(limit) || 50);
+    const safeOffset = Math.max(0, Number(offset) || 0);
+
+    const { data, error, count } = await supabase
+      .from('damage_reports')
+      .select('*, damage_types(name)', { count: 'exact' })
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .range(safeOffset, safeOffset + safeLimit - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      success: true,
+      reports: (data || []).map(mapDamageReportRow),
+      total: count || 0,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      reports: [],
+      total: 0,
+    };
+  }
+};
+
+/**
+ * Verify (approve) pending damage report.
+ */
+export const verifyDamageReport = async ({
+  reportId,
+  verificationNotes = null,
+  priorityLevel = null,
+  adminId = null,
+}) => {
+  try {
+    const fullPayload = {
+      status: 'terverifikasi',
+      verification_notes: verificationNotes,
+      priority_level: priorityLevel,
+      verified_by: adminId,
+      verified_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    let updateResult = await supabase
+      .from('damage_reports')
+      .update(fullPayload)
+      .eq('id', reportId)
+      .select()
+      .single();
+
+    // Fallback for schema that does not include verification columns yet.
+    if (updateResult.error && /column .* does not exist/i.test(updateResult.error.message || '')) {
+      updateResult = await supabase
+        .from('damage_reports')
+        .update({
+          status: 'terverifikasi',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', reportId)
+        .select()
+        .single();
+    }
+
+    if (updateResult.error) {
+      throw updateResult.error;
+    }
+
+    return {
+      success: true,
+      report: updateResult.data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+/**
+ * Reject pending damage report.
+ */
+export const rejectDamageReport = async ({ reportId, verificationNotes = null, adminId = null }) => {
+  try {
+    const fullPayload = {
+      status: 'ditolak',
+      verification_notes: verificationNotes,
+      verified_by: adminId,
+      verified_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    let updateResult = await supabase
+      .from('damage_reports')
+      .update(fullPayload)
+      .eq('id', reportId)
+      .select()
+      .single();
+
+    // Fallback for schema that does not include verification columns yet.
+    if (updateResult.error && /column .* does not exist/i.test(updateResult.error.message || '')) {
+      updateResult = await supabase
+        .from('damage_reports')
+        .update({
+          status: 'ditolak',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', reportId)
+        .select()
+        .single();
+    }
+
+    if (updateResult.error) {
+      throw updateResult.error;
+    }
+
+    return {
+      success: true,
+      report: updateResult.data,
+    };
+  } catch (error) {
     return {
       success: false,
       error: error.message,
