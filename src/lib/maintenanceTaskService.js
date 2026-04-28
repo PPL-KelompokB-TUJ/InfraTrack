@@ -268,11 +268,6 @@ export async function getActiveFieldOfficers() {
   }
 }
 
-function generateTemporaryPassword(length = 10) {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
-  return Array.from({ length }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
-}
-
 /**
  * Create field officer user + profile.
  */
@@ -285,44 +280,48 @@ export async function createFieldOfficer(formData) {
       throw new Error('Nama dan email petugas wajib diisi.');
     }
 
-    const { data: userRow, error: userError } = await supabase
-      .from('users')
-      .insert([
-        {
-          name,
-          email,
-          role: 'field_officer',
-          is_active: true,
-        },
-      ])
-      .select('id, name, email, role, is_active')
-      .single();
-
-    if (userError) {
-      throw new Error(userError.message);
-    }
-
-    const profilePayload = {
-      user_id: userRow.id,
-      specialization: formData?.specialization || null,
-      work_area: formData?.work_area || null,
-      phone: formData?.phone || null,
-    };
-
-    const { error: profileError } = await supabase.from('user_profiles').upsert([profilePayload], {
-      onConflict: 'user_id',
+    const { data, error } = await supabase.functions.invoke('create-field-officer', {
+      body: {
+        name,
+        email,
+        phone: formData?.phone || null,
+        specialization: formData?.specialization || null,
+        work_area: formData?.work_area || null,
+      },
     });
 
-    if (profileError) {
-      throw new Error(profileError.message);
+    if (error) {
+      throw new Error(error.message);
     }
 
     return {
-      user: userRow,
-      temporaryPassword: generateTemporaryPassword(),
+      user: data?.user,
+      temporaryPassword: data?.temporaryPassword,
     };
   } catch (error) {
     throw new Error(`Failed to create field officer: ${error.message}`);
+  }
+}
+
+/**
+ * Reset field officer password (admin only).
+ */
+export async function resetFieldOfficerPassword({ userId, email }) {
+  try {
+    const { data, error } = await supabase.functions.invoke('reset-field-officer-password', {
+      body: {
+        userId,
+        email,
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(`Failed to reset field officer password: ${error.message}`);
   }
 }
 

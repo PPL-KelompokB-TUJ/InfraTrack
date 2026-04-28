@@ -372,6 +372,27 @@ export const verifyDamageReport = async ({
   adminId = null,
 }) => {
   try {
+    const { data, error } = await supabase.functions.invoke('verify-damage-report', {
+      body: {
+        reportId,
+        status: 'terverifikasi',
+        verificationNotes,
+        priorityLevel,
+      },
+    });
+
+    if (!error) {
+      return {
+        success: true,
+        report: data?.report,
+      };
+    }
+
+    const fallbackMessage = String(error.message || '').toLowerCase();
+    if (!fallbackMessage.includes('function') && !fallbackMessage.includes('not found')) {
+      throw error;
+    }
+
     const fullPayload = {
       status: 'terverifikasi',
       verification_notes: verificationNotes,
@@ -422,6 +443,26 @@ export const verifyDamageReport = async ({
  */
 export const rejectDamageReport = async ({ reportId, verificationNotes = null, adminId = null }) => {
   try {
+    const { data, error } = await supabase.functions.invoke('verify-damage-report', {
+      body: {
+        reportId,
+        status: 'ditolak',
+        verificationNotes,
+      },
+    });
+
+    if (!error) {
+      return {
+        success: true,
+        report: data?.report,
+      };
+    }
+
+    const fallbackMessage = String(error.message || '').toLowerCase();
+    if (!fallbackMessage.includes('function') && !fallbackMessage.includes('not found')) {
+      throw error;
+    }
+
     const fullPayload = {
       status: 'ditolak',
       verification_notes: verificationNotes,
