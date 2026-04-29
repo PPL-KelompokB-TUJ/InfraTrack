@@ -269,34 +269,67 @@ export async function getActiveFieldOfficers() {
 }
 
 /**
+ * Generate default email from officer name.
+ * Example: "Ahmad Sutrisno" -> "ahmadsutrisno@gmail.com"
+ */
+function generateDefaultEmail(name) {
+  const sanitized = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return `${sanitized}@gmail.com`;
+}
+
+/**
  * Create field officer user + profile.
+ * Email defaults to namapetugas@gmail.com, password defaults to 1234.
  */
 export async function createFieldOfficer(formData) {
   try {
     const name = String(formData?.name || '').trim();
-    const email = String(formData?.email || '').trim().toLowerCase();
 
-    if (!name || !email) {
-      throw new Error('Nama dan email petugas wajib diisi.');
+    if (!name) {
+      throw new Error('Nama petugas wajib diisi.');
     }
 
-    const { data, error } = await supabase.functions.invoke('create-field-officer', {
-      body: {
+    // Auto-generate email from name if not provided
+    const email = formData?.email
+      ? String(formData.email).trim().toLowerCase()
+      : generateDefaultEmail(name);
+
+    // Get current session for auth header
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+    if (!accessToken) {
+      throw new Error('Anda harus login sebagai admin untuk menambahkan petugas.');
+    }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/create-field-officer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+        'apikey': apiKey,
+      },
+      body: JSON.stringify({
         name,
         email,
         phone: formData?.phone || null,
         specialization: formData?.specialization || null,
         work_area: formData?.work_area || null,
-      },
+      }),
     });
 
-    if (error) {
-      throw new Error(error.message);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.error || `HTTP ${response.status}`);
     }
 
     return {
       user: data?.user,
-      temporaryPassword: data?.temporaryPassword,
+      defaultEmail: data?.defaultEmail || email,
+      defaultPassword: data?.defaultPassword || '1234',
     };
   } catch (error) {
     throw new Error(`Failed to create field officer: ${error.message}`);

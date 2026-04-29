@@ -32,7 +32,7 @@ export default function FieldOfficersPage() {
     work_area: '',
   });
 
-  const [generatedPassword, setGeneratedPassword] = useState('');
+  const [createdCredentials, setCreatedCredentials] = useState({ email: '', password: '' });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   // Load officers
@@ -87,6 +87,23 @@ export default function FieldOfficersPage() {
     });
   };
 
+  // Auto-generate email from name
+  const generateDefaultEmail = (name) => {
+    const sanitized = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return sanitized ? `${sanitized}@gmail.com` : '';
+  };
+
+  const handleNameChange = (value) => {
+    setFormData((prev) => {
+      const updated = { ...prev, name: value };
+      // Auto-generate email only when adding new officer (not editing)
+      if (!editingId) {
+        updated.email = generateDefaultEmail(value);
+      }
+      return updated;
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -96,8 +113,11 @@ export default function FieldOfficersPage() {
         addNotification('Petugas berhasil diperbarui', 'success', 3000);
       } else {
         const result = await createFieldOfficer(formData);
-        if (result && result.temporaryPassword) {
-          setGeneratedPassword(result.temporaryPassword);
+        if (result) {
+          setCreatedCredentials({
+            email: result.defaultEmail || formData.email,
+            password: result.defaultPassword || '1234',
+          });
           setShowPasswordModal(true);
         }
         addNotification('Petugas berhasil ditambahkan', 'success', 3000);
@@ -259,7 +279,7 @@ export default function FieldOfficersPage() {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
                   placeholder="Contoh: Ahmad Sutrisno"
                   required
@@ -267,16 +287,34 @@ export default function FieldOfficersPage() {
               </label>
 
               <label className="block text-sm font-semibold text-slate-700">
-                Email *
+                Email {editingId ? '*' : '(auto-generate)'}
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleFormChange('email', e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                  className={`mt-1.5 w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400 ${
+                    !editingId ? 'bg-slate-50 text-slate-500' : 'bg-white'
+                  }`}
                   placeholder="ahmad@example.com"
+                  readOnly={!editingId}
                   required
                 />
+                {!editingId && formData.email && (
+                  <p className="mt-1 text-xs text-cyan-600">
+                    📧 Email otomatis: {formData.email}
+                  </p>
+                )}
               </label>
+
+              {!editingId && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                  <p className="text-xs font-semibold text-amber-700">🔑 Password Default</p>
+                  <p className="mt-1 font-mono text-sm font-bold text-amber-900">1234</p>
+                  <p className="mt-1 text-xs text-amber-600">
+                    Petugas bisa login dengan email dan password ini.
+                  </p>
+                </div>
+              )}
 
               <label className="block text-sm font-semibold text-slate-700">
                 Telepon
@@ -335,7 +373,7 @@ export default function FieldOfficersPage() {
         </div>
       )}
 
-      {/* Password Display Modal */}
+      {/* Credential Display Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-6">
           <div className="glass-panel fade-slide-in w-full max-w-md rounded-3xl p-6">
@@ -344,23 +382,35 @@ export default function FieldOfficersPage() {
             </div>
             <h2 className="text-2xl font-extrabold text-slate-800">Petugas Berhasil Dibuat!</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Berikut adalah password sementara untuk login. Bagikan kepada petugas dengan aman.
+              Berikut adalah kredensial default untuk login petugas.
             </p>
 
             <div className="mt-5 space-y-3">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <label className="block text-xs font-semibold text-slate-600">Email</label>
-                <p className="mt-1.5 font-mono text-sm text-slate-800">{formData.email}</p>
-              </div>
-
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                <label className="block text-xs font-semibold text-emerald-700">Password Sementara</label>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <p className="font-mono text-sm font-bold text-emerald-900">{generatedPassword}</p>
+                  <p className="font-mono text-sm text-slate-800">{createdCredentials.email}</p>
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText(generatedPassword);
+                      navigator.clipboard.writeText(createdCredentials.email);
+                      addNotification('Email berhasil disalin!', 'success', 2000);
+                    }}
+                    className="rounded-lg bg-slate-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700"
+                  >
+                    Salin
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <label className="block text-xs font-semibold text-emerald-700">Password Default</label>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <p className="font-mono text-sm font-bold text-emerald-900">{createdCredentials.password}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(createdCredentials.password);
                       addNotification('Password berhasil disalin!', 'success', 2000);
                     }}
                     className="rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
@@ -374,7 +424,7 @@ export default function FieldOfficersPage() {
             <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
               <p className="text-xs font-semibold text-blue-700">💡 Tips:</p>
               <p className="mt-1 text-xs text-blue-600">
-                Bagikan email dan password ini kepada petugas. Mereka harus mengubah password saat login pertama kali.
+                Bagikan email dan password ini kepada petugas. Disarankan untuk mengubah password setelah login pertama.
               </p>
             </div>
 
@@ -382,7 +432,7 @@ export default function FieldOfficersPage() {
               type="button"
               onClick={() => {
                 setShowPasswordModal(false);
-                setGeneratedPassword('');
+                setCreatedCredentials({ email: '', password: '' });
               }}
               className="mt-5 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
             >
