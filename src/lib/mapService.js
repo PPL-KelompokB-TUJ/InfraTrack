@@ -3,20 +3,69 @@ import { supabase } from './supabaseClient';
 /**
  * Get all damage reports with location data for map visualization
  */
-export async function getDamageReportsForMap() {
+export async function getActiveDamageReportsForMap() {
   try {
     const { data: reports, error } = await supabase
       .from('damage_reports')
       .select(`
         id,
         ticket_code,
-        damage_type_name,
-        location_description,
+        damage_type_id,
+        damage_types(name),
         latitude,
         longitude,
         status,
         created_at,
-        description
+        description,
+        location
+      `)
+      .in('status', ['pending', 'terverifikasi'])
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Map nested damage_types to damage_type_name
+    const mappedReports = (reports || []).map(r => ({
+      ...r,
+      damage_type_name: r.damage_types?.name || 'Unknown',
+      location_description: r.description || 'Lokasi laporan',
+    }));
+
+    console.log('Active damage reports loaded:', mappedReports?.length, mappedReports);
+
+    return {
+      success: true,
+      reports: mappedReports,
+    };
+  } catch (error) {
+    console.error('Error loading active damage reports:', error);
+    return {
+      success: false,
+      error: error.message,
+      reports: [],
+    };
+  }
+}
+
+export async function getDamageReportsForMap() {
+  return getActiveDamageReportsForMap();
+}
+
+export async function getInfrastructureAssetsForMap() {
+  try {
+    const { data: assets, error } = await supabase
+      .from('infrastructure_assets_view')
+      .select(`
+        id,
+        name,
+        condition,
+        year_built,
+        lat,
+        lng,
+        photo_url,
+        description,
+        category_name,
+        infrastructure_category_name
       `)
       .order('created_at', { ascending: false });
 
@@ -24,13 +73,18 @@ export async function getDamageReportsForMap() {
 
     return {
       success: true,
-      reports: reports || [],
+      assets: (assets || []).map((row) => ({
+        ...row,
+        lat: Number(row.lat ?? row.latitude),
+        lng: Number(row.lng ?? row.longitude),
+        category_name: row.category_name || row.infrastructure_category_name || 'Aset Infrastruktur',
+      })),
     };
   } catch (error) {
     return {
       success: false,
       error: error.message,
-      reports: [],
+      assets: [],
     };
   }
 }
@@ -70,6 +124,7 @@ export async function getDamageReportsByCategory(categoryId) {
       .select(`
         id,
         ticket_code,
+        damage_type_id,
         damage_type_name,
         location_description,
         latitude,
@@ -77,7 +132,8 @@ export async function getDamageReportsByCategory(categoryId) {
         status,
         created_at,
         description
-      `);
+      `)
+      .in('status', ['pending', 'terverifikasi']);
 
     if (categoryId) {
       query = query.eq('damage_type_id', categoryId);
