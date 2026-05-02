@@ -14,6 +14,8 @@ import {
   ChevronUp,
   Clock,
   Target,
+  Ruler,
+  Maximize2,
 } from 'lucide-react';
 import {
   detectRoadDamage,
@@ -24,11 +26,107 @@ import {
 } from '../lib/roboflowService';
 
 // ─── Severity helpers ────────────────────────────────────────────────────────
-function getSeverityLevel(predictions) {
+
+/**
+ * Classify a single detection's size relative to the image.
+ * Returns 'kecil', 'sedang', or 'besar' and an area ratio.
+ */
+function getSizeCategory(pred, imageWidth, imageHeight) {
+  const imageArea = imageWidth * imageHeight;
+  if (imageArea === 0) return { category: 'sedang', areaRatio: 0 };
+  const detArea = pred.width * pred.height;
+  const areaRatio = detArea / imageArea;
+
+  if (areaRatio >= 0.10) return { category: 'besar', areaRatio };
+  if (areaRatio >= 0.03) return { category: 'sedang', areaRatio };
+  return { category: 'kecil', areaRatio };
+}
+
+/**
+ * Compute detailed size metrics for all predictions.
+ */
+function computeSizeMetrics(predictions, imageWidth, imageHeight) {
+  if (!predictions || predictions.length === 0) {
+    return { totalAreaRatio: 0, maxAreaRatio: 0, details: [], avgAreaRatio: 0 };
+  }
+
+  const imageArea = imageWidth * imageHeight;
+  let totalDetArea = 0;
+  let maxAreaRatio = 0;
+
+  const details = predictions.map((pred) => {
+    const detArea = pred.width * pred.height;
+    const areaRatio = imageArea > 0 ? detArea / imageArea : 0;
+    totalDetArea += detArea;
+    if (areaRatio > maxAreaRatio) maxAreaRatio = areaRatio;
+    const sizeInfo = getSizeCategory(pred, imageWidth, imageHeight);
+    return {
+      ...pred,
+      detArea,
+      areaRatio,
+      sizeCategory: sizeInfo.category,
+    };
+  });
+
+  const totalAreaRatio = imageArea > 0 ? totalDetArea / imageArea : 0;
+  const avgAreaRatio = totalAreaRatio / predictions.length;
+
+  return { totalAreaRatio, maxAreaRatio, avgAreaRatio, details };
+}
+
+const SIZE_CATEGORY_CONFIG = {
+  kecil:  { label: 'Kecil',  color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' },
+  sedang: { label: 'Sedang', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' },
+  besar:  { label: 'Besar',  color: 'text-red-600',    bg: 'bg-red-50',    border: 'border-red-200' },
+};
+
+/**
+ * Determine severity using a composite score of:
+ *   - quantity (number of detections)
+ *   - size (total + max bounding box area relative to image)
+ *
+ * Scoring:
+ *   quantityScore: 0-40 points
+ *   sizeScore:     0-60 points
+ *
+ * Thresholds:
+ *   >= 60 → high (Berat)
+ *   >= 30 → medium (Sedang)
+ *   >  0  → low (Ringan)
+ */
+function getSeverityLevel(predictions, imageWidth = 0, imageHeight = 0) {
   if (!predictions || predictions.length === 0) return 'none';
+
   const total = predictions.length;
-  if (total >= 5) return 'high';
-  if (total >= 2) return 'medium';
+  const metrics = computeSizeMetrics(predictions, imageWidth, imageHeight);
+
+  // ── Quantity score (max 40) ────────────────────────────────────────
+  let quantityScore = 0;
+  if (total >= 5)      quantityScore = 40;
+  else if (total >= 3) quantityScore = 30;
+  else if (total >= 2) quantityScore = 20;
+  else                 quantityScore = 10;
+
+  // ── Size score (max 60) ────────────────────────────────────────────
+  //    Based on largest detection and total area coverage
+  let sizeScore = 0;
+
+  // Max single detection area contribution (max 35)
+  if (metrics.maxAreaRatio >= 0.15)      sizeScore += 35;
+  else if (metrics.maxAreaRatio >= 0.08) sizeScore += 25;
+  else if (metrics.maxAreaRatio >= 0.03) sizeScore += 15;
+  else                                   sizeScore += 5;
+
+  // Total area coverage contribution (max 25)
+  if (metrics.totalAreaRatio >= 0.25)      sizeScore += 25;
+  else if (metrics.totalAreaRatio >= 0.12) sizeScore += 18;
+  else if (metrics.totalAreaRatio >= 0.05) sizeScore += 10;
+  else                                     sizeScore += 3;
+
+  const compositeScore = quantityScore + sizeScore;
+
+  if (compositeScore >= 60) return 'high';
+  if (compositeScore >= 30) return 'medium';
   return 'low';
 }
 
@@ -194,7 +292,7 @@ export default function AIAnalyticsPage() {
           thumbnail: imagePreview,
           predictions: result.predictions,
           summary,
-          severity: getSeverityLevel(result.predictions),
+          severity: getSeverityLevel(result.predictions, result.image?.width, result.image?.height),
         },
         ...prev.slice(0, 9), // Keep last 10
       ]);
@@ -220,8 +318,13 @@ export default function AIAnalyticsPage() {
   };
 
   const summary = detectionResult ? summarizeDetections(detectionResult.predictions) : null;
-  const severity = detectionResult ? getSeverityLevel(detectionResult.predictions) : null;
+  const severity = detectionResult
+    ? getSeverityLevel(detectionResult.predictions, detectionResult.image?.width, detectionResult.image?.height)
+    : null;
   const severityConfig = severity ? SEVERITY_CONFIG[severity] : null;
+  const sizeMetrics = detectionResult
+    ? computeSizeMetrics(detectionResult.predictions, detectionResult.image?.width, detectionResult.image?.height)
+    : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
@@ -448,6 +551,31 @@ export default function AIAnalyticsPage() {
                       </p>
                     </div>
                   </div>
+                  {/* Severity Factors */}
+                  {sizeMetrics && detectionResult.predictions.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-slate-200/60 space-y-1">
+                      <p className="text-xs font-semibold text-slate-500">Faktor Penilaian:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/80 border border-slate-200 text-slate-600">
+                          📊 Jumlah: {detectionResult.predictions.length} deteksi
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/80 border border-slate-200 text-slate-600">
+                          📐 Area: {(sizeMetrics.totalAreaRatio * 100).toFixed(1)}% dari gambar
+                        </span>
+                        {sizeMetrics.details.length > 0 && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${
+                            SIZE_CATEGORY_CONFIG[sizeMetrics.details.reduce((max, d) => d.areaRatio > max.areaRatio ? d : max).sizeCategory]?.bg
+                          } ${
+                            SIZE_CATEGORY_CONFIG[sizeMetrics.details.reduce((max, d) => d.areaRatio > max.areaRatio ? d : max).sizeCategory]?.border
+                          } ${
+                            SIZE_CATEGORY_CONFIG[sizeMetrics.details.reduce((max, d) => d.areaRatio > max.areaRatio ? d : max).sizeCategory]?.color
+                          }`}>
+                            🔍 Terbesar: {SIZE_CATEGORY_CONFIG[sizeMetrics.details.reduce((max, d) => d.areaRatio > max.areaRatio ? d : max).sizeCategory]?.label}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Summary Stats */}
@@ -482,6 +610,55 @@ export default function AIAnalyticsPage() {
                   </div>
                 </div>
 
+                {/* Size Metrics */}
+                {sizeMetrics && sizeMetrics.details.length > 0 && (
+                  <div className="glass-panel rounded-2xl p-5 bg-white border border-slate-200">
+                    <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <Ruler size={16} className="text-cyan-600" />
+                      Metrik Ukuran Kerusakan
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-xs text-slate-500 font-medium">Total Area Kerusakan</p>
+                        <p className="text-2xl font-extrabold text-slate-900 mt-1">
+                          {(sizeMetrics.totalAreaRatio * 100).toFixed(1)}%
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">dari total gambar</p>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <p className="text-xs text-slate-500 font-medium">Area Terbesar</p>
+                        <p className="text-2xl font-extrabold text-slate-900 mt-1">
+                          {(sizeMetrics.maxAreaRatio * 100).toFixed(1)}%
+                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">deteksi terbesar</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {sizeMetrics.details.map((d, idx) => {
+                        const sizeCfg = SIZE_CATEGORY_CONFIG[d.sizeCategory];
+                        return (
+                          <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:bg-slate-50 transition">
+                            <div className="flex items-center gap-2">
+                              <Maximize2 size={14} className="text-slate-400" />
+                              <div>
+                                <p className="text-sm font-semibold text-slate-800">
+                                  {CLASS_LABELS[d.class] || d.class} #{idx + 1}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {Math.round(d.width)}×{Math.round(d.height)}px — {(d.areaRatio * 100).toFixed(2)}% area
+                                </p>
+                              </div>
+                            </div>
+                            <span className={`text-xs font-bold px-2 py-1 rounded-full border ${sizeCfg.bg} ${sizeCfg.color} ${sizeCfg.border}`}>
+                              {sizeCfg.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Detail list */}
                 {detectionResult.predictions.length > 0 && (
                   <div className="glass-panel rounded-2xl p-5 bg-white border border-slate-200">
@@ -506,6 +683,11 @@ export default function AIAnalyticsPage() {
                                 <p className="text-xs text-slate-500">
                                   Posisi: ({Math.round(pred.x)}, {Math.round(pred.y)}) — {Math.round(pred.width)}×{Math.round(pred.height)}px
                                 </p>
+                                {detectionResult?.image && (
+                                  <p className="text-xs text-slate-400">
+                                    Area: {((pred.width * pred.height) / (detectionResult.image.width * detectionResult.image.height) * 100).toFixed(2)}% dari gambar
+                                  </p>
+                                )}
                               </div>
                             </div>
                             <span
