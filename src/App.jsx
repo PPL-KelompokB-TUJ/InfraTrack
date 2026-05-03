@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import AIAnalyticsPage from './pages/AIAnalyticsPage';
 import ActiveReportsPage from './pages/ActiveReportsPage';
 import FieldOfficerTasksPage from './pages/FieldOfficerTasksPage';
+import PreventiveSchedulePage from './pages/PreventiveSchedulePage';
 import NotificationContainer from './components/NotificationContainer';
 import Sidebar from './components/Sidebar';
 import { NotificationProvider } from './context/NotificationContext';
@@ -44,6 +45,11 @@ const modules = [
   {
     key: 'maintenance-task',
     label: 'Penugasan Pemeliharaan',
+    requiresAdmin: true,
+  },
+  {
+    key: 'preventive-schedule',
+    label: 'Jadwal Preventif',
     requiresAdmin: true,
   },
   {
@@ -406,6 +412,12 @@ export default function App() {
       case 'maintenance-task':
         return isAdmin ? (
           <MaintenanceTaskPage />
+        ) : (
+          <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />
+        );
+      case 'preventive-schedule':
+        return isAdmin ? (
+          <PreventiveSchedulePage />
         ) : (
           <AdminAccessLocked onOpenLogin={handleOpenLoginModal} />
         );
