@@ -285,7 +285,7 @@ export default function PreventiveSchedulePage() {
                           const Icon = statusIcons[s.status] || AlertCircle;
                           return (
                             <tr key={s.id} className="transition hover:bg-cyan-50/30">
-                              <td className="px-4 py-3 font-semibold text-slate-700">{s.title}</td>
+                              <td className="max-w-[200px] truncate px-4 py-3 font-semibold text-slate-700" title={s.title}>{s.title}</td>
                               <td className="px-4 py-3 text-slate-700">{s.asset?.name || '-'}</td>
                               <td className="px-4 py-3 text-slate-600">{s.frequency_days} hari</td>
                               <td className="px-4 py-3 text-slate-600">{fmtDate(s.last_done)}</td>
