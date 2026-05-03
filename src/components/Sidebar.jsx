@@ -72,7 +72,7 @@ export default function Sidebar({
           {/* MENU UTAMA Section */}
           <div className="pt-2 pb-1">
             <p className="px-3 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Menu Utama</p>
-            {modules.slice(0, 8).map((module) => {
+            {modules.slice(0, 9).map((module) => {
               // Skip disabled modules
               if (module.disabled) {
                 return null;
@@ -117,7 +117,7 @@ export default function Sidebar({
           {/* SISTEM Section */}
           <div className="pt-2 pb-1">
             <p className="px-3 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Sistem</p>
-            {modules.slice(8).map((module) => {
+            {modules.slice(9).map((module) => {
               // Skip disabled modules
               if (module.disabled) {
                 return null;
