@@ -97,6 +97,12 @@ export default function PreventiveCalendar({ onSelectEvent }) {
     if (onSelectEvent) onSelectEvent(event.resource);
   }, [onSelectEvent]);
 
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const handleNavigate = useCallback((newDate) => {
+    setCurrentDate(newDate);
+  }, []);
+
   return (
     <div className="rounded-2xl border border-cyan-100 bg-white p-4">
       {/* Legend */}
@@ -119,9 +125,12 @@ export default function PreventiveCalendar({ onSelectEvent }) {
         </span>
       </div>
 
-      {isLoading ? (
-        <div className="py-16 text-center text-sm text-slate-500">Memuat kalender...</div>
-      ) : (
+      <div className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/50 backdrop-blur-[2px]">
+            <span className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-md">Memuat kalender...</span>
+          </div>
+        )}
         <div style={{ height: 560 }}>
           <Calendar
             localizer={localizer}
@@ -131,6 +140,8 @@ export default function PreventiveCalendar({ onSelectEvent }) {
             eventPropGetter={eventStyleGetter}
             onRangeChange={handleRangeChange}
             onSelectEvent={handleSelectEvent}
+            date={currentDate}
+            onNavigate={handleNavigate}
             views={['month', 'week']}
             defaultView="month"
             messages={{
@@ -144,7 +155,7 @@ export default function PreventiveCalendar({ onSelectEvent }) {
             popup
           />
         </div>
-      )}
+      </div>
     </div>
   );
 }
