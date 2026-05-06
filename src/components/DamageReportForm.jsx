@@ -113,32 +113,44 @@ export default function DamageReportForm() {
 
   const getGPSLocation = () => {
     setGpsLoading(true);
-    setLocationStatus('Mencari lokasi...');
+    setLocationStatus('Meminta akses GPS...');
+    setError('');
 
     if (!navigator.geolocation) {
-      setLocationStatus('Geolocation tidak didukung oleh browser');
+      setLocationStatus('Geolocation tidak didukung oleh browser Anda.');
       setGpsLoading(false);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const lat = position.coords.latitude.toFixed(6);
+        const lng = position.coords.longitude.toFixed(6);
         setFormData((prev) => ({
           ...prev,
-          latitude: position.coords.latitude.toFixed(6),
-          longitude: position.coords.longitude.toFixed(6),
+          latitude: lat,
+          longitude: lng,
         }));
-        setLocationStatus(
-          `Lokasi ditemukan: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
-        );
+        setLocationStatus(`Lokasi ditemukan: ${lat}, ${lng}`);
         setGpsLoading(false);
       },
       (error) => {
         console.error('GPS error:', error);
-        setLocationStatus(
-          `Akses GPS ditolak atau gagal (${error.message}). Silakan isi koordinat manual.`
-        );
         setGpsLoading(false);
+
+        if (error.code === 1) { // PERMISSION_DENIED
+          setLocationStatus('Akses GPS ditolak.');
+          setError('Akses lokasi diblokir oleh browser. Harap izinkan akses lokasi melalui pengaturan browser (icon gembok di bar alamat) lalu klik "Perbarui Lokasi" kembali.');
+        } else if (error.code === 2) { // POSITION_UNAVAILABLE
+          setLocationStatus('Lokasi tidak ditemukan.');
+          setError('Sinyal GPS tidak tersedia atau lokasi tidak dapat ditentukan.');
+        } else if (error.code === 3) { // TIMEOUT
+          setLocationStatus('Waktu permintaan habis.');
+          setError('Permintaan lokasi terlalu lama. Pastikan GPS aktif dan coba lagi.');
+        } else {
+          setLocationStatus('Gagal mendapatkan lokasi.');
+          setError(`Gagal mendapatkan lokasi: ${error.message}`);
+        }
       },
       {
         enableHighAccuracy: true,
@@ -226,16 +238,22 @@ export default function DamageReportForm() {
       return false;
     }
 
+    if (formData.latitude === '' || formData.longitude === '') {
+      setError('Lokasi (Latitude & Longitude) wajib diisi. Silakan aktifkan GPS browser atau isi koordinat secara manual.');
+      getGPSLocation(); // Trigger ulang permintaan akses GPS
+      return false;
+    }
+
     const latitude = Number(formData.latitude);
     const longitude = Number(formData.longitude);
 
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-      setError('Koordinat tidak valid. Gunakan GPS atau isi koordinat manual dengan benar.');
+      setError('Koordinat tidak valid. Harap isi angka koordinat dengan benar.');
       return false;
     }
 
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-      setError('Rentang koordinat tidak valid (lat: -90..90, lng: -180..180).');
+      setError('Rentang koordinat tidak valid (Lat: -90 s/d 90, Lng: -180 s/d 180).');
       return false;
     }
 
@@ -418,6 +436,7 @@ export default function DamageReportForm() {
                       }
                       placeholder="-6.200000"
                       className="mt-1.5 w-full rounded-lg border border-cyan-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-500"
+                      required
                     />
                   </div>
 
@@ -432,6 +451,7 @@ export default function DamageReportForm() {
                       }
                       placeholder="106.816666"
                       className="mt-1.5 w-full rounded-lg border border-cyan-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-500"
+                      required
                     />
                   </div>
                 </div>
