@@ -16,8 +16,8 @@ function buildDefaultForm(categoryOptions) {
     category: firstCategory,
     condition: CONDITION_OPTIONS[0],
     year_built: currentYear,
-    lat: DEFAULT_POSITION.lat,
-    lng: DEFAULT_POSITION.lng,
+    lat: '',
+    lng: '',
     photo_url: '',
   };
 }
@@ -100,7 +100,7 @@ export default function AssetFormModal({
       return;
     }
 
-    if (!Number.isFinite(Number(form.lat)) || !Number.isFinite(Number(form.lng))) {
+    if (form.lat === '' || form.lng === '' || !Number.isFinite(Number(form.lat)) || !Number.isFinite(Number(form.lng))) {
       setErrorMessage('Koordinat belum valid. Klik peta untuk memilih titik.');
       return;
     }
@@ -210,7 +210,7 @@ export default function AssetFormModal({
               Lokasi Aset (klik peta)
             </div>
             <MapPicker
-              value={{ lat: Number(form.lat), lng: Number(form.lng) }}
+              value={form.lat !== '' && form.lng !== '' ? { lat: Number(form.lat), lng: Number(form.lng) } : null}
               onChange={(coord) =>
                 setForm((prev) => ({ ...prev, lat: coord.lat, lng: coord.lng }))
               }
@@ -220,16 +220,18 @@ export default function AssetFormModal({
                 Latitude
                 <input
                   value={form.lat}
+                  placeholder={String(DEFAULT_POSITION.lat)}
                   readOnly
-                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-sm text-slate-700"
+                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400"
                 />
               </label>
               <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Longitude
                 <input
                   value={form.lng}
+                  placeholder={String(DEFAULT_POSITION.lng)}
                   readOnly
-                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-sm text-slate-700"
+                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400"
                 />
               </label>
             </div>
