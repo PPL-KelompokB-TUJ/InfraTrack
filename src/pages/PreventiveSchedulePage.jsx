@@ -153,6 +153,10 @@ export default function PreventiveSchedulePage() {
   };
 
   const handleNavigate = (action) => {
+    if (action === 'TODAY') {
+      setCurrentDate(new Date());
+      return;
+    }
     const newDate = new Date(currentDate);
     if (calendarView === 'month') {
       newDate.setMonth(currentDate.getMonth() + (action === 'NEXT' ? 1 : -1));
@@ -313,7 +317,10 @@ export default function PreventiveSchedulePage() {
               <h2 className="text-xl font-bold text-slate-800">
                 {moment(currentDate).format('MMMM YYYY')}
               </h2>
-              <div className="flex gap-2 text-slate-700">
+              <div className="flex items-center gap-2 text-slate-700">
+                <button onClick={() => handleNavigate('TODAY')} className="px-3 py-1 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors border border-cyan-200 mr-2">
+                  Hari Ini
+                </button>
                 <button onClick={() => handleNavigate('PREV')} className="p-1 hover:text-cyan-700 transition font-bold">
                   <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                 </button>

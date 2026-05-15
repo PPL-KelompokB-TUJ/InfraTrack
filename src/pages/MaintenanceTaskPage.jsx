@@ -217,6 +217,10 @@ export default function MaintenanceTaskPage() {
   };
 
   const handleNavigate = (action) => {
+    if (action === 'TODAY') {
+      setCurrentDate(new Date());
+      return;
+    }
     const newDate = new Date(currentDate);
     if (calendarView === 'month') {
       newDate.setMonth(currentDate.getMonth() + (action === 'NEXT' ? 1 : -1));

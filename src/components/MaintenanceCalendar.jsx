@@ -93,7 +93,13 @@ export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, on
         <h2 className="text-xl font-bold text-slate-800">
           {moment(currentDate).format('MMMM YYYY')}
         </h2>
-        <div className="flex gap-2 text-slate-700">
+        <div className="flex items-center gap-2 text-slate-700">
+          <button 
+            onClick={() => onNavigate('TODAY')}
+            className="px-3 py-1 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors border border-cyan-200 mr-2"
+          >
+            Hari Ini
+          </button>
           <button 
             onClick={() => onNavigate('PREV')}
             className="p-1 hover:text-cyan-700 transition font-bold"
