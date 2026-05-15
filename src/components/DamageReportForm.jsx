@@ -6,6 +6,7 @@ import {
   getActiveDamageTypeNames,
   getActiveInfrastructureCategories,
 } from '../lib/masterDataService';
+import MapPicker from './MapPicker';
 
 const urgency_levels = [
   { value: 'rendah', label: 'Rendah' },
@@ -432,7 +433,17 @@ export default function DamageReportForm() {
               </div>
             ) : (
               <>
-                <p className="mb-3 text-sm text-slate-600">{locationStatus || 'Belum ada koordinat.'}</p>
+                <p className="mb-3 text-sm text-slate-600">{locationStatus || 'Belum ada koordinat. Klik pada peta untuk memilih lokasi.'}</p>
+
+                <div className="mb-4">
+                  <MapPicker 
+                    value={(formData.latitude && formData.longitude) ? { lat: Number(formData.latitude), lng: Number(formData.longitude) } : null} 
+                    onChange={(coords) => {
+                      handleCoordinateChange('latitude', coords.lat);
+                      handleCoordinateChange('longitude', coords.lng);
+                    }} 
+                  />
+                </div>
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
