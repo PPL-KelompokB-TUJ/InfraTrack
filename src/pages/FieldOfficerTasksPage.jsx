@@ -58,6 +58,7 @@ export default function FieldOfficerTasksPage() {
       if (!sessionData.session) throw new Error('Not authenticated');
 
       const officerId = sessionData.session.user.id;
+      console.log('Officer ID from session:', officerId); // Tambahan log debug
 
       const [tasksData, statsData] = await Promise.all([
         getOfficerTasks(officerId),
