@@ -90,6 +90,80 @@ export default function LandingPage() {
                 </motion.div>
             </header>
 
+            {/* About Section */}
+            <section id="tentang" className="py-24 bg-surface-container-lowest px-6 md:px-8 border-t border-outline-variant/30">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="space-y-6"
+                        >
+                            <div className="inline-block px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container font-bold text-sm mb-2">
+                                Tentang InfraTrack
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-black text-on-background leading-tight">
+                                Dedikasi untuk Infrastruktur Publik yang Lebih Baik
+                            </h2>
+                            <p className="text-lg text-on-surface-variant leading-relaxed">
+                                InfraTrack lahir dari kebutuhan akan sistem manajemen infrastruktur yang transparan, cepat, dan terukur. Kami percaya bahwa setiap laporan dari masyarakat adalah langkah awal untuk kota yang lebih aman dan nyaman.
+                            </p>
+                            <p className="text-lg text-on-surface-variant leading-relaxed">
+                                Melalui pemanfaatan teknologi kecerdasan buatan (AI) dan pelacakan real-time, kami menjembatani komunikasi antara masyarakat dan pemerintah daerah. Tim lapangan kami dilengkapi dengan sistem penugasan terpadu untuk memastikan setiap perbaikan dilakukan secara efisien.
+                            </p>
+                            <div className="pt-4 flex items-center gap-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-surface-bright rounded-full flex items-center justify-center shadow-sm">
+                                        <span className="material-symbols-outlined text-primary">groups</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-xl text-on-surface">100+</p>
+                                        <p className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">Petugas Lapangan</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-surface-bright rounded-full flex items-center justify-center shadow-sm">
+                                        <span className="material-symbols-outlined text-primary">thumb_up</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-xl text-on-surface">Transparan</p>
+                                        <p className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">Lacak Prosesnya</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div 
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="relative"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-3xl transform translate-x-4 translate-y-4 -z-10"></div>
+                            <img 
+                                src="https://images.unsplash.com/photo-1541888086425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200" 
+                                alt="Tim Pekerja Infrastruktur" 
+                                className="rounded-3xl shadow-xl w-full h-[450px] object-cover"
+                            />
+                            
+                            {/* Floating Badge */}
+                            <div className="absolute -bottom-8 -left-8 bg-surface-container-lowest p-6 rounded-2xl shadow-xl border border-outline-variant/20 max-w-xs animate-bounce" style={{ animationDuration: '3s' }}>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container">
+                                        <span className="material-symbols-outlined">gavel</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-on-surface text-sm">Respons Cepat</p>
+                                        <p className="text-xs text-on-surface-variant">Penanganan &lt; 24 Jam</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
             {/* Features Section */}
             <section className="py-24 bg-surface-container-low px-6 md:px-8">
                 <div className="max-w-7xl mx-auto">

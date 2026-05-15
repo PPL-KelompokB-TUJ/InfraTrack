@@ -34,7 +34,7 @@ export default function TopNavBar() {
                     >
                         Layanan
                     </Link>
-                    <a href="#" className="font-medium text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 px-3 py-2 rounded-lg">Tentang</a>
+                    <a href="/#tentang" className="font-medium text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 px-3 py-2 rounded-lg">Tentang</a>
                 </div>
 
                 <Link to="/login" className="bg-primary hover:bg-primary-container text-on-primary font-semibold px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 text-sm">
