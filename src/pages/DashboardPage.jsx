@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Building2, FileText, CheckCircle2, DollarSign,
   AlertCircle, Clock, Eye, X, Filter, Sparkles, MapIcon, Search, Bell, Settings,
@@ -16,7 +17,8 @@ import {
 import MapVisualization from '../components/MapVisualization';
 import { useNotification } from '../context/NotificationContext';
 
-export default function DashboardPage({ onNavigateToModule }) {
+export default function DashboardPage() {
+  const navigate = useNavigate();
   const { addNotification } = useNotification();
   const [stats, setStats] = useState({
     totalAssets: 0,
@@ -193,7 +195,7 @@ export default function DashboardPage({ onNavigateToModule }) {
 
           {/* Damage Reports - Clickable */}
           <button
-            onClick={() => onNavigateToModule?.('active-reports')}
+            onClick={() => navigate('/dashboard/reports')}
             className="glass-panel rounded-2xl p-6 border border-red-100 bg-white hover:bg-red-50 hover:border-red-200 transition-colors cursor-pointer"
           >
             <div className="flex items-start justify-between">
