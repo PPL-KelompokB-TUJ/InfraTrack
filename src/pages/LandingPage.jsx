@@ -143,9 +143,10 @@ export default function LandingPage() {
                         >
                             <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-3xl transform translate-x-4 translate-y-4 -z-10"></div>
                             <img
-                                src="https://images.unsplash.com/photo-1541888086425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200"
+                                src="https://lh3.googleusercontent.com/d/1X7lQ7fy9QTVxc02bw63QtPvKQn6VflX_"
                                 alt="Tim Pekerja Infrastruktur"
                                 className="rounded-3xl shadow-xl w-full h-[450px] object-cover"
+                                referrerPolicy="no-referrer"
                             />
 
                             {/* Floating Badge */}

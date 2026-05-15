@@ -18,9 +18,14 @@ export default function TopNavBar() {
                 <div className="hidden md:flex gap-8 items-center">
                     <Link 
                         to="/" 
+                        onClick={() => {
+                            if (location.pathname === '/') {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }}
                         className={cn(
                             "font-medium transition-all duration-300 px-3 py-2 rounded-lg",
-                            location.pathname === '/' ? "text-primary border-b-2 border-primary rounded-none" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50"
+                            location.pathname === '/' && !location.hash ? "text-primary border-b-2 border-primary rounded-none" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50"
                         )}
                     >
                         Beranda
@@ -34,7 +39,24 @@ export default function TopNavBar() {
                     >
                         Layanan
                     </Link>
-                    <a href="/#tentang" className="font-medium text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50 transition-all duration-300 px-3 py-2 rounded-lg">Tentang</a>
+                    <Link 
+                        to="/#tentang"
+                        onClick={(e) => {
+                            if (location.pathname === '/') {
+                                e.preventDefault();
+                                document.getElementById('tentang')?.scrollIntoView({ behavior: 'smooth' });
+                                window.history.pushState(null, '', '/#tentang');
+                                // Force an update by dispatching a popstate event so useLocation updates
+                                window.dispatchEvent(new Event('popstate'));
+                            }
+                        }}
+                        className={cn(
+                            "font-medium transition-all duration-300 px-3 py-2 rounded-lg",
+                            location.pathname === '/' && location.hash === '#tentang' ? "text-primary border-b-2 border-primary rounded-none" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50"
+                        )}
+                    >
+                        Tentang
+                    </Link>
                 </div>
 
                 <Link to="/login" className="bg-primary hover:bg-primary-container text-on-primary font-semibold px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 text-sm">
