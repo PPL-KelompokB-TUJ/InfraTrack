@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, ChevronLeft, Eye, AlertCircle, Filter, X, Brain, Loader2, Info, Target } from 'lucide-react';
 import { getRecentDamageReports, verifyDamageReport, rejectDamageReport } from '../lib/damageReportService';
 import { getAnalysisResult, SEVERITY_CONFIG } from '../lib/aiAnalysisService';
 import { useNotification } from '../context/NotificationContext';
 import { supabase } from '../lib/supabaseClient';
 
-export default function ActiveReportsPage({ onBackToDashboard }) {
+export default function ActiveReportsPage() {
+  const navigate = useNavigate();
   const { addNotification } = useNotification();
   const [reports, setReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,9 +117,9 @@ export default function ActiveReportsPage({ onBackToDashboard }) {
       {/* Header with Back Button */}
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {onBackToDashboard && (
+          {true && (
             <button
-              onClick={onBackToDashboard}
+              onClick={() => navigate('/dashboard')}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold transition-colors"
             >
               <ChevronLeft size={20} />
