@@ -37,7 +37,7 @@ export default function LandingPage() {
         <div className="flex flex-col min-h-screen">
             {/* Hero Section */}
             <header className="pt-32 pb-20 px-6 md:px-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[85vh]">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6 }}
@@ -50,13 +50,13 @@ export default function LandingPage() {
                         Platform cerdas untuk pelaporan, pemantauan, dan pemeliharaan infrastruktur publik. Laporkan masalah dengan mudah, pantau perbaikan secara real-time.
                     </p>
                     <div className="flex flex-wrap gap-4 pt-4">
-                        <button 
+                        <button
                             onClick={() => navigate('/layanan')}
                             className="bg-gradient-to-b from-primary-container to-primary text-on-primary font-bold px-10 py-4 rounded-full shadow-lg hover:shadow-primary/40 hover:-translate-y-1 transition-all duration-300"
                         >
                             Buat Laporan
                         </button>
-                        <button 
+                        <button
                             onClick={() => navigate('/layanan')}
                             className="border-2 border-primary text-primary hover:bg-surface-container-high/50 font-bold px-10 py-4 rounded-full transition-all duration-300 hover:-translate-y-1"
                         >
@@ -65,16 +65,16 @@ export default function LandingPage() {
                     </div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8 }}
                     className="relative rounded-3xl overflow-hidden shadow-2xl h-[500px] border border-outline-variant/30"
                 >
-                    <img 
-                        alt="Smart City" 
+                    <img
+                        alt="Smart City"
                         className="w-full h-full object-cover"
-                        src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=1200"
+                        src="https://lh3.googleusercontent.com/d/17V6O371r_4SKPz3Dx1Oz4TqxwbBwCxbY"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-on-background/80 via-transparent to-transparent flex items-end p-8">
                         <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl w-full flex items-center justify-between">
@@ -94,7 +94,7 @@ export default function LandingPage() {
             <section id="tentang" className="py-24 bg-surface-container-lowest px-6 md:px-8 border-t border-outline-variant/30">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -134,19 +134,19 @@ export default function LandingPage() {
                             </div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             className="relative"
                         >
                             <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-3xl transform translate-x-4 translate-y-4 -z-10"></div>
-                            <img 
-                                src="https://images.unsplash.com/photo-1541888086425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200" 
-                                alt="Tim Pekerja Infrastruktur" 
+                            <img
+                                src="https://images.unsplash.com/photo-1541888086425-d81bb19240f5?auto=format&fit=crop&q=80&w=1200"
+                                alt="Tim Pekerja Infrastruktur"
                                 className="rounded-3xl shadow-xl w-full h-[450px] object-cover"
                             />
-                            
+
                             {/* Floating Badge */}
                             <div className="absolute -bottom-8 -left-8 bg-surface-container-lowest p-6 rounded-2xl shadow-xl border border-outline-variant/20 max-w-xs animate-bounce" style={{ animationDuration: '3s' }}>
                                 <div className="flex items-center gap-4">
@@ -174,7 +174,7 @@ export default function LandingPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {features.map((f, i) => (
-                            <motion.div 
+                            <motion.div
                                 key={f.title}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -200,7 +200,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-12 text-center">
                     {stats.map((s) => (
                         <div key={s.label} className="space-y-3">
-                            <motion.p 
+                            <motion.p
                                 initial={{ opacity: 0 }}
                                 whileInView={{ opacity: 1 }}
                                 className="text-5xl font-black text-secondary-fixed"
@@ -233,7 +233,7 @@ export default function LandingPage() {
                     </div>
                     <div className="text-left md:text-right">
                         <p className="text-sm font-medium text-on-surface-variant/60 italic">
-                            &copy; 2026 InfraTrack Systems.<br/>All rights reserved.
+                            &copy; 2026 InfraTrack Systems.<br />All rights reserved.
                         </p>
                     </div>
                 </div>
