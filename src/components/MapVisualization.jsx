@@ -26,8 +26,17 @@ export default function MapVisualization() {
   // Initialize map on mount
   useEffect(() => {
     if (mapRef.current && !mapInstanceRef.current && L) {
-      // Default center: Jakarta
-      mapInstanceRef.current = L.map(mapRef.current).setView([-6.2, 106.8], 11);
+      // Batas koordinat Indonesia (South-West ke North-East)
+      const indonesiaBounds = [
+        [-11.00, 94.00], // South-West
+        [6.00, 141.00]   // North-East
+      ];
+
+      mapInstanceRef.current = L.map(mapRef.current, {
+        maxBounds: indonesiaBounds,
+        maxBoundsViscosity: 1.0, // Kunci sepenuhnya, tidak bisa drag keluar batas
+        minZoom: 5, // Batas maksimal zoom out agar tidak melihat negara lain
+      }).setView([-6.2, 106.8], 11);
 
       // Add tile layer (OpenStreetMap)
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
