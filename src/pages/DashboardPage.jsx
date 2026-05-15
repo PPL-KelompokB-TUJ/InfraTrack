@@ -631,22 +631,42 @@ function MaintenanceKPICards({ kpis }) {
  * Damage Trend Chart Component
  */
 function TrendChart({ data, period, onPeriodChange }) {
-  const maxValue = data.length > 0 ? Math.max(...data.map(d => d.total)) : 10;
-  const chartHeight = 200;
+  const maxValue = data.length > 0 ? Math.max(...data.map(d => d.total), 10) : 10;
+  
+  const generatePath = () => {
+    if (!data || data.length === 0) return '';
+    const points = data.map((d, i) => {
+      const x = ((i + 0.5) / data.length) * 100;
+      const y = 100 - (d.total / maxValue) * 100;
+      return { x, y };
+    });
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const curr = points[i];
+      const next = points[i + 1];
+      const cp1X = curr.x + (next.x - curr.x) / 2;
+      const cp1Y = curr.y;
+      const cp2X = curr.x + (next.x - curr.x) / 2;
+      const cp2Y = next.y;
+      path += ` C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${next.x} ${next.y}`;
+    }
+    return path;
+  };
 
   return (
     <div className="glass-panel rounded-2xl p-6 bg-white border border-slate-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp size={20} className="text-purple-600" />
-          <h2 className="text-lg font-bold text-slate-900">Tren Kerusakan</h2>
+          <TrendingUp size={20} className="text-teal-600" />
+          <h2 className="text-lg font-bold text-slate-900">Tren Pelaporan Kerusakan</h2>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => onPeriodChange('weekly')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
               period === 'weekly'
-                ? 'bg-purple-500 text-white'
+                ? 'bg-teal-500 text-white shadow-sm'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -656,7 +676,7 @@ function TrendChart({ data, period, onPeriodChange }) {
             onClick={() => onPeriodChange('monthly')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
               period === 'monthly'
-                ? 'bg-purple-500 text-white'
+                ? 'bg-teal-500 text-white shadow-sm'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -664,54 +684,104 @@ function TrendChart({ data, period, onPeriodChange }) {
           </button>
         </div>
       </div>
+      <p className="text-sm text-slate-500 mb-8">Intensitas laporan berbasis AI analysis selama periode terpilih.</p>
 
       {data.length === 0 ? (
         <div className="h-64 flex items-center justify-center text-slate-500">
           <p>Tidak ada data tren</p>
         </div>
       ) : (
-        <div className="h-64 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200">
-          <div className="flex items-end justify-around h-full gap-1">
-            {data.map((item, index) => (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                <div className="relative w-full h-full flex items-end">
+        <div className="relative h-56 w-full rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden px-4">
+          {/* Dotted Grid Background */}
+          <div 
+            className="absolute inset-0 z-0 opacity-50" 
+            style={{ 
+              backgroundImage: 'radial-gradient(#94a3b8 1.5px, transparent 1.5px)', 
+              backgroundSize: '24px 24px',
+              backgroundPosition: '0 0'
+            }}
+          />
+
+          <div className="relative h-40 mt-8 mb-8 w-full z-10">
+            {/* SVG Line Overlay */}
+            <svg 
+              className="absolute inset-0 h-full w-full pointer-events-none overflow-visible" 
+              preserveAspectRatio="none" 
+              viewBox="0 0 100 100"
+            >
+              <path 
+                d={generatePath()} 
+                fill="none" 
+                stroke="#0d9488" 
+                strokeWidth="2" 
+                vectorEffect="non-scaling-stroke" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+              />
+              {data.map((d, i) => {
+                const x = ((i + 0.5) / data.length) * 100;
+                const y = 100 - (d.total / maxValue) * 100;
+                return (
+                  <circle 
+                    key={i} 
+                    cx={x} 
+                    cy={y} 
+                    r="4" 
+                    fill="#fff" 
+                    stroke="#0d9488" 
+                    strokeWidth="2" 
+                    vectorEffect="non-scaling-stroke" 
+                  />
+                );
+              })}
+            </svg>
+
+            {/* Bars */}
+            <div className="absolute inset-0 flex items-end justify-around gap-2 z-20">
+              {data.map((item, index) => (
+                <div key={index} className="flex-1 flex flex-col justify-end items-center group cursor-pointer h-full relative">
+                  {/* Tooltip */}
+                  <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-30 pointer-events-none">
+                    {item.total} laporan
+                  </div>
+                  
+                  {/* Bar */}
                   <div
-                    className="w-full bg-gradient-to-t from-purple-500 to-purple-400 rounded-t opacity-70 hover:opacity-100 transition-opacity group-hover:shadow-lg"
+                    className="w-full max-w-[4.5rem] bg-teal-500/60 group-hover:bg-teal-500 transition-all rounded-t-sm"
                     style={{
                       height: `${(item.total / maxValue) * 100}%`,
                       minHeight: item.total > 0 ? '4px' : '2px',
                     }}
                   />
+                  
+                  {/* Label */}
+                  <span className="absolute -bottom-6 text-xs font-semibold text-slate-600 text-center w-full truncate">
+                    {item.period}
+                  </span>
                 </div>
-                <span className="text-xs font-semibold text-slate-600 text-center truncate w-full">
-                  {item.period}
-                </span>
-                <div className="hidden group-hover:flex absolute -top-12 bg-slate-900 text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap">
-                  {item.total} laporan
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       {/* Legend */}
-      <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t border-slate-200">
+      <div className="mt-6 grid grid-cols-3 gap-4 pt-4 border-t border-slate-200">
         <div>
           <p className="text-xs text-slate-600 mb-1">Total Laporan</p>
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="text-2xl font-black text-slate-900">
             {data.reduce((sum, item) => sum + item.total, 0)}
           </p>
         </div>
         <div>
           <p className="text-xs text-slate-600 mb-1">Selesai</p>
-          <p className="text-2xl font-bold text-emerald-600">
+          <p className="text-2xl font-black text-teal-600">
             {data.reduce((sum, item) => sum + item.completed, 0)}
           </p>
         </div>
         <div>
           <p className="text-xs text-slate-600 mb-1">Pending</p>
-          <p className="text-2xl font-bold text-orange-600">
+          <p className="text-2xl font-black text-orange-600">
             {data.reduce((sum, item) => sum + item.pending, 0)}
           </p>
         </div>
