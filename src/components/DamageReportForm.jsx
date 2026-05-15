@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, Loader, MapPin, Camera } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader, MapPin, Camera, SlidersHorizontal } from 'lucide-react';
 import { submitDamageReport } from '../lib/damageReportService';
+import { runAutoAnalysisFromFile } from '../lib/aiAnalysisService';
 import {
   getActiveDamageTypeNames,
   getActiveInfrastructureCategories,
@@ -36,6 +37,7 @@ export default function DamageReportForm() {
   const [gpsLoading, setGpsLoading] = useState(false);
   const [damageTypeOptions, setDamageTypeOptions] = useState([]);
   const [infrastructureCategoryOptions, setInfrastructureCategoryOptions] = useState([]);
+  const [confidenceThreshold, setConfidenceThreshold] = useState(25);
 
   // Get GPS location on component mount
   useEffect(() => {
@@ -293,6 +295,14 @@ export default function DamageReportForm() {
     if (result.success) {
       setSuccess(true);
       setTicketCode(result.ticketCode);
+
+      // Fire-and-forget: run AI analysis using the original file (avoids CORS)
+      // We need to capture photoFile before resetting it below
+      const capturedFile = photoFile;
+      if (result.report?.id && capturedFile) {
+        runAutoAnalysisFromFile(result.report.id, capturedFile, confidenceThreshold);
+      }
+
       // Reset form
       setFormData({
         reporterName: '',
@@ -582,6 +592,32 @@ export default function DamageReportForm() {
                 </div>
               )}
             </label>
+          </div>
+        </div>
+
+        {/* AI Confidence Threshold */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+            <SlidersHorizontal className="w-4 h-4" /> Sensitivitas Deteksi AI
+          </label>
+          <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4">
+            <p className="text-xs text-slate-500 mb-3">
+              Atur tingkat confidence untuk deteksi kerusakan otomatis. Semakin rendah nilainya, semakin sensitif deteksi (lebih banyak hasil tapi mungkin kurang akurat).
+            </p>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min="5"
+                max="90"
+                step="1"
+                value={confidenceThreshold}
+                onChange={(e) => setConfidenceThreshold(Number(e.target.value))}
+                className="flex-1 h-1.5 bg-slate-200 rounded-full accent-cyan-500 cursor-pointer"
+              />
+              <span className="text-sm font-bold text-cyan-700 min-w-[3rem] text-right">
+                {confidenceThreshold}%
+              </span>
+            </div>
           </div>
         </div>
 

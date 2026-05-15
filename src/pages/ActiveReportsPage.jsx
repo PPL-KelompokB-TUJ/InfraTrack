@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Search, ChevronLeft, Eye, AlertCircle, Filter, X } from 'lucide-react';
+import { Search, ChevronLeft, Eye, AlertCircle, Filter, X, Brain, Loader2, Info, Target } from 'lucide-react';
 import { getRecentDamageReports, verifyDamageReport, rejectDamageReport } from '../lib/damageReportService';
+import { getAnalysisResult, SEVERITY_CONFIG } from '../lib/aiAnalysisService';
 import { useNotification } from '../context/NotificationContext';
 import { supabase } from '../lib/supabaseClient';
 
@@ -283,6 +284,23 @@ function ReportDetailModal({ report, onClose }) {
   const [verificationNotes, setVerificationNotes] = useState('');
   const [priorityLevel, setPriorityLevel] = useState('sedang');
   const [verificationAction, setVerificationAction] = useState(null); // 'approve' or 'reject'
+  const [aiResult, setAiResult] = useState(null);
+  const [isLoadingAi, setIsLoadingAi] = useState(true);
+
+  // Fetch AI analysis result when modal opens
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchAiResult() {
+      setIsLoadingAi(true);
+      const response = await getAnalysisResult(report.id);
+      if (isMounted) {
+        setAiResult(response.success ? response.data : null);
+        setIsLoadingAi(false);
+      }
+    }
+    fetchAiResult();
+    return () => { isMounted = false; };
+  }, [report.id]);
 
   const handleVerificationClick = (action) => {
     setVerificationAction(action);
@@ -398,6 +416,99 @@ function ReportDetailModal({ report, onClose }) {
               </div>
             </div>
           )}
+
+          {/* AI Analysis Result */}
+          <div className="rounded-xl border border-slate-200 overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 border-b border-slate-200">
+              <Brain size={18} className="text-cyan-600" />
+              <h3 className="font-semibold text-slate-800 text-sm">Hasil Analisis AI</h3>
+            </div>
+            <div className="p-4">
+              {isLoadingAi ? (
+                <div className="flex items-center gap-3 py-4 justify-center text-slate-500">
+                  <Loader2 size={20} className="animate-spin text-cyan-500" />
+                  <span className="text-sm">Memuat hasil analisis...</span>
+                </div>
+              ) : aiResult ? (
+                aiResult.error_message ? (
+                  <div className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 rounded-lg p-3 border border-amber-200">
+                    <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Analisis gagal</p>
+                      <p className="text-xs mt-1 text-amber-600">{aiResult.error_message}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Severity Badge */}
+                    {aiResult.severity_level && SEVERITY_CONFIG[aiResult.severity_level] && (
+                      <div className={`flex items-center gap-3 p-3 rounded-lg border ${SEVERITY_CONFIG[aiResult.severity_level].bg} ${SEVERITY_CONFIG[aiResult.severity_level].border}`}>
+                        <Target size={20} className={SEVERITY_CONFIG[aiResult.severity_level].color} />
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tingkat Kerusakan</p>
+                          <p className={`text-base font-extrabold ${SEVERITY_CONFIG[aiResult.severity_level].color}`}>
+                            {SEVERITY_CONFIG[aiResult.severity_level].label}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-center">
+                        <p className="text-xs text-slate-500 font-medium">Total Deteksi</p>
+                        <p className="text-xl font-extrabold text-slate-900 mt-1">{aiResult.total_detections}</p>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-center">
+                        <p className="text-xs text-slate-500 font-medium">Avg. Confidence</p>
+                        <p className="text-xl font-extrabold text-slate-900 mt-1">
+                          {aiResult.total_detections > 0 ? `${(aiResult.avg_confidence * 100).toFixed(0)}%` : '-'}
+                        </p>
+                      </div>
+                      <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-center">
+                        <p className="text-xs text-slate-500 font-medium">Threshold</p>
+                        <p className="text-xl font-extrabold text-slate-900 mt-1">{aiResult.confidence_threshold}%</p>
+                      </div>
+                    </div>
+
+                    {/* Detection details */}
+                    {aiResult.predictions && aiResult.predictions.length > 0 && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Detail Deteksi</p>
+                        {aiResult.predictions.map((pred, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2 rounded-lg border border-slate-100 hover:bg-slate-50 transition text-sm">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white shadow-sm" />
+                              <span className="font-semibold text-slate-800">
+                                {pred.class === 'pothole' ? 'Lubang Jalan' : pred.class} #{idx + 1}
+                              </span>
+                            </div>
+                            <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-50 text-red-600 border border-red-200">
+                              {(pred.confidence * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Analysis Metadata */}
+                    <div className="flex items-start gap-2 text-xs text-slate-400 pt-2 border-t border-slate-100">
+                      <Info size={12} className="shrink-0 mt-0.5" />
+                      <p>
+                        Dianalisis pada {new Date(aiResult.analyzed_at).toLocaleString('id-ID')}.
+                        Resolusi: {aiResult.image_width}×{aiResult.image_height}px.
+                      </p>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div className="flex items-center gap-3 py-4 justify-center text-slate-400">
+                  <Brain size={20} />
+                  <span className="text-sm">Belum ada hasil analisis AI untuk laporan ini.</span>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Informasi Pelapor */}
           <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
