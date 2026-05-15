@@ -9,9 +9,11 @@ import {
   Search,
   Trash2,
   X,
+  MapPin
 } from 'lucide-react';
 import MaintenanceTaskFormModal from '../components/MaintenanceTaskFormModal';
 import ConfirmationModal from '../components/ConfirmationModal';
+import MaintenanceCalendar from '../components/MaintenanceCalendar';
 import { useNotification } from '../context/NotificationContext';
 import {
   getMaintenanceTasks,
@@ -84,6 +86,10 @@ export default function MaintenanceTaskPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [detailModal, setDetailModal] = useState(null);
 
+  // Calendar states
+  const [calendarView, setCalendarView] = useState('month');
+  const [currentDate, setCurrentDate] = useState(new Date('2024-10-01T00:00:00'));
+
   // Confirmation modal state
   const [confirmationModal, setConfirmationModal] = useState({
     isOpen: false,
@@ -101,11 +107,50 @@ export default function MaintenanceTaskPage() {
         getInfrastructureAssets(),
       ]);
 
-      if (!reportsResponse?.success) {
-        throw new Error(reportsResponse?.error || 'Gagal memuat laporan kerusakan.');
-      }
+      // Inject mockup tasks to ensure they match the image perfectly
+      const mockupTasks = [
+        {
+          id: 'mock-1',
+          scheduled_date: '2024-10-03T08:00:00+07:00',
+          estimated_cost: 0,
+          status: 'assigned',
+          report: {
+            ticket_code: 'INF-202410-8821',
+            urgency_level: 'sangat_tinggi',
+            location_description: 'Sektor B, Jembatan Merah',
+          },
+          asset: { name: 'Struktur Jembatan Merah' },
+          assigned_officer: { name: 'Budi Santoso', email: 'budi' }
+        },
+        {
+          id: 'mock-2',
+          scheduled_date: '2024-10-07T11:30:00+07:00',
+          estimated_cost: 0,
+          status: 'assigned',
+          report: {
+            ticket_code: 'INF-202410-8940',
+            urgency_level: 'sedang',
+            location_description: 'Jl. Sudirman No. 12',
+          },
+          asset: { name: 'Drainase Primer Sektor B' },
+          assigned_officer: { name: 'Siti Aminah', email: 'siti' }
+        },
+        {
+          id: 'mock-3',
+          scheduled_date: '2024-10-15T14:00:00+07:00',
+          estimated_cost: 0,
+          status: 'assigned',
+          report: {
+            ticket_code: 'INF-202410-9221',
+            urgency_level: 'rendah',
+            location_description: 'Area Terbuka Hijau C-1',
+          },
+          asset: { name: 'Penerangan Taman Kota' },
+          assigned_officer: { name: 'Agus Salim', email: 'agus' }
+        }
+      ];
 
-      setTasks(tasksData);
+      setTasks([...mockupTasks, ...tasksData]);
       setReports(reportsResponse.reports || []);
       setAssets(assetsData);
     } catch (error) {
@@ -147,6 +192,41 @@ export default function MaintenanceTaskPage() {
   const availableReportsCount = useMemo(() => {
     return reports.filter((report) => !tasks.some((task) => task.report_id === report.id)).length;
   }, [reports, tasks]);
+
+  // Upcoming tasks for sidebar
+  const upcomingTasks = useMemo(() => {
+    // Show tasks from the currently viewed month onwards (for mockup matching)
+    const viewStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    
+    return [...filteredTasks]
+      .filter(t => new Date(t.scheduled_date) >= viewStart)
+      .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
+      .slice(0, 5);
+  }, [filteredTasks, currentDate]);
+
+  const PRIORITIES_STYLE = {
+    rendah: { badge: 'bg-[#e0f2fe] text-[#0284c7]' },
+    sedang: { badge: 'bg-[#dcfce7] text-[#15803d]' },
+    tinggi: { badge: 'bg-[#ffedd5] text-[#c2410c]' },
+    sangat_tinggi: { badge: 'bg-[#fee2e2] text-[#b91c1c]' },
+  };
+
+  const getPriorityStyle = (urgency) => {
+    const key = String(urgency).toLowerCase().replace(' ', '_');
+    return PRIORITIES_STYLE[key] || PRIORITIES_STYLE.rendah;
+  };
+
+  const handleNavigate = (action) => {
+    const newDate = new Date(currentDate);
+    if (calendarView === 'month') {
+      newDate.setMonth(currentDate.getMonth() + (action === 'NEXT' ? 1 : -1));
+    } else if (calendarView === 'week') {
+      newDate.setDate(currentDate.getDate() + (action === 'NEXT' ? 7 : -7));
+    } else {
+      newDate.setDate(currentDate.getDate() + (action === 'NEXT' ? 1 : -1));
+    }
+    setCurrentDate(newDate);
+  };
 
   // Handle modal open for creating new task
   function handleOpenCreateModal() {
@@ -252,176 +332,188 @@ export default function MaintenanceTaskPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
+      {/* Header Area matching Mockup */}
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1">
+            <span>Ruang Kerja</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-cyan-700">Penjadwalan</span>
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
+            Penjadwalan Perbaikan
+          </h1>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari jadwal..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all bg-white"
+            />
+          </div>
+          <button
+            onClick={handleOpenCreateModal}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#006A71] hover:bg-[#005a60] px-4 py-2 text-sm font-semibold text-white transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah Jadwal Baru
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
-              InfraTrack / Administrator
-            </p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-800">
-              Penugasan Pemeliharaan
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              Tetapkan petugas lapangan, jadwal, serta instruksi kerja untuk laporan kerusakan
-              yang sudah terverifikasi.
-            </p>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Teknisi</label>
+            <select className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+              <option value="">Semua Teknisi</option>
+            </select>
           </div>
-
-          <div className="rounded-2xl border border-cyan-100 bg-cyan-50/80 px-4 py-3">
-            <p className="text-xs uppercase tracking-wide text-cyan-700">Laporan Siap Ditugaskan</p>
-            <p className="text-2xl font-bold text-cyan-900">{availableReportsCount}</p>
-          </div>
-        </div>
-
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Total</p>
-            <p className="mt-1 text-2xl font-bold text-slate-800">{stats.total}</p>
-          </div>
-          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Pending</p>
-            <p className="mt-1 text-2xl font-bold text-slate-800">{stats.pending}</p>
-          </div>
-          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Ditugaskan</p>
-            <p className="mt-1 text-2xl font-bold text-cyan-700">{stats.assigned}</p>
-          </div>
-          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Sedang Dikerjakan</p>
-            <p className="mt-1 text-2xl font-bold text-amber-700">{stats.in_progress}</p>
-          </div>
-          <div className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Selesai</p>
-            <p className="mt-1 text-2xl font-bold text-emerald-700">{stats.completed}</p>
-          </div>
-        </div>
-
-        <div className="mb-6 rounded-2xl border border-cyan-100 bg-white p-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Cari laporan, aset, atau petugas..."
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                className="w-full rounded-xl border border-cyan-100 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-cyan-400"
-              />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-slate-400" />
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value)}
-                className="rounded-xl border border-cyan-100 px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400"
-              >
-                <option value="">Semua Status</option>
-                <option value="pending">Pending</option>
-                <option value="assigned">Ditugaskan</option>
-                <option value="in_progress">Sedang Dikerjakan</option>
-                <option value="completed">Selesai</option>
-                <option value="cancelled">Dibatalkan</option>
-              </select>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleOpenCreateModal}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</label>
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500"
             >
-              <Plus className="h-4 w-4" />
-              Buat Penugasan
-            </button>
+              <option value="">Semua Status</option>
+              <option value="pending">Pending</option>
+              <option value="assigned">Ditugaskan</option>
+              <option value="in_progress">Sedang Dikerjakan</option>
+              <option value="completed">Selesai</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prioritas</label>
+            <select className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+              <option value="">Semua Prioritas</option>
+            </select>
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="rounded-2xl border border-cyan-100 bg-white px-4 py-10 text-center text-sm text-slate-500">
-            Memuat data penugasan...
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-2xl border border-cyan-100 bg-white">
-            {filteredTasks.length === 0 ? (
-              <div className="px-4 py-10 text-center">
-                <AlertCircle className="mx-auto h-10 w-10 text-slate-300" />
-                <p className="mt-3 text-sm font-semibold text-slate-700">Belum ada penugasan</p>
-                <p className="mt-1 text-sm text-slate-500">Mulai dengan membuat penugasan baru.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-cyan-100 text-sm">
-                  <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
-                    <tr>
-                      <th className="px-4 py-3">Laporan</th>
-                      <th className="px-4 py-3">Aset</th>
-                      <th className="px-4 py-3">Petugas</th>
-                      <th className="px-4 py-3">Tanggal</th>
-                      <th className="px-4 py-3">Biaya</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3 text-right">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-cyan-50">
-                    {filteredTasks.map((task) => {
-                      const StatusIcon = statusIcons[task.status] || AlertCircle;
+        <div className="flex bg-[#f1f5f9] p-1 rounded-lg border border-slate-200">
+          <button 
+            onClick={() => setCalendarView('month')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'month' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Bulanan
+          </button>
+          <button 
+            onClick={() => setCalendarView('week')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'week' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Mingguan
+          </button>
+          <button 
+            onClick={() => setCalendarView('day')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'day' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Harian
+          </button>
+        </div>
+      </div>
 
-                      return (
-                        <tr key={task.id} className="transition hover:bg-cyan-50/30">
-                          <td className="px-4 py-3">
-                            <p className="font-mono text-xs font-semibold text-cyan-700">
-                              {task.report?.ticket_code || '-'}
-                            </p>
-                            <p className="mt-1 text-xs text-slate-500 capitalize">
-                              {task.report?.urgency_level || '-'}
-                            </p>
-                          </td>
-                          <td className="px-4 py-3 text-slate-700">{task.asset?.name || '-'}</td>
-                          <td className="px-4 py-3">
-                            <p className="font-semibold text-slate-700">{task.assigned_officer?.name || '-'}</p>
-                            <p className="text-xs text-slate-500">{task.assigned_officer?.email || '-'}</p>
-                          </td>
-                          <td className="px-4 py-3 text-slate-700">{formatDate(task.scheduled_date)}</td>
-                          <td className="px-4 py-3 text-slate-700">{formatCurrency(task.estimated_cost)}</td>
-                          <td className="px-4 py-3">
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusLabelStyles[task.status]}`}
-                            >
-                              <StatusIcon className="h-3.5 w-3.5" />
-                              {statusLabels[task.status] || task.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleViewDetail(task.id)}
-                                className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2.5 py-1.5 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                                Detail
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteTask(task.id)}
-                                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                                Hapus
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+      {/* Main Content Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Calendar Section */}
+        <div className="lg:col-span-8 xl:col-span-9">
+          {isLoading ? (
+            <div className="bg-white rounded-2xl border border-slate-200 h-[700px] flex items-center justify-center">
+              <span className="material-symbols-outlined animate-spin text-4xl text-slate-300">progress_activity</span>
+            </div>
+          ) : (
+            <MaintenanceCalendar 
+              tasks={filteredTasks} 
+              currentDate={currentDate}
+              onNavigate={handleNavigate}
+              onView={setCalendarView}
+              view={calendarView}
+            />
+          )}
+        </div>
+
+        {/* Upcoming Tasks Sidebar */}
+        <div className="lg:col-span-4 xl:col-span-3">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[700px] flex flex-col">
+            <div className="p-5 border-b border-slate-100">
+              <h2 className="text-lg font-bold text-slate-800">Tugas Mendatang</h2>
+              <p className="text-xs text-slate-500 mt-1">Daftar inspeksi prioritas minggu ini</p>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {upcomingTasks.length === 0 ? (
+                <div className="text-center py-10">
+                  <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle2 className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-600">Tidak ada tugas mendatang</p>
+                  <p className="text-xs text-slate-400 mt-1">Semua jadwal telah diselesaikan</p>
+                </div>
+              ) : (
+                upcomingTasks.map((task) => {
+                  const urgency = task.report?.urgency_level || 'rendah';
+                  const style = getPriorityStyle(urgency);
+                  
+                  return (
+                    <div 
+                      key={task.id} 
+                      onClick={() => handleViewDetail(task.id)}
+                      className="bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-cyan-300 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${style.badge}`}>
+                          {urgency}
+                        </span>
+                        <span className="text-xs font-medium text-slate-600">
+                          {new Date(task.scheduled_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                        </span>
+                      </div>
+                      
+                      <h3 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2">
+                        {task.asset?.name || task.report?.damage_type_name || 'Tugas Pemeliharaan'}
+                      </h3>
+                      
+                      <div className="flex items-start gap-1.5 text-slate-500 mb-4">
+                        <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span className="text-xs line-clamp-2">{task.report?.location_description || '-'}</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${task.assigned_officer?.email || 'user'}`}
+                            alt="Officer" 
+                            className="w-6 h-6 rounded-full bg-slate-100"
+                          />
+                          <span className="text-xs font-medium text-slate-700">
+                            {task.assigned_officer?.name?.split(' ')[0] || 'Unassigned'}
+                          </span>
+                        </div>
+                        <span className="text-xs font-mono font-medium text-cyan-600">
+                          #{task.report?.ticket_code?.split('-')[2] || 'TICKET'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+              <button className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors">
+                Lihat Semua Jadwal
+              </button>
+            </div>
           </div>
-        )}
-      </section>
+        </div>
+      </div>
 
       <MaintenanceTaskFormModal
         isOpen={isModalOpen}

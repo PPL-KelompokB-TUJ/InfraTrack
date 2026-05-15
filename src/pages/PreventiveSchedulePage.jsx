@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  AlertCircle, Calendar as CalendarIcon, CheckCircle2, Clock3,
-  Filter, List, Plus, Search, X, Trash2, Edit3, Ban,
+  AlertCircle, CheckCircle2, Clock3,
+  Plus, Search, X, Trash2, Edit3, Ban, MapPin,
 } from 'lucide-react';
-import PreventiveCalendar from '../components/PreventiveCalendar';
 import PreventiveScheduleFormModal from '../components/PreventiveScheduleFormModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useNotification } from '../context/NotificationContext';
@@ -17,6 +16,18 @@ import {
   updatePreventiveSchedule,
   triggerReminderCheck,
 } from '../lib/preventiveScheduleService';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const localizer = momentLocalizer(moment);
+
+const STATUS_COLORS = {
+  scheduled: { bg: '#dcfce7', border: '#16a34a', text: '#15803d' },
+  overdue:   { bg: '#fee2e2', border: '#dc2626', text: '#b91c1c' },
+  completed: { bg: '#f1f5f9', border: '#94a3b8', text: '#64748b' },
+  cancelled: { bg: '#f1f5f9', border: '#cbd5e1', text: '#94a3b8' },
+};
 
 const statusStyles = {
   scheduled: 'border-emerald-200 bg-emerald-100 text-emerald-700',
@@ -30,11 +41,12 @@ const statusLabels = {
   completed: 'Selesai',
   cancelled: 'Dibatalkan',
 };
-const statusIcons = {
-  scheduled: Clock3,
-  overdue: AlertCircle,
-  completed: CheckCircle2,
-  cancelled: Ban,
+
+const STATUS_BADGE = {
+  scheduled: 'bg-[#dcfce7] text-[#15803d]',
+  overdue:   'bg-[#fee2e2] text-[#b91c1c]',
+  completed: 'bg-[#f1f5f9] text-[#64748b]',
+  cancelled: 'bg-[#f1f5f9] text-[#94a3b8]',
 };
 
 function fmtDate(d) {
@@ -44,7 +56,6 @@ function fmtDate(d) {
 
 export default function PreventiveSchedulePage() {
   const { addNotification } = useNotification();
-  const [tab, setTab] = useState('calendar');
   const [schedules, setSchedules] = useState([]);
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,6 +66,10 @@ export default function PreventiveSchedulePage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [assetFilter, setAssetFilter] = useState('');
 
+  // Calendar states
+  const [calendarView, setCalendarView] = useState('month');
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   // Modals
   const [formModal, setFormModal] = useState({ open: false, editData: null });
   const [detailModal, setDetailModal] = useState(null);
@@ -62,25 +77,19 @@ export default function PreventiveSchedulePage() {
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
-
-    // Load assets independently — must always succeed for the form dropdown
     try {
       const assetsData = await getInfrastructureAssets();
       setAssets(assetsData);
     } catch (err) {
       addNotification('Gagal memuat daftar aset: ' + (err.message || ''), 'error');
     }
-
-    // Load schedules separately so asset loading is not blocked
     try {
       const schedulesData = await getPreventiveSchedules();
       setSchedules(schedulesData);
-      // Client-side reminder trigger on page load
       triggerReminderCheck();
     } catch (err) {
       addNotification(err.message || 'Gagal memuat jadwal', 'error');
     }
-
     setIsLoading(false);
   }, [addNotification]);
 
@@ -95,13 +104,65 @@ export default function PreventiveSchedulePage() {
     return matchSearch && matchStatus && matchAsset;
   }), [schedules, searchQuery, statusFilter, assetFilter]);
 
-  // Stats
-  const stats = useMemo(() => ({
-    total: schedules.length,
-    scheduled: schedules.filter((s) => s.status === 'scheduled').length,
-    overdue: schedules.filter((s) => s.status === 'overdue').length,
-    completed: schedules.filter((s) => s.status === 'completed').length,
-  }), [schedules]);
+  // Upcoming schedules for sidebar
+  const upcomingSchedules = useMemo(() => {
+    return [...filtered]
+      .filter(s => s.status === 'scheduled' || s.status === 'overdue')
+      .sort((a, b) => new Date(a.next_due) - new Date(b.next_due))
+      .slice(0, 5);
+  }, [filtered]);
+
+  // Calendar events
+  const events = useMemo(() => filtered.map((s) => ({
+    id: s.id,
+    title: s.title || 'Jadwal',
+    start: new Date(s.next_due + 'T00:00:00'),
+    end: new Date(s.next_due + 'T23:59:59'),
+    allDay: true,
+    resource: s,
+  })), [filtered]);
+
+  const eventStyleGetter = useCallback((event) => {
+    const s = event.resource;
+    const colors = STATUS_COLORS[s.status] || STATUS_COLORS.scheduled;
+    return {
+      style: {
+        backgroundColor: colors.bg,
+        borderLeft: `4px solid ${colors.border}`,
+        color: colors.text,
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '11px',
+        fontWeight: 'bold',
+        padding: '2px 4px',
+        opacity: 0.9,
+      },
+    };
+  }, []);
+
+  const CustomEvent = ({ event }) => {
+    const s = event.resource;
+    return (
+      <div className="flex flex-col overflow-hidden leading-tight">
+        <span className="font-bold truncate">{s.title}</span>
+        <span className="text-[9px] truncate font-medium opacity-80 mt-0.5">
+          {s.asset?.name || 'Aset'}
+        </span>
+      </div>
+    );
+  };
+
+  const handleNavigate = (action) => {
+    const newDate = new Date(currentDate);
+    if (calendarView === 'month') {
+      newDate.setMonth(currentDate.getMonth() + (action === 'NEXT' ? 1 : -1));
+    } else if (calendarView === 'week') {
+      newDate.setDate(currentDate.getDate() + (action === 'NEXT' ? 7 : -7));
+    } else {
+      newDate.setDate(currentDate.getDate() + (action === 'NEXT' ? 1 : -1));
+    }
+    setCurrentDate(newDate);
+  };
 
   // Handlers
   async function handleSave(formData) {
@@ -162,166 +223,208 @@ export default function PreventiveSchedulePage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
-              InfraTrack / Administrator
-            </p>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-800">
-              Jadwal Pemeliharaan Preventif
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              Kelola jadwal pemeliharaan rutin berdasarkan periode atau kondisi aset.
-            </p>
+    <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1">
+            <span>Ruang Kerja</span>
+            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <span className="text-cyan-700">Jadwal Preventif</span>
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
+            Jadwal Pemeliharaan Preventif
+          </h1>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari jadwal..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all bg-white"
+            />
           </div>
-          <button type="button" onClick={() => setFormModal({ open: true, editData: null })}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110">
-            <Plus className="h-4 w-4" /> Buat Jadwal
+          <button
+            onClick={() => setFormModal({ open: true, editData: null })}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#006A71] hover:bg-[#005a60] px-4 py-2 text-sm font-semibold text-white transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah Jadwal Baru
           </button>
         </div>
+      </div>
 
-        {/* Stats */}
-        <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: 'Total', val: stats.total, color: 'text-slate-800' },
-            { label: 'Terjadwal', val: stats.scheduled, color: 'text-emerald-700' },
-            { label: 'Overdue', val: stats.overdue, color: 'text-rose-700' },
-            { label: 'Selesai', val: stats.completed, color: 'text-slate-600' },
-          ].map((s) => (
-            <div key={s.label} className="rounded-xl border border-cyan-100 bg-white px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">{s.label}</p>
-              <p className={`mt-1 text-2xl font-bold ${s.color}`}>{s.val}</p>
-            </div>
-          ))}
+      {/* Filter Bar */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Aset</label>
+            <select value={assetFilter} onChange={(e) => setAssetFilter(e.target.value)}
+              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+              <option value="">Semua Aset</option>
+              {assets.map((a) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</label>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+              <option value="">Semua Status</option>
+              <option value="scheduled">Terjadwal</option>
+              <option value="overdue">Overdue</option>
+              <option value="completed">Selesai</option>
+              <option value="cancelled">Dibatalkan</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Frekuensi</label>
+            <select className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+              <option value="">Semua Frekuensi</option>
+            </select>
+          </div>
         </div>
-
-        {/* Tabs */}
-        <div className="mb-6 flex gap-2">
-          <button onClick={() => setTab('calendar')}
-            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-              tab === 'calendar'
-                ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md'
-                : 'bg-white border border-cyan-100 text-slate-700 hover:bg-cyan-50'
-            }`}>
-            <CalendarIcon className="h-4 w-4" /> Kalender
+        <div className="flex bg-[#f1f5f9] p-1 rounded-lg border border-slate-200">
+          <button onClick={() => setCalendarView('month')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'month' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+            Bulanan
           </button>
-          <button onClick={() => setTab('list')}
-            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-              tab === 'list'
-                ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md'
-                : 'bg-white border border-cyan-100 text-slate-700 hover:bg-cyan-50'
-            }`}>
-            <List className="h-4 w-4" /> Daftar & Riwayat
+          <button onClick={() => setCalendarView('week')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'week' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+            Mingguan
+          </button>
+          <button onClick={() => setCalendarView('day')}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'day' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+            Harian
           </button>
         </div>
+      </div>
 
-        {/* Calendar Tab */}
-        {tab === 'calendar' && <PreventiveCalendar onSelectEvent={openDetail} />}
-
-        {/* List Tab */}
-        {tab === 'list' && (
-          <>
-            {/* Filters */}
-            <div className="mb-4 rounded-2xl border border-cyan-100 bg-white p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                  <input type="text" placeholder="Cari judul atau aset..."
-                    value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-cyan-100 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-cyan-400" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4 text-slate-400" />
-                  <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                    className="rounded-xl border border-cyan-100 px-3 py-2.5 text-sm outline-none focus:border-cyan-400">
-                    <option value="">Semua Status</option>
-                    <option value="scheduled">Terjadwal</option>
-                    <option value="overdue">Overdue</option>
-                    <option value="completed">Selesai</option>
-                    <option value="cancelled">Dibatalkan</option>
-                  </select>
-                  <select value={assetFilter} onChange={(e) => setAssetFilter(e.target.value)}
-                    className="rounded-xl border border-cyan-100 px-3 py-2.5 text-sm outline-none focus:border-cyan-400">
-                    <option value="">Semua Aset</option>
-                    {assets.map((a) => (
-                      <option key={a.id} value={a.id}>{a.name}</option>
-                    ))}
-                  </select>
-                </div>
+      {/* Main Content: Calendar + Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Calendar */}
+        <div className="lg:col-span-8 xl:col-span-9">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-[700px] w-full flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-800">
+                {moment(currentDate).format('MMMM YYYY')}
+              </h2>
+              <div className="flex gap-2 text-slate-700">
+                <button onClick={() => handleNavigate('PREV')} className="p-1 hover:text-cyan-700 transition font-bold">
+                  <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                </button>
+                <button onClick={() => handleNavigate('NEXT')} className="p-1 hover:text-cyan-700 transition font-bold">
+                  <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                </button>
               </div>
             </div>
+            <div className="flex-1 min-h-0">
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <span className="material-symbols-outlined animate-spin text-4xl text-slate-300">progress_activity</span>
+                </div>
+              ) : (
+                <Calendar
+                  localizer={localizer}
+                  events={events}
+                  startAccessor="start"
+                  endAccessor="end"
+                  eventPropGetter={eventStyleGetter}
+                  components={{ event: CustomEvent }}
+                  date={currentDate}
+                  onNavigate={() => {}}
+                  view={calendarView}
+                  onView={setCalendarView}
+                  onSelectEvent={(event) => openDetail(event.resource)}
+                  toolbar={false}
+                  messages={{ showMore: total => `+${total} lagi` }}
+                  className="custom-calendar-theme"
+                  formats={{
+                    weekdayFormat: (date) => {
+                      const days = ['MIN', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
+                      return days[date.getDay()];
+                    }
+                  }}
+                />
+              )}
+            </div>
+            <style>{`
+              .custom-calendar-theme { font-family: 'Inter', sans-serif; }
+              .custom-calendar-theme .rbc-month-view { border: 1px solid #f1f5f9; border-radius: 8px; overflow: hidden; }
+              .custom-calendar-theme .rbc-month-row { border-top: 1px solid #f1f5f9; }
+              .custom-calendar-theme .rbc-header { border-bottom: 1px solid #f1f5f9; border-left: 1px solid #f1f5f9; padding: 12px 0; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; background-color: #f8fafc; }
+              .custom-calendar-theme .rbc-header:first-child { border-left: none; }
+              .custom-calendar-theme .rbc-day-bg { border-left: 1px solid #f1f5f9; }
+              .custom-calendar-theme .rbc-day-bg:first-child { border-left: none; }
+              .custom-calendar-theme .rbc-date-cell { padding: 8px; font-weight: 500; color: #475569; text-align: left; font-size: 12px; }
+              .custom-calendar-theme .rbc-off-range-bg { background-color: #ffffff; }
+              .custom-calendar-theme .rbc-today { background-color: #ffffff; }
+              .custom-calendar-theme .rbc-today .rbc-date-cell { color: #0369a1; font-weight: 800; }
+              .custom-calendar-theme .rbc-event { box-shadow: none; margin-bottom: 2px; }
+              .custom-calendar-theme .rbc-row-segment { padding: 0 4px; }
+            `}</style>
+          </div>
+        </div>
 
-            {/* Table */}
-            {isLoading ? (
-              <div className="rounded-2xl border border-cyan-100 bg-white px-4 py-10 text-center text-sm text-slate-500">
-                Memuat data jadwal...
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-2xl border border-cyan-100 bg-white">
-                {filtered.length === 0 ? (
-                  <div className="px-4 py-10 text-center">
-                    <AlertCircle className="mx-auto h-10 w-10 text-slate-300" />
-                    <p className="mt-3 text-sm font-semibold text-slate-700">Belum ada jadwal</p>
+        {/* Sidebar: Upcoming Schedules */}
+        <div className="lg:col-span-4 xl:col-span-3">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[700px] flex flex-col">
+            <div className="p-5 border-b border-slate-100">
+              <h2 className="text-lg font-bold text-slate-800">Jadwal Mendatang</h2>
+              <p className="text-xs text-slate-500 mt-1">Daftar pemeliharaan preventif terdekat</p>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {upcomingSchedules.length === 0 ? (
+                <div className="text-center py-10">
+                  <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle2 className="w-6 h-6 text-slate-300" />
                   </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-cyan-100 text-sm">
-                      <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
-                        <tr>
-                          <th className="px-4 py-3">Judul</th>
-                          <th className="px-4 py-3">Aset</th>
-                          <th className="px-4 py-3">Frekuensi</th>
-                          <th className="px-4 py-3">Terakhir</th>
-                          <th className="px-4 py-3">Jatuh Tempo</th>
-                          <th className="px-4 py-3">Status</th>
-                          <th className="px-4 py-3 text-right">Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-cyan-50">
-                        {filtered.map((s) => {
-                          const Icon = statusIcons[s.status] || AlertCircle;
-                          return (
-                            <tr key={s.id} className="transition hover:bg-cyan-50/30">
-                              <td className="max-w-[200px] truncate px-4 py-3 font-semibold text-slate-700" title={s.title}>{s.title}</td>
-                              <td className="px-4 py-3 text-slate-700">{s.asset?.name || '-'}</td>
-                              <td className="px-4 py-3 text-slate-600">{s.frequency_days} hari</td>
-                              <td className="px-4 py-3 text-slate-600">{fmtDate(s.last_done)}</td>
-                              <td className="px-4 py-3 text-slate-700 font-medium">{fmtDate(s.next_due)}</td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[s.status]}`}>
-                                  <Icon className="h-3.5 w-3.5" />
-                                  {statusLabels[s.status]}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3">
-                                <div className="flex items-center justify-end gap-2">
-                                  <button type="button" onClick={() => openDetail(s)}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2.5 py-1.5 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50">
-                                    Detail
-                                  </button>
-                                  {s.status === 'scheduled' || s.status === 'overdue' ? (
-                                    <button type="button" onClick={() => handleComplete(s.id)}
-                                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100">
-                                      <CheckCircle2 className="h-3.5 w-3.5" /> Selesai
-                                    </button>
-                                  ) : null}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  <p className="text-sm font-medium text-slate-600">Tidak ada jadwal mendatang</p>
+                  <p className="text-xs text-slate-400 mt-1">Semua jadwal telah diselesaikan</p>
+                </div>
+              ) : (
+                upcomingSchedules.map((s) => (
+                  <div
+                    key={s.id}
+                    onClick={() => openDetail(s)}
+                    className="bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-cyan-300 hover:shadow-sm transition-all"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${STATUS_BADGE[s.status]}`}>
+                        {statusLabels[s.status]}
+                      </span>
+                      <span className="text-xs font-medium text-slate-600">
+                        {fmtDate(s.next_due)}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2">
+                      {s.title}
+                    </h3>
+                    <div className="flex items-start gap-1.5 text-slate-500 mb-4">
+                      <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      <span className="text-xs line-clamp-2">{s.asset?.name || '-'}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                      <span className="text-xs text-slate-500">
+                        Setiap {s.frequency_days} hari
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </section>
+                ))
+              )}
+            </div>
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+              <button className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors">
+                Lihat Semua Jadwal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Detail Modal */}
       {detailModal && (
