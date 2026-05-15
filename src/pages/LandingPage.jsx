@@ -75,6 +75,7 @@ export default function LandingPage() {
                         alt="Smart City"
                         className="w-full h-full object-cover"
                         src="https://lh3.googleusercontent.com/d/17V6O371r_4SKPz3Dx1Oz4TqxwbBwCxbY"
+                        referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-on-background/80 via-transparent to-transparent flex items-end p-8">
                         <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl w-full flex items-center justify-between">
