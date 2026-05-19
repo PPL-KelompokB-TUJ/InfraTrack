@@ -48,7 +48,7 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
       const { count: completedTasks, error: tasksError } = await supabase
         .from('maintenance_tasks')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'selesai');
+        .eq('status', 'completed');
 
       if (tasksError) throw tasksError;
 

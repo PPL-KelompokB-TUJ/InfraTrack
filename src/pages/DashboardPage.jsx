@@ -72,7 +72,7 @@ export default function DashboardPage() {
       const { count: completedTasks, error: tasksError } = await supabase
         .from('maintenance_tasks')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'selesai');
+        .eq('status', 'completed');
 
       if (tasksError) throw tasksError;
 
@@ -308,7 +308,11 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 glass-panel rounded-2xl p-6 bg-white">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900">Laporan Terbaru</h2>
-              <button className="text-sm text-cyan-600 hover:text-cyan-700 font-semibold">
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/reports')}
+                className="text-sm text-cyan-600 hover:text-cyan-700 font-semibold"
+              >
                 Lihat Semua →
               </button>
             </div>

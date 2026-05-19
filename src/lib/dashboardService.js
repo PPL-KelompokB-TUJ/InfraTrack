@@ -9,24 +9,26 @@ export async function getAssetConditionStats() {
     // Get all assets with their damage reports
     const { data: assets, error: assetsError } = await supabase
       .from('infrastructure_assets')
-      .select('id, condition_status, created_at');
+      .select('id, condition, created_at');
 
     if (assetsError) throw assetsError;
 
-    // Count by condition
+    // Count assets by condition using the actual schema values
     const stats = {
       good: 0,
       light_damage: 0,
       heavy_damage: 0,
     };
 
+    const conditionMap = {
+      baik: 'good',
+      'rusak ringan': 'light_damage',
+      'rusak berat': 'heavy_damage',
+    };
+
     assets?.forEach(asset => {
-      const condition = asset.condition_status || 'good';
-      if (stats.hasOwnProperty(condition)) {
-        stats[condition]++;
-      } else {
-        stats.good++;
-      }
+      const conditionKey = conditionMap[String(asset.condition || 'baik').toLowerCase()] || 'good';
+      stats[conditionKey]++;
     });
 
     return {
@@ -91,7 +93,7 @@ export async function getMaintenanceKPIs() {
   try {
     const { data: tasks, error } = await supabase
       .from('maintenance_tasks')
-      .select('id, status, created_at, scheduled_date, completed_date');
+      .select('id, status, created_at, updated_at, scheduled_date');
 
     if (error) throw error;
 
@@ -100,12 +102,12 @@ export async function getMaintenanceKPIs() {
     let onTimeCount = 0;
 
     tasks?.forEach(task => {
-      if (task.status === 'selesai' && task.completed_date) {
+      if (task.status === 'completed' && task.updated_at) {
         completedTasks++;
         
         const createdDate = new Date(task.created_at);
-        const completedDate = new Date(task.completed_date);
-        const completionTime = Math.ceil((completedDate - createdDate) / (1000 * 60 * 60 * 24)); // in days
+        const completedDate = new Date(task.updated_at);
+        const completionTime = Math.max(0, Math.ceil((completedDate - createdDate) / (1000 * 60 * 60 * 24))); // in days
         
         totalCompletionTime += completionTime;
 
