@@ -223,7 +223,7 @@ export default function MapVisualization() {
             <h4 style="margin: 0 0 8px 0; font-weight: bold; color: #1e293b;">${report.ticket_code}</h4>
             <p style="margin: 4px 0; font-size: 12px; color: #475569;"><strong>Jenis:</strong> ${report.damage_type_name}</p>
             <p style="margin: 4px 0; font-size: 12px; color: #475569;"><strong>Status:</strong> ${report.status}</p>
-            <p style="margin: 4px 0; font-size: 12px; color: #475569;"><strong>Lokasi:</strong> ${report.location_description}</p>
+            <p style="margin: 4px 0; font-size: 12px; color: #475569;"><strong>Lokasi:</strong> ${Number(report.latitude).toFixed(5)}, ${Number(report.longitude).toFixed(5)}</p>
             ${report.description ? `<p style="margin: 4px 0; font-size: 12px; color: #475569;"><strong>Keterangan:</strong> ${report.description}</p>` : ''}
             <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0;">
               <span style="display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; background-color: ${markerColor}; color: white;">
@@ -457,7 +457,7 @@ export default function MapVisualization() {
                   <p className="text-sm font-semibold text-slate-900">{selectedMapItem.data.ticket_code}</p>
                   <p className="text-xs text-slate-600 mt-1">Jenis: {selectedMapItem.data.damage_type_name}</p>
                   <p className="text-xs text-slate-600 mt-1">Status: {selectedMapItem.data.status}</p>
-                  <p className="text-xs text-slate-600 mt-1">📍 {selectedMapItem.data.location_description}</p>
+                  <p className="text-xs text-slate-600 mt-1">📍 {selectedMapItem.data.latitude != null && selectedMapItem.data.longitude != null ? `${Number(selectedMapItem.data.latitude).toFixed(5)}, ${Number(selectedMapItem.data.longitude).toFixed(5)}` : selectedMapItem.data.location_description || '-'}</p>
                 </>
               )}
               {selectedMapItem.data.description && (
