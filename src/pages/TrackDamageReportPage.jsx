@@ -166,6 +166,7 @@ export default function TrackDamageReportPage() {
             <div className="flex justify-end gap-3 px-2 print:hidden">
               <button
                 type="button"
+                onClick={() => navigator.clipboard.writeText(window.location.href)}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-50 transition"
               >
                 <Share2 className="w-4 h-4 text-cyan-600" />
