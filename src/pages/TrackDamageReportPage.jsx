@@ -164,15 +164,16 @@ export default function TrackDamageReportPage() {
 
             {/* Action Buttons Section */}
             <div className="flex justify-end gap-3 px-2">
-              <button 
+              <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-50 transition"
               >
                 <Share2 className="w-4 h-4 text-cyan-600" />
                 Bagikan
               </button>
-              <button 
+              <button
                 type="button"
+                onClick={() => window.print()}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-50 transition"
               >
                 <Printer className="w-4 h-4 text-cyan-600" />
@@ -250,9 +251,8 @@ export default function TrackDamageReportPage() {
 
                 <div className="flex gap-3">
                   <div
-                    className={`mt-1 h-3 w-3 rounded-full ${
-                      report.status !== 'pending' ? 'bg-cyan-600' : 'bg-slate-300'
-                    }`}
+                    className={`mt-1 h-3 w-3 rounded-full ${report.status !== 'pending' ? 'bg-cyan-600' : 'bg-slate-300'
+                      }`}
                   />
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Verifikasi</p>
@@ -264,11 +264,10 @@ export default function TrackDamageReportPage() {
 
                 <div className="flex gap-3">
                   <div
-                    className={`mt-1 h-3 w-3 rounded-full ${
-                      ['sedang_dikerjakan', 'selesai'].includes(report.status)
+                    className={`mt-1 h-3 w-3 rounded-full ${['sedang_dikerjakan', 'selesai'].includes(report.status)
                         ? 'bg-cyan-600'
                         : 'bg-slate-300'
-                    }`}
+                      }`}
                   />
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Penanganan</p>
