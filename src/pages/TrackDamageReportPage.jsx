@@ -108,7 +108,7 @@ export default function TrackDamageReportPage() {
           </p>
         </div>
 
-        <div className="surface-card mx-auto mt-7 max-w-3xl rounded-2xl p-4 sm:p-5">
+        <div className="surface-card mx-auto mt-7 max-w-3xl rounded-2xl p-4 sm:p-5 print:hidden">
           <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
@@ -163,7 +163,7 @@ export default function TrackDamageReportPage() {
             </section>
 
             {/* Action Buttons Section */}
-            <div className="flex justify-end gap-3 px-2">
+            <div className="flex justify-end gap-3 px-2 print:hidden">
               <button
                 type="button"
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-50 transition"
@@ -265,8 +265,8 @@ export default function TrackDamageReportPage() {
                 <div className="flex gap-3">
                   <div
                     className={`mt-1 h-3 w-3 rounded-full ${['sedang_dikerjakan', 'selesai'].includes(report.status)
-                        ? 'bg-cyan-600'
-                        : 'bg-slate-300'
+                      ? 'bg-cyan-600'
+                      : 'bg-slate-300'
                       }`}
                   />
                   <div>
@@ -291,7 +291,7 @@ export default function TrackDamageReportPage() {
         )}
 
         {!searched && (
-          <div className="mx-auto mt-7 max-w-3xl rounded-2xl border border-cyan-100 bg-cyan-50/70 p-5">
+          <div className="mx-auto mt-7 max-w-3xl rounded-2xl border border-cyan-100 bg-cyan-50/70 p-5 print:hidden">
             <h3 className="text-sm font-bold uppercase tracking-wide text-cyan-800">Tips Tracking</h3>
             <ul className="mt-3 space-y-1.5 text-sm text-cyan-900">
               <li>• Kode tiket didapat setelah laporan berhasil dikirim.</li>
