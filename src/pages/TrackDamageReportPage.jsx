@@ -57,6 +57,7 @@ export default function TrackDamageReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -91,6 +92,14 @@ export default function TrackDamageReportPage() {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const handleShare = () => {
+    if (!report) return;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?ticket=${report.ticket_code}`;
+    navigator.clipboard.writeText(shareUrl);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
@@ -166,11 +175,15 @@ export default function TrackDamageReportPage() {
             <div className="flex justify-end gap-3 px-2 print:hidden">
               <button
                 type="button"
-                onClick={() => navigator.clipboard.writeText(window.location.href)}
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-50 transition"
+                onClick={handleShare}
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm border transition ${
+                  isCopied 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                }`}
               >
-                <Share2 className="w-4 h-4 text-cyan-600" />
-                Bagikan
+                {isCopied ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-cyan-600" />}
+                {isCopied ? 'Tersalin!' : 'Bagikan'}
               </button>
               <button
                 type="button"
