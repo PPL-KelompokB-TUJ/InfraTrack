@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, AlertCircle, CheckCircle, Clock, MapPin, Printer, Share2 } from 'lucide-react';
 import { getDamageReportByTicket } from '../lib/damageReportService';
 
@@ -58,6 +58,29 @@ export default function TrackDamageReportPage() {
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ticketParam = params.get('ticket');
+    
+    if (ticketParam) {
+      setTicketCode(ticketParam);
+      
+      const fetchInitialReport = async () => {
+        setLoading(true);
+        setSearched(true);
+        const result = await getDamageReportByTicket(ticketParam);
+        setLoading(false);
+        if (result.success) {
+          setReport(result.report);
+        } else {
+          setError(result.error || 'Laporan tidak ditemukan');
+        }
+      };
+      
+      fetchInitialReport();
+    }
+  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -176,11 +199,10 @@ export default function TrackDamageReportPage() {
               <button
                 type="button"
                 onClick={handleShare}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm border transition ${
-                  isCopied 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm border transition ${isCopied
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 {isCopied ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-cyan-600" />}
                 {isCopied ? 'Tersalin!' : 'Bagikan'}
