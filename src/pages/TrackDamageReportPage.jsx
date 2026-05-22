@@ -60,6 +60,7 @@ export default function TrackDamageReportPage() {
   const [isCopied, setIsCopied] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [feedbackText, setFeedbackText] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -342,6 +343,26 @@ export default function TrackDamageReportPage() {
                     </button>
                   ))}
                 </div>
+
+                {rating > 0 && (
+                  <div className="mt-5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <textarea
+                      rows="3"
+                      placeholder="Bagaimana hasil perbaikannya? (Opsional)"
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                      className="w-full rounded-xl border border-cyan-100 bg-white p-3 text-sm text-slate-700 outline-none transition focus:border-cyan-400"
+                    />
+                    <div className="mt-3 flex justify-end">
+                      <button
+                        type="button"
+                        className="rounded-lg bg-cyan-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-700"
+                      >
+                        Kirim Penilaian
+                      </button>
+                    </div>
+                  </div>
+                )}
               </section>
             )}
           </div>
