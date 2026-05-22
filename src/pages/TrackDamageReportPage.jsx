@@ -354,7 +354,7 @@ export default function TrackDamageReportPage() {
                   ))}
                 </div>
 
-                {rating > 0 && (
+                {rating > 0 && !feedbackSubmitted && (
                   <div className="mt-5 animate-in fade-in slide-in-from-top-2 duration-300">
                     <textarea
                       rows="3"
@@ -374,6 +374,14 @@ export default function TrackDamageReportPage() {
                         {isSubmittingFeedback ? 'Mengirim...' : 'Kirim Penilaian'}
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {feedbackSubmitted && (
+                  <div className="mt-5 animate-in fade-in rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-center text-emerald-700">
+                    <CheckCircle className="mx-auto mb-2 h-6 w-6 text-emerald-500" />
+                    <p className="text-sm font-semibold">Terima kasih atas ulasan Anda!</p>
+                    <p className="mt-1 text-xs opacity-80">Feedback Anda sangat berarti untuk peningkatan layanan kami.</p>
                   </div>
                 )}
               </section>
