@@ -58,6 +58,8 @@ export default function TrackDamageReportPage() {
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -324,7 +326,18 @@ export default function TrackDamageReportPage() {
                 <p className="mt-1 text-sm text-slate-500">Seberapa puas Anda dengan penanganan laporan ini?</p>
                 <div className="mt-4 flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <button key={star} type="button" className="text-slate-300 hover:text-amber-400 transition">
+                    <button 
+                      key={star} 
+                      type="button" 
+                      onMouseEnter={() => setHoveredRating(star)}
+                      onMouseLeave={() => setHoveredRating(0)}
+                      onClick={() => setRating(star)}
+                      className={`transition ${
+                        star <= (hoveredRating || rating) 
+                          ? 'text-amber-400' 
+                          : 'text-slate-300'
+                      }`}
+                    >
                       <Star className="w-8 h-8 fill-current" />
                     </button>
                   ))}
