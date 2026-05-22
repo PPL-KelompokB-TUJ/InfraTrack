@@ -61,6 +61,16 @@ export default function TrackDamageReportPage() {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+  const handleSubmitFeedback = async () => {
+    setIsSubmittingFeedback(true);
+    // Simulasi pengiriman data ke server (Mock API)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsSubmittingFeedback(false);
+    setFeedbackSubmitted(true);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
