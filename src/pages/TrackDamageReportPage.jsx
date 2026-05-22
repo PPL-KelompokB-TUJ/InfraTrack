@@ -366,9 +366,12 @@ export default function TrackDamageReportPage() {
                     <div className="mt-3 flex justify-end">
                       <button
                         type="button"
-                        className="rounded-lg bg-cyan-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-700"
+                        onClick={handleSubmitFeedback}
+                        disabled={isSubmittingFeedback}
+                        className="flex items-center gap-2 rounded-lg bg-cyan-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-700 disabled:opacity-70"
                       >
-                        Kirim Penilaian
+                        {isSubmittingFeedback && <Clock className="w-4 h-4 animate-spin" />}
+                        {isSubmittingFeedback ? 'Mengirim...' : 'Kirim Penilaian'}
                       </button>
                     </div>
                   </div>
