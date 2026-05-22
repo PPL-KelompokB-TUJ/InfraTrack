@@ -318,17 +318,19 @@ export default function TrackDamageReportPage() {
             </section>
 
             {/* Rating Section UI */}
-            <section className="surface-card rounded-2xl p-5 sm:p-6 print:hidden">
-              <h3 className="text-base font-bold text-slate-800">Berikan Penilaian</h3>
-              <p className="mt-1 text-sm text-slate-500">Seberapa puas Anda dengan penanganan laporan ini?</p>
-              <div className="mt-4 flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button key={star} type="button" className="text-slate-300 hover:text-amber-400 transition">
-                    <Star className="w-8 h-8 fill-current" />
-                  </button>
-                ))}
-              </div>
-            </section>
+            {report.status === 'selesai' && (
+              <section className="surface-card rounded-2xl p-5 sm:p-6 print:hidden">
+                <h3 className="text-base font-bold text-slate-800">Berikan Penilaian</h3>
+                <p className="mt-1 text-sm text-slate-500">Seberapa puas Anda dengan penanganan laporan ini?</p>
+                <div className="mt-4 flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} type="button" className="text-slate-300 hover:text-amber-400 transition">
+                      <Star className="w-8 h-8 fill-current" />
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
 
