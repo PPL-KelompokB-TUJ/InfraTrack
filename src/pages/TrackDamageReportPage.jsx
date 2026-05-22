@@ -75,10 +75,10 @@ export default function TrackDamageReportPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ticketParam = params.get('ticket');
-    
+
     if (ticketParam) {
       setTicketCode(ticketParam);
-      
+
       const fetchInitialReport = async () => {
         setLoading(true);
         setSearched(true);
@@ -90,7 +90,7 @@ export default function TrackDamageReportPage() {
           setError(result.error || 'Laporan tidak ditemukan');
         }
       };
-      
+
       fetchInitialReport();
     }
   }, []);
@@ -213,8 +213,8 @@ export default function TrackDamageReportPage() {
                 type="button"
                 onClick={handleShare}
                 className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-sm border transition ${isCopied
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                   }`}
               >
                 {isCopied ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4 text-cyan-600" />}
@@ -337,17 +337,16 @@ export default function TrackDamageReportPage() {
                 <p className="mt-1 text-sm text-slate-500">Seberapa puas Anda dengan penanganan laporan ini?</p>
                 <div className="mt-4 flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <button 
-                      key={star} 
-                      type="button" 
+                    <button
+                      key={star}
+                      type="button"
                       onMouseEnter={() => setHoveredRating(star)}
                       onMouseLeave={() => setHoveredRating(0)}
                       onClick={() => setRating(star)}
-                      className={`transition ${
-                        star <= (hoveredRating || rating) 
-                          ? 'text-amber-400' 
+                      className={`transition ${star <= (hoveredRating || rating)
+                          ? 'text-amber-400'
                           : 'text-slate-300'
-                      }`}
+                        }`}
                     >
                       <Star className="w-8 h-8 fill-current" />
                     </button>
