@@ -73,10 +73,18 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
                 </NavLink>
                 
                 <div className="border-t border-outline-variant/30 pt-4 space-y-1">
-                    <button className="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-primary transition-colors text-sm font-medium">
-                        <span className="material-symbols-outlined text-[20px]">help</span>
-                        <span>Bantuan</span>
-                    </button>
+                    <NavLink
+                        to="/dashboard/profile"
+                        className={({ isActive }) => cn(
+                            "flex w-full items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm font-medium",
+                            isActive
+                                ? "text-primary bg-primary-container/40 font-bold"
+                                : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high"
+                        )}
+                    >
+                        <span className="material-symbols-outlined text-[20px]">manage_accounts</span>
+                        <span>Pengaturan Profil</span>
+                    </NavLink>
                     <button 
                         onClick={handleLogout}
                         className="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-error transition-colors text-sm font-medium"
@@ -87,21 +95,33 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
                 </div>
 
                 {currentUser && (
-                    <div className="mt-6 flex items-center space-x-3 px-2 py-3 bg-surface-bright rounded-xl border border-outline-variant/30">
+                    <NavLink
+                        to="/dashboard/profile"
+                        className="mt-2 flex items-center space-x-3 px-2 py-3 bg-surface-bright rounded-xl border border-outline-variant/30 hover:border-primary/40 hover:bg-primary-container/10 transition-colors group"
+                    >
                         <div className="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border border-outline-variant shrink-0">
                             <img 
                                 alt="User" 
                                 className="w-full h-full object-cover"
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email || 'user'}`}
+                                src={
+                                    currentUser.user_metadata?.avatar_url ||
+                                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email || 'user'}`
+                                }
+                                onError={(e) => {
+                                    e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email || 'user'}`;
+                                }}
                             />
                         </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-sm font-bold text-on-surface truncate">{currentUser.email}</span>
+                        <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-sm font-bold text-on-surface truncate group-hover:text-primary transition-colors">
+                                {currentUser.user_metadata?.full_name || currentUser.email}
+                            </span>
                             <span className="text-[10px] text-on-surface-variant uppercase font-black">
                                 {isAdmin ? 'Administrator' : isFieldOfficer ? 'Petugas Lapangan' : 'User'}
                             </span>
                         </div>
-                    </div>
+                        <span className="material-symbols-outlined text-[16px] text-on-surface-variant/50 group-hover:text-primary transition-colors shrink-0">chevron_right</span>
+                    </NavLink>
                 )}
             </div>
         </aside>
