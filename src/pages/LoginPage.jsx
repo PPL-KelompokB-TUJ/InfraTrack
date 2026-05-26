@@ -40,7 +40,11 @@ export default function LoginPage() {
                 }
             }
 
-            navigate('/dashboard');
+            if (selectedRole === 'field_officer') {
+                navigate('/dashboard/my-tasks');
+            } else {
+                navigate('/dashboard');
+            }
         } catch (error) {
             console.error('Login error:', error);
             setAuthError(error.message || 'Login gagal. Periksa email dan password Anda.');

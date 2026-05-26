@@ -170,7 +170,7 @@ export default function App() {
               />
             }
           >
-            <Route index element={<DashboardPage />} />
+            <Route index element={auth.isOfficer ? <Navigate to="/dashboard/my-tasks" replace /> : <DashboardPage />} />
             <Route path="reports" element={<ActiveReportsPage />} />
             <Route path="assets" element={<AssetManagementPage />} />
             <Route path="maintenance" element={<MaintenanceTaskPage />} />
