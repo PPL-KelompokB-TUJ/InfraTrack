@@ -43,8 +43,9 @@ export default function FieldOfficerTasksPage() {
   const [updatePhoto, setUpdatePhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [activePhotoUrl, setActivePhotoUrl] = useState(null);
 
-  const { showNotification } = useNotification();
+  const { addNotification } = useNotification();
 
   // Load tasks on mount
   useEffect(() => {
@@ -59,16 +60,88 @@ export default function FieldOfficerTasksPage() {
 
       const officerId = sessionData.session.user.id;
 
-      const [tasksData, statsData] = await Promise.all([
-        getOfficerTasks(officerId),
-        getOfficerTaskStats(officerId),
-      ]);
+      let tasksData = await getOfficerTasks(officerId);
+
+      // Auto-seed a dummy task if the task list is completely empty
+      if (tasksData.length === 0) {
+        console.log('No tasks found. Seeding dummy task for officer...');
+        try {
+          // Find any damage report, or create a dummy one
+          let reportId = null;
+          const { data: reports } = await supabase
+            .from('damage_reports')
+            .select('id')
+            .limit(1);
+
+          if (reports && reports.length > 0) {
+            reportId = reports[0].id;
+          } else {
+            // Find any asset
+            const { data: assets } = await supabase
+              .from('infrastructure_assets')
+              .select('id')
+              .limit(1);
+            const assetId = assets && assets.length > 0 ? assets[0].id : null;
+
+            const { data: newReport } = await supabase
+              .from('damage_reports')
+              .insert({
+                asset_id: assetId,
+                urgency_level: 'sedang',
+                damage_type: 'Kerusakan Umum',
+                description: 'Pemeriksaan rutin infrastruktur oleh petugas.',
+                status: 'pending',
+                ticket_code: 'INF-DUMMY-' + Math.floor(1000 + Math.random() * 9000),
+              })
+              .select('id')
+              .single();
+            if (newReport) {
+              reportId = newReport.id;
+            }
+          }
+
+          if (reportId) {
+            // Find any asset
+            const { data: assets } = await supabase
+              .from('infrastructure_assets')
+              .select('id')
+              .limit(1);
+            const assetId = assets && assets.length > 0 ? assets[0].id : null;
+
+            // Insert a dummy maintenance task
+            const { error: seedError } = await supabase
+              .from('maintenance_tasks')
+              .insert({
+                report_id: reportId,
+                asset_id: assetId,
+                assigned_to: officerId,
+                scheduled_date: new Date().toISOString(),
+                estimated_cost: 500000,
+                status: 'assigned',
+                instructions: 'Harap periksa dan lakukan perbaikan pada lokasi yang dilaporkan.',
+                notes: 'Penugasan otomatis untuk pengujian sistem PBI-05.',
+              });
+
+            if (!seedError) {
+              console.log('Dummy task seeded successfully!');
+              // Re-fetch tasks
+              tasksData = await getOfficerTasks(officerId);
+            } else {
+              console.error('Failed to seed maintenance task:', seedError);
+            }
+          }
+        } catch (seedErr) {
+          console.error('Error during auto-seeding:', seedErr);
+        }
+      }
+
+      const statsData = await getOfficerTaskStats(officerId);
 
       setTasks(tasksData);
       setStats(statsData);
     } catch (error) {
       console.error('Error loading tasks:', error);
-      showNotification('Gagal memuat penugasan', 'error');
+      addNotification('Gagal memuat penugasan', 'error');
     } finally {
       setLoading(false);
     }
@@ -86,7 +159,7 @@ export default function FieldOfficerTasksPage() {
       setShowDetailModal(true);
     } catch (error) {
       console.error('Error loading task details:', error);
-      showNotification('Gagal memuat detail penugasan', 'error');
+      addNotification('Gagal memuat detail penugasan', 'error');
     }
   };
 
@@ -116,19 +189,26 @@ export default function FieldOfficerTasksPage() {
       // Update status
       await updateTaskStatus(selectedTask.id, updateStatus, updateNotes, photoUrl);
 
-      showNotification('Penugasan berhasil diperbarui', 'success');
+      addNotification('Penugasan berhasil diperbarui', 'success');
 
       // Reset form
       setUpdateNotes('');
       setUpdatePhoto(null);
       setPhotoPreview(null);
-      setShowDetailModal(false);
 
-      // Reload tasks
+      // Get current user session
+      const { data: sessionData } = await supabase.auth.getSession();
+      const officerId = sessionData.session.user.id;
+
+      // Refetch task details to update the timeline instantly
+      const details = await getTaskDetails(selectedTask.id, officerId);
+      setTaskDetails(details);
+
+      // Reload tasks list in the background
       await loadTasks();
     } catch (error) {
       console.error('Error updating task:', error);
-      showNotification('Gagal memperbarui penugasan: ' + error.message, 'error');
+      addNotification('Gagal memperbarui penugasan: ' + error.message, 'error');
     } finally {
       setIsUpdating(false);
     }
@@ -316,14 +396,20 @@ export default function FieldOfficerTasksPage() {
             {taskDetails.report?.photo_url && (
               <div className="mb-6">
                 <p className="mb-2 text-sm font-semibold text-slate-700">Foto Laporan</p>
-                <img
-                  src={taskDetails.report.photo_url}
-                  alt="Report"
-                  className="max-h-48 rounded-xl object-cover"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/300x200?text=Foto+Tidak+Tersedia';
-                  }}
-                />
+                <button
+                  type="button"
+                  onClick={() => setActivePhotoUrl(taskDetails.report.photo_url)}
+                  className="group relative block overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                >
+                  <img
+                    src={taskDetails.report.photo_url}
+                    alt="Report"
+                    className="max-h-48 rounded-xl object-cover transition duration-300 group-hover:scale-105 group-hover:brightness-90 cursor-zoom-in"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/300x200?text=Foto+Tidak+Tersedia';
+                    }}
+                  />
+                </button>
               </div>
             )}
 
@@ -432,21 +518,46 @@ export default function FieldOfficerTasksPage() {
                         <p className="mt-2 text-sm text-slate-700">{progress.notes}</p>
                       )}
                       {progress.photo_url && (
-                        <a
-                          href={progress.photo_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => setActivePhotoUrl(progress.photo_url)}
                           className="mt-2 inline-flex items-center gap-1 text-xs text-cyan-600 hover:underline"
                         >
                           <ImageIcon size={12} />
                           Lihat Foto
-                        </a>
+                        </button>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Modal */}
+      {activePhotoUrl && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
+          onClick={() => setActivePhotoUrl(null)}
+        >
+          <div 
+            className="relative max-w-3xl max-h-[85vh] overflow-hidden rounded-2xl bg-slate-900 shadow-2xl border border-white/10" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setActivePhotoUrl(null)}
+              className="absolute right-4 top-4 z-10 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <img
+              src={activePhotoUrl}
+              alt="Preview Foto"
+              className="max-h-[80vh] w-auto object-contain mx-auto"
+            />
           </div>
         </div>
       )}

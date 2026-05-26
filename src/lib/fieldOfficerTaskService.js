@@ -19,7 +19,7 @@ export async function getOfficerTasks(officerId) {
         created_at,
         updated_at,
         report:report_id(id, ticket_code, damage_type_id, urgency_level, description, photo_url),
-        asset:asset_id(id, name, category_id)
+        asset:asset_id(id, name)
       `)
       .eq('assigned_to', officerId)
       .order('scheduled_date', { ascending: true });
@@ -53,7 +53,7 @@ export async function getTaskDetails(taskId, officerId) {
         created_at,
         updated_at,
         report:report_id(id, ticket_code, damage_type_id, urgency_level, description, photo_url, latitude, longitude),
-        asset:asset_id(id, name, category_id, location)
+        asset:asset_id(id, name, location)
       `)
       .eq('id', taskId)
       .eq('assigned_to', officerId)
