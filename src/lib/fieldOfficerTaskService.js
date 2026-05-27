@@ -5,7 +5,8 @@ import { supabase } from './supabaseClient';
  */
 export async function getOfficerTasks(officerId) {
   try {
-    const { data, error } = await supabase
+    // 1. Fetch assigned maintenance tasks
+    const { data: tasks, error: tasksError } = await supabase
       .from('maintenance_tasks')
       .select(`
         id,
@@ -21,12 +22,63 @@ export async function getOfficerTasks(officerId) {
         report:report_id(id, ticket_code, damage_type_id, urgency_level, description, photo_url),
         asset:asset_id(id, name)
       `)
-      .eq('assigned_to', officerId)
-      .order('scheduled_date', { ascending: true });
+      .eq('assigned_to', officerId);
 
-    if (error) throw error;
+    if (tasksError) throw tasksError;
 
-    return data || [];
+    // 2. Fetch pending and ditolak reports
+    const { data: reports, error: reportsError } = await supabase
+      .from('damage_reports')
+      .select(`
+        id,
+        ticket_code,
+        urgency_level,
+        description,
+        photo_url,
+        created_at,
+        status
+      `)
+      .in('status', ['pending', 'ditolak']);
+
+    if (reportsError) throw reportsError;
+
+    // 3. Map reports to task-like structures
+    const mappedReports = (reports || []).map(r => {
+      const isPending = r.status === 'pending';
+      return {
+        id: (isPending ? 'pending-' : 'cancelled-') + r.id,
+        status: isPending ? 'pending' : 'cancelled',
+        scheduled_date: r.created_at,
+        estimated_cost: 0,
+        instructions: isPending 
+          ? 'Laporan masuk dari masyarakat (Menunggu verifikasi admin).' 
+          : 'Laporan ini telah ditolak oleh administrator.',
+        notes: isPending 
+          ? 'Belum ditugaskan ke petugas.' 
+          : 'Laporan tidak ditindaklanjuti.',
+        last_officer_notes: null,
+        last_status_update: null,
+        created_at: r.created_at,
+        updated_at: r.created_at,
+        report: {
+          id: r.id,
+          ticket_code: r.ticket_code,
+          damage_type_id: null,
+          urgency_level: r.urgency_level,
+          description: r.description,
+          photo_url: r.photo_url
+        },
+        asset: null,
+        isExternalReport: true
+      };
+    });
+
+    const combined = [...(tasks || []), ...mappedReports];
+
+    // Sort by scheduled_date ascending
+    combined.sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
+
+    return combined;
   } catch (error) {
     console.error('Error fetching officer tasks:', error);
     throw error;
@@ -38,6 +90,49 @@ export async function getOfficerTasks(officerId) {
  */
 export async function getTaskDetails(taskId, officerId) {
   try {
+    // If it is a pseudo-task, return details mocked from damage_report
+    if (typeof taskId === 'string' && (taskId.startsWith('pending-') || taskId.startsWith('cancelled-'))) {
+      const realId = taskId.replace('pending-', '').replace('cancelled-', '');
+      const isPending = taskId.startsWith('pending-');
+
+      const { data: report, error: reportError } = await supabase
+        .from('damage_reports')
+        .select('id, ticket_code, urgency_level, description, photo_url, latitude, longitude, created_at, status')
+        .eq('id', realId)
+        .single();
+
+      if (reportError) throw reportError;
+
+      return {
+        id: taskId,
+        status: isPending ? 'pending' : 'cancelled',
+        scheduled_date: report.created_at,
+        estimated_cost: 0,
+        instructions: isPending 
+          ? 'Laporan masuk dari masyarakat (Menunggu verifikasi admin).' 
+          : 'Laporan ini telah ditolak oleh administrator.',
+        notes: isPending 
+          ? 'Belum ditugaskan ke petugas.' 
+          : 'Laporan tidak ditindaklanjuti.',
+        last_officer_notes: null,
+        last_status_update: null,
+        created_at: report.created_at,
+        updated_at: report.created_at,
+        report: {
+          id: report.id,
+          ticket_code: report.ticket_code,
+          urgency_level: report.urgency_level,
+          description: report.description,
+          photo_url: report.photo_url,
+          latitude: report.latitude,
+          longitude: report.longitude
+        },
+        asset: null,
+        progressHistory: [],
+        isExternalReport: true
+      };
+    }
+
     // Get task details
     const { data: task, error: taskError } = await supabase
       .from('maintenance_tasks')

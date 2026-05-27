@@ -28,6 +28,7 @@ const statusOptions = [
   { value: 'assigned', label: 'Ditugaskan', color: 'blue', icon: Clock },
   { value: 'in_progress', label: 'Sedang Dikerjakan', color: 'amber', icon: Play },
   { value: 'completed', label: 'Selesai', color: 'emerald', icon: CheckCircle },
+  { value: 'cancelled', label: 'Dibatalkan', color: 'rose', icon: X },
 ];
 
 export default function FieldOfficerTasksPage() {
@@ -254,9 +255,10 @@ export default function FieldOfficerTasksPage() {
 
       {/* Stats Cards */}
       {stats && (
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-5">
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-6">
           {[
             { label: 'Total', value: stats.total, color: 'slate' },
+            { label: 'Menunggu', value: stats.pending, color: 'slate' },
             { label: 'Ditugaskan', value: stats.assigned, color: 'blue' },
             { label: 'Sedang Dikerjakan', value: stats.in_progress, color: 'amber' },
             { label: 'Selesai', value: stats.completed, color: 'emerald' },
@@ -414,7 +416,29 @@ export default function FieldOfficerTasksPage() {
             )}
 
             {/* Update Form */}
-            <form onSubmit={handleUpdateStatus} className="space-y-4">
+            {taskDetails.isExternalReport ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+                <AlertCircle size={24} className="mx-auto mb-2 text-slate-500" />
+                <p className="text-sm font-semibold text-slate-700">
+                  {taskDetails.status === 'pending'
+                    ? 'Laporan masih menunggu verifikasi admin. Tugas belum aktif.'
+                    : 'Laporan ini telah ditolak oleh admin. Tugas dibatalkan.'}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Anda tidak dapat memperbarui status pekerjaan untuk laporan ini.
+                </p>
+                <div className="flex gap-3 pt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetailModal(false)}
+                    className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 font-semibold text-slate-700 bg-white transition hover:bg-slate-100"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleUpdateStatus} className="space-y-4">
               {/* Status Dropdown */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700">Status Pekerjaan</label>
@@ -498,6 +522,7 @@ export default function FieldOfficerTasksPage() {
                 </button>
               </div>
             </form>
+          )}
 
             {/* Progress History */}
             {taskDetails.progressHistory && taskDetails.progressHistory.length > 0 && (
