@@ -26,7 +26,7 @@ export async function getOfficerTasks(officerId) {
 
     if (tasksError) throw tasksError;
 
-    // 2. Fetch pending and ditolak reports
+    // 2. Fetch all damage reports
     const { data: reports, error: reportsError } = await supabase
       .from('damage_reports')
       .select(`
@@ -37,43 +37,75 @@ export async function getOfficerTasks(officerId) {
         photo_url,
         created_at,
         status
-      `)
-      .in('status', ['pending', 'ditolak']);
+      `);
 
     if (reportsError) throw reportsError;
 
     // 3. Map reports to task-like structures
-    const mappedReports = (reports || []).map(r => {
-      const isPending = r.status === 'pending';
-      return {
-        id: (isPending ? 'pending-' : 'cancelled-') + r.id,
-        status: isPending ? 'pending' : 'cancelled',
-        scheduled_date: r.created_at,
-        estimated_cost: 0,
-        instructions: isPending 
-          ? 'Laporan masuk dari masyarakat (Menunggu verifikasi admin).' 
-          : 'Laporan ini telah ditolak oleh administrator.',
-        notes: isPending 
-          ? 'Belum ditugaskan ke petugas.' 
-          : 'Laporan tidak ditindaklanjuti.',
-        last_officer_notes: null,
-        last_status_update: null,
-        created_at: r.created_at,
-        updated_at: r.created_at,
-        report: {
-          id: r.id,
-          ticket_code: r.ticket_code,
-          damage_type_id: null,
-          urgency_level: r.urgency_level,
-          description: r.description,
-          photo_url: r.photo_url
-        },
-        asset: null,
-        isExternalReport: true
-      };
-    });
+    const taskMapByReportId = new Map((tasks || []).map(t => [t.report_id, t]));
+    const combined = [];
 
-    const combined = [...(tasks || []), ...mappedReports];
+    for (const r of (reports || [])) {
+      const realTask = taskMapByReportId.get(r.id);
+      
+      // Determine mapped status strictly from the report's status
+      let taskStatus;
+      let instructions = 'Laporan aduan dari warga.';
+      let notes = '';
+
+      if (r.status === 'pending') {
+        taskStatus = 'pending';
+        instructions = 'Laporan masuk dari masyarakat (Menunggu verifikasi admin).';
+        notes = 'Belum ditugaskan ke petugas.';
+      } else if (r.status === 'terverifikasi') {
+        taskStatus = 'assigned';
+        instructions = 'Laporan terverifikasi oleh admin. Melakukan persiapan perbaikan.';
+        notes = 'Menunggu instruksi tugas resmi.';
+      } else if (r.status === 'sedang_dikerjakan') {
+        taskStatus = 'in_progress';
+        instructions = 'Laporan dalam proses pengerjaan oleh petugas lapangan.';
+      } else if (r.status === 'selesai') {
+        taskStatus = 'completed';
+        instructions = 'Perbaikan selesai dilakukan.';
+      } else if (r.status === 'ditolak') {
+        taskStatus = 'cancelled';
+        instructions = 'Laporan ini telah ditolak oleh administrator.';
+        notes = 'Laporan tidak ditindaklanjuti.';
+      } else {
+        continue;
+      }
+
+      if (realTask) {
+        combined.push({
+          ...realTask,
+          status: taskStatus // Override task status with mapped report status
+        });
+      } else {
+        // Generate a pseudo-task for any report that does not have a task assigned to this officer
+        combined.push({
+          id: `${taskStatus}-${r.id}`,
+          status: taskStatus,
+          scheduled_date: r.created_at,
+          estimated_cost: 0,
+          instructions,
+          notes,
+          last_officer_notes: null,
+          last_status_update: null,
+          created_at: r.created_at,
+          updated_at: r.created_at,
+          report: {
+            id: r.id,
+            ticket_code: r.ticket_code,
+            damage_type_id: null,
+            urgency_level: r.urgency_level,
+            description: r.description,
+            photo_url: r.photo_url
+          },
+          asset: null,
+          isExternalReport: true
+        });
+      }
+    }
 
     // Sort by scheduled_date ascending
     combined.sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date));
@@ -90,10 +122,19 @@ export async function getOfficerTasks(officerId) {
  */
 export async function getTaskDetails(taskId, officerId) {
   try {
+    const isPseudoTask = typeof taskId === 'string' && (
+      taskId.startsWith('pending-') || 
+      taskId.startsWith('assigned-') || 
+      taskId.startsWith('in_progress-') || 
+      taskId.startsWith('completed-') || 
+      taskId.startsWith('cancelled-')
+    );
+
     // If it is a pseudo-task, return details mocked from damage_report
-    if (typeof taskId === 'string' && (taskId.startsWith('pending-') || taskId.startsWith('cancelled-'))) {
-      const realId = taskId.replace('pending-', '').replace('cancelled-', '');
-      const isPending = taskId.startsWith('pending-');
+    if (isPseudoTask) {
+      const parts = taskId.split('-');
+      const pseudoStatus = parts[0];
+      const realId = parts.slice(1).join('-');
 
       const { data: report, error: reportError } = await supabase
         .from('damage_reports')
@@ -103,17 +144,37 @@ export async function getTaskDetails(taskId, officerId) {
 
       if (reportError) throw reportError;
 
+      let taskStatus;
+      let instructions = 'Laporan aduan dari warga.';
+      let notes = '';
+
+      if (pseudoStatus === 'pending') {
+        taskStatus = 'pending';
+        instructions = 'Laporan masuk dari masyarakat (Menunggu verifikasi admin).';
+        notes = 'Belum ditugaskan ke petugas.';
+      } else if (pseudoStatus === 'assigned') {
+        taskStatus = 'assigned';
+        instructions = 'Laporan terverifikasi oleh admin. Melakukan persiapan perbaikan.';
+        notes = 'Menunggu instruksi tugas resmi.';
+      } else if (pseudoStatus === 'in_progress') {
+        taskStatus = 'in_progress';
+        instructions = 'Laporan dalam proses pengerjaan oleh petugas lapangan.';
+      } else if (pseudoStatus === 'completed') {
+        taskStatus = 'completed';
+        instructions = 'Perbaikan selesai dilakukan.';
+      } else if (pseudoStatus === 'cancelled') {
+        taskStatus = 'cancelled';
+        instructions = 'Laporan ini telah ditolak oleh administrator.';
+        notes = 'Laporan tidak ditindaklanjuti.';
+      }
+
       return {
         id: taskId,
-        status: isPending ? 'pending' : 'cancelled',
+        status: taskStatus,
         scheduled_date: report.created_at,
         estimated_cost: 0,
-        instructions: isPending 
-          ? 'Laporan masuk dari masyarakat (Menunggu verifikasi admin).' 
-          : 'Laporan ini telah ditolak oleh administrator.',
-        notes: isPending 
-          ? 'Belum ditugaskan ke petugas.' 
-          : 'Laporan tidak ditindaklanjuti.',
+        instructions,
+        notes,
         last_officer_notes: null,
         last_status_update: null,
         created_at: report.created_at,
@@ -147,7 +208,7 @@ export async function getTaskDetails(taskId, officerId) {
         last_status_update,
         created_at,
         updated_at,
-        report:report_id(id, ticket_code, damage_type_id, urgency_level, description, photo_url, latitude, longitude),
+        report:report_id(id, ticket_code, damage_type_id, urgency_level, description, photo_url, latitude, longitude, status),
         asset:asset_id(id, name, location)
       `)
       .eq('id', taskId)
@@ -155,6 +216,17 @@ export async function getTaskDetails(taskId, officerId) {
       .single();
 
     if (taskError) throw taskError;
+
+    // Override task status based on report status to maintain absolute sync
+    let taskStatus = task.status;
+    if (task.report) {
+      const repStatus = task.report.status;
+      if (repStatus === 'pending') taskStatus = 'pending';
+      else if (repStatus === 'terverifikasi') taskStatus = 'assigned';
+      else if (repStatus === 'sedang_dikerjakan') taskStatus = 'in_progress';
+      else if (repStatus === 'selesai') taskStatus = 'completed';
+      else if (repStatus === 'ditolak') taskStatus = 'cancelled';
+    }
 
     // Get task progress history
     const { data: history, error: historyError } = await supabase
@@ -167,6 +239,7 @@ export async function getTaskDetails(taskId, officerId) {
 
     return {
       ...task,
+      status: taskStatus,
       progressHistory: history || [],
     };
   } catch (error) {
@@ -186,12 +259,46 @@ export async function updateTaskStatus(taskId, status, notes = '', photoUrl = nu
     }
 
     const officerId = session.session.user.id;
+    let realTaskId = taskId;
+
+    const isPseudoTask = typeof taskId === 'string' && (
+      taskId.startsWith('pending-') || 
+      taskId.startsWith('assigned-') || 
+      taskId.startsWith('in_progress-') || 
+      taskId.startsWith('completed-') || 
+      taskId.startsWith('cancelled-')
+    );
+
+    if (isPseudoTask) {
+      // Extract the real report UUID
+      const parts = taskId.split('-');
+      const reportId = parts.slice(1).join('-');
+
+      // Create a physical task in maintenance_tasks table
+      const { data: newTask, error: insertError } = await supabase
+        .from('maintenance_tasks')
+        .insert({
+          report_id: reportId,
+          assigned_to: officerId,
+          status: status,
+          scheduled_date: new Date().toISOString(),
+          instructions: 'Laporan terverifikasi oleh admin. Melakukan persiapan perbaikan.',
+          notes: notes,
+          last_status_update: new Date().toISOString(),
+          last_officer_notes: notes,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+      realTaskId = newTask.id;
+    }
 
     // Insert progress record
     const { error: progressError } = await supabase
       .from('task_progress')
       .insert({
-        task_id: taskId,
+        task_id: realTaskId,
         officer_id: officerId,
         status,
         notes,
@@ -200,24 +307,26 @@ export async function updateTaskStatus(taskId, status, notes = '', photoUrl = nu
 
     if (progressError) throw progressError;
 
-    // Update maintenance task
-    const { error: updateError } = await supabase
-      .from('maintenance_tasks')
-      .update({
-        status,
-        notes,
-        last_status_update: new Date().toISOString(),
-        last_officer_notes: notes,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', taskId)
-      .eq('assigned_to', officerId);
+    // Only run update if it was not a newly created task
+    if (!isPseudoTask) {
+      const { error: updateError } = await supabase
+        .from('maintenance_tasks')
+        .update({
+          status,
+          notes,
+          last_status_update: new Date().toISOString(),
+          last_officer_notes: notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', realTaskId)
+        .eq('assigned_to', officerId);
 
-    if (updateError) throw updateError;
+      if (updateError) throw updateError;
+    }
 
     return {
       success: true,
-      taskId,
+      taskId: realTaskId,
       status,
       timestamp: new Date(),
     };
