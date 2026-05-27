@@ -188,7 +188,8 @@ export default function FieldOfficerTasksPage() {
       }
 
       // Update status
-      await updateTaskStatus(selectedTask.id, updateStatus, updateNotes, photoUrl);
+      const result = await updateTaskStatus(selectedTask.id, updateStatus, updateNotes, photoUrl);
+      const finalTaskId = result?.taskId || selectedTask.id;
 
       addNotification('Penugasan berhasil diperbarui', 'success');
 
@@ -201,8 +202,11 @@ export default function FieldOfficerTasksPage() {
       const { data: sessionData } = await supabase.auth.getSession();
       const officerId = sessionData.session.user.id;
 
+      // Update selectedTask state with the new real ID
+      setSelectedTask(prev => ({ ...prev, id: finalTaskId }));
+
       // Refetch task details to update the timeline instantly
-      const details = await getTaskDetails(selectedTask.id, officerId);
+      const details = await getTaskDetails(finalTaskId, officerId);
       setTaskDetails(details);
 
       // Reload tasks list in the background
@@ -416,7 +420,7 @@ export default function FieldOfficerTasksPage() {
             )}
 
             {/* Update Form */}
-            {taskDetails.isExternalReport ? (
+            {taskDetails.isExternalReport && (taskDetails.status === 'pending' || taskDetails.status === 'cancelled') ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
                 <AlertCircle size={24} className="mx-auto mb-2 text-slate-500" />
                 <p className="text-sm font-semibold text-slate-700">
