@@ -451,11 +451,13 @@ export default function FieldOfficerTasksPage() {
                   onChange={(e) => setUpdateStatus(e.target.value)}
                   className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
                 >
-                  {statusOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
+                  {statusOptions
+                    .filter((opt) => opt.value !== 'pending' && opt.value !== 'cancelled')
+                    .map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                 </select>
               </div>
 
