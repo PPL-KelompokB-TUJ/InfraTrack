@@ -54,7 +54,10 @@ export default function ActiveReportsPage() {
       report.location_description?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus =
-      statusFilter === 'all' || report.status === statusFilter;
+      statusFilter === 'all' ||
+      (statusFilter === 'terverifikasi'
+        ? (report.status === 'terverifikasi' || report.status === 'sedang_dikerjakan')
+        : report.status === statusFilter);
 
     return matchesSearch && matchesStatus;
   });
@@ -148,7 +151,7 @@ export default function ActiveReportsPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <p className="text-xs uppercase tracking-wide text-slate-500 font-bold">Terverifikasi</p>
           <p className="text-3xl font-bold text-blue-600 mt-2">
-            {reports.filter((r) => r.status === 'terverifikasi').length}
+            {reports.filter((r) => r.status === 'terverifikasi' || r.status === 'sedang_dikerjakan').length}
           </p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4">
@@ -198,7 +201,6 @@ export default function ActiveReportsPage() {
               <option value="pending">Pending</option>
               <option value="terverifikasi">Terverifikasi</option>
               <option value="ditolak">Ditolak</option>
-              <option value="sedang_dikerjakan">Sedang Dikerjakan</option>
               <option value="selesai">Selesai</option>
             </select>
           </div>
@@ -244,9 +246,25 @@ export default function ActiveReportsPage() {
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`inline-block px-3 py-1 rounded text-xs font-bold border ${getStatusColor(report.status)}`}>
-                        {getStatusLabel(report.status)}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`inline-block px-3 py-1 rounded text-xs font-bold border ${
+                          report.status === 'sedang_dikerjakan'
+                            ? 'bg-blue-100 text-blue-800 border-blue-300'
+                            : getStatusColor(report.status)
+                        }`}>
+                          {report.status === 'sedang_dikerjakan' ? 'Terverifikasi' : getStatusLabel(report.status)}
+                        </span>
+                        {report.status === 'terverifikasi' && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
+                            Ditugaskan
+                          </span>
+                        )}
+                        {report.status === 'sedang_dikerjakan' && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-100">
+                            Sedang Dikerjakan
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-4 px-6 text-slate-600 text-xs">
                       {new Date(report.created_at).toLocaleDateString('id-ID')}
@@ -389,14 +407,15 @@ function ReportDetailModal({ report, onClose }) {
             <span className={`inline-block px-4 py-2 rounded-lg text-sm font-bold ${
               report.status === 'pending' 
                 ? 'bg-slate-100 text-slate-800 border border-slate-300'
-                : report.status === 'terverifikasi'
+                : (report.status === 'terverifikasi' || report.status === 'sedang_dikerjakan')
                 ? 'bg-blue-100 text-blue-800 border border-blue-300'
                 : report.status === 'ditolak'
                 ? 'bg-red-100 text-red-800 border border-red-300'
                 : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
             }`}>
               {report.status === 'pending' && 'Pending'}
-              {report.status === 'terverifikasi' && 'Terverifikasi'}
+              {report.status === 'terverifikasi' && 'Terverifikasi (Ditugaskan)'}
+              {report.status === 'sedang_dikerjakan' && 'Terverifikasi (Sedang Dikerjakan)'}
               {report.status === 'ditolak' && 'Ditolak'}
               {report.status === 'selesai' && 'Selesai'}
             </span>
