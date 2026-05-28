@@ -200,7 +200,12 @@ export default function DamageReportVerificationPanel() {
             {pendingReports.map((report) => (
               <div
                 key={report.id}
-                onClick={() => setSelectedReport(report)}
+                onClick={() => {
+                  setSelectedReport(report);
+                  if (report.priority_recommendation === 'Sangat Mendesak') setPriorityLevel('sangat_tinggi');
+                  else if (report.priority_recommendation === 'Mendesak') setPriorityLevel('tinggi');
+                  else setPriorityLevel('sedang');
+                }}
                 className={`px-6 py-4 cursor-pointer transition-colors ${
                   selectedReport?.id === report.id
                     ? 'bg-cyan-50 border-l-4 border-cyan-500'
@@ -209,13 +214,22 @@ export default function DamageReportVerificationPanel() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-semibold text-slate-900">{report.ticket_code}</span>
-                      <span className={`text-sm font-medium ${getUrgencyColor(report.urgency_level)}`}>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 ${getUrgencyColor(report.urgency_level)}`}>
                         {report.urgency_level?.toUpperCase()}
                       </span>
+                      {report.priority_score && (
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                          report.priority_score >= 80 ? 'bg-red-100 text-red-700 border border-red-200' :
+                          report.priority_score >= 60 ? 'bg-orange-100 text-orange-700 border border-orange-200' :
+                          'bg-blue-100 text-blue-700 border border-blue-200'
+                        }`}>
+                          Skor: {report.priority_score}/100 ({report.priority_recommendation})
+                        </span>
+                      )}
                     </div>
-                    <p className="text-sm text-slate-600 mt-1">{report.damage_type}</p>
+                    <p className="text-sm text-slate-600 mt-2">{report.damage_type}</p>
                     <p className="text-sm text-slate-600">{report.reporter_name}</p>
                     <p className="text-xs text-slate-500 mt-1">
                       📍 {report.latitude?.toFixed(4)}, {report.longitude?.toFixed(4)}
@@ -234,6 +248,18 @@ export default function DamageReportVerificationPanel() {
 
               {/* Report Details */}
               <div className="mb-6 p-4 bg-white rounded-lg border border-slate-200">
+                {selectedReport.priority_score && (
+                  <div className="mb-4 p-3 rounded-lg border border-cyan-200 bg-cyan-50 flex items-start gap-3">
+                    <Info className="text-cyan-600 flex-shrink-0 mt-0.5" size={18} />
+                    <div>
+                      <p className="text-sm font-semibold text-cyan-900">Rekomendasi Prioritas Otomatis (Skor: {selectedReport.priority_score}/100)</p>
+                      <p className="text-xs text-cyan-700 mt-1">
+                        Sistem merekomendasikan prioritas penanganan: <span className="font-bold">{selectedReport.priority_recommendation}</span>. Skor ini dihitung dari tingkat urgensi, frekuensi pelaporan di radius 1km yang sama, ketersediaan petugas, dan anggaran.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-slate-600">Pelapor:</span>

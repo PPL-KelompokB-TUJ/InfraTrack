@@ -299,6 +299,72 @@ function mapDamageReportRow(item) {
   };
 }
 
+// Helper for Haversine distance in km
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);
+  var dLon = deg2rad(lon2-lon1); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
+
+// Calculate priority score (0-100)
+async function calculatePriorityScore(report, allPendingReports) {
+  let score = 0;
+  
+  // 1. Urgency (40 points)
+  const urgency = (report.urgency_level || '').toLowerCase();
+  if (urgency === 'tinggi') score += 40;
+  else if (urgency === 'sedang') score += 25;
+  else score += 10; // rendah
+
+  // 2. Location Frequency (30 points)
+  // Count how many OTHER pending reports are within 1km
+  let nearbyCount = 0;
+  if (report.latitude && report.longitude) {
+    for (const other of allPendingReports) {
+      if (other.id !== report.id && other.latitude && other.longitude) {
+        const dist = getDistanceFromLatLonInKm(
+          report.latitude, report.longitude,
+          other.latitude, other.longitude
+        );
+        if (dist <= 1.0) { // within 1 km
+          nearbyCount++;
+        }
+      }
+    }
+  }
+  
+  if (nearbyCount >= 3) score += 30;
+  else if (nearbyCount >= 1) score += 20;
+  else score += 10;
+
+  // 3. Officer Availability (15 points)
+  // 4. Budget Availability (15 points)
+  // Base 20 points for MVP since DB modeling for these is limited currently.
+  score += 20;
+  
+  // Cap score at 100
+  score = Math.min(100, Math.max(0, score));
+
+  // Determine Recommendation
+  let recommendation = 'Biasa';
+  if (score >= 80) recommendation = 'Sangat Mendesak';
+  else if (score >= 60) recommendation = 'Mendesak';
+
+  return { score, recommendation };
+}
+
 /**
  * Get latest damage reports for dashboard.
  */
@@ -347,9 +413,28 @@ export const getPendingDamageReports = async ({ limit = 50, offset = 0 } = {}) =
       throw error;
     }
 
+    const rawReports = data || [];
+    const scoredReports = [];
+    
+    for (const item of rawReports) {
+      const mapped = mapDamageReportRow(item);
+      const priorityInfo = await calculatePriorityScore(item, rawReports);
+      mapped.priority_score = priorityInfo.score;
+      mapped.priority_recommendation = priorityInfo.recommendation;
+      scoredReports.push(mapped);
+    }
+    
+    // Sort reports by priority_score descending, then created_at descending
+    scoredReports.sort((a, b) => {
+      if (b.priority_score !== a.priority_score) {
+        return b.priority_score - a.priority_score;
+      }
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
     return {
       success: true,
-      reports: (data || []).map(mapDamageReportRow),
+      reports: scoredReports,
       total: count || 0,
     };
   } catch (error) {
