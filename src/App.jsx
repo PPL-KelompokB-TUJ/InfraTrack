@@ -174,6 +174,7 @@ export default function App() {
             <Route index element={auth.isOfficer ? <Navigate to="/dashboard/my-tasks" replace /> : <DashboardPage />} />
             <Route path="reports" element={<ActiveReportsPage />} />
             <Route path="assets" element={<AssetManagementPage />} />
+            <Route path="assets/:id" element={<AssetDetailPage />} />
             <Route path="maintenance" element={<MaintenanceTaskPage />} />
             <Route path="preventive" element={<PreventiveSchedulePage />} />
             <Route path="officers" element={<FieldOfficersPage />} />
@@ -181,6 +182,7 @@ export default function App() {
             <Route path="ai-analytics" element={<AIAnalyticsPage />} />
             <Route path="exports" element={<ExportPage />} />
             <Route path="my-tasks" element={<FieldOfficerTasksPage />} />
+            <Route path="profile" element={<ProfileSettingsPage />} />
           </Route>
 
           {/* Catch-all → redirect to landing */}
