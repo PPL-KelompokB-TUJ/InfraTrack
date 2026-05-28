@@ -17,6 +17,8 @@ import { supabase } from '../lib/supabaseClient';
 import { useNotification } from '../context/NotificationContext';
 import { getActiveInfrastructureCategoryNames } from '../lib/masterDataService';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 export default function ExportPage() {
   const { addNotification } = useNotification();
   const [reportType, setReportType] = useState('asset-condition');
@@ -47,7 +49,7 @@ export default function ExportPage() {
 
       if (!token) return;
 
-      const res = await fetch('/api/export/history', {
+      const res = await fetch(`${API_BASE_URL}/api/export/history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -131,7 +133,7 @@ export default function ExportPage() {
         filters.category = category;
       }
 
-      const response = await fetch('/api/export', {
+      const response = await fetch(`${API_BASE_URL}/api/export`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,7 +196,7 @@ export default function ExportPage() {
         throw new Error('Sesi anda telah berakhir. Silakan login kembali.');
       }
 
-      const res = await fetch('/api/export/delete-bulk', {
+      const res = await fetch(`${API_BASE_URL}/api/export/delete-bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
