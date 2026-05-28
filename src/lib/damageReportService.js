@@ -381,9 +381,20 @@ export const getRecentDamageReports = async (limit = 10) => {
       throw error;
     }
 
+    const rawReports = data || [];
+    const scoredReports = [];
+    
+    for (const item of rawReports) {
+      const mapped = mapDamageReportRow(item);
+      const priorityInfo = await calculatePriorityScore(item, rawReports);
+      mapped.priority_score = priorityInfo.score;
+      mapped.priority_recommendation = priorityInfo.recommendation;
+      scoredReports.push(mapped);
+    }
+
     return {
       success: true,
-      reports: (data || []).map(mapDamageReportRow),
+      reports: scoredReports,
     };
   } catch (error) {
     return {
