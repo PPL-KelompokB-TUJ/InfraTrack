@@ -34,6 +34,7 @@ export default function ExportPage() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   // Polling reference
   const pollingRef = useRef(null);
@@ -210,6 +211,7 @@ export default function ExportPage() {
 
       addNotification(data.message || 'Riwayat ekspor berhasil dihapus.', 'success', 4000);
       setSelectedIds([]);
+      setIsSelectionMode(false);
       await loadHistory();
     } catch (error) {
       addNotification(error.message, 'error', 4000);
@@ -455,10 +457,30 @@ export default function ExportPage() {
         {/* Right Side: Export History Sidebar */}
         <section className="lg:col-span-1 space-y-6">
           <div className="glass-panel fade-slide-in rounded-3xl p-6">
-            <h2 className="text-lg font-bold text-slate-800 mb-1">Riwayat Ekspor</h2>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-bold text-slate-800">Riwayat Ekspor</h2>
+              {history.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isSelectionMode) {
+                      setSelectedIds([]);
+                    }
+                    setIsSelectionMode(!isSelectionMode);
+                  }}
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition ${
+                    isSelectionMode
+                      ? 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                      : 'border-cyan-200 bg-cyan-50/50 text-cyan-700 hover:bg-cyan-50'
+                  }`}
+                >
+                  {isSelectionMode ? 'Batal' : 'Pilih'}
+                </button>
+              )}
+            </div>
             <p className="text-xs text-slate-500 mb-6">Tautan unduhan tetap aktif selama server berjalan.</p>
 
-            {history.length > 0 && (
+            {history.length > 0 && isSelectionMode && (
               <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
                 <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
                   <input
@@ -497,18 +519,20 @@ export default function ExportPage() {
                   <div
                     key={job.id}
                     className={`group relative rounded-2xl border p-4 transition ${
-                      selectedIds.includes(job.id)
+                      isSelectionMode && selectedIds.includes(job.id)
                         ? 'border-cyan-200 bg-cyan-50/10 shadow-sm'
                         : 'border-slate-100 bg-white hover:border-cyan-100 hover:shadow-sm'
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(job.id)}
-                        onChange={() => handleToggleSelect(job.id)}
-                        className="mt-0.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 h-4 w-4 cursor-pointer"
-                      />
+                      {isSelectionMode && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(job.id)}
+                          onChange={() => handleToggleSelect(job.id)}
+                          className="mt-0.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 h-4 w-4 cursor-pointer"
+                        />
+                      )}
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
