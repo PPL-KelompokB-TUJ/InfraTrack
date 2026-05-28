@@ -31,6 +31,7 @@ import FieldOfficersPage from './pages/FieldOfficersPage';
 import FieldOfficerTasksPage from './pages/FieldOfficerTasksPage';
 import MasterDataPage from './pages/MasterDataPage';
 import AIAnalyticsPage from './pages/AIAnalyticsPage';
+import ExportPage from './pages/ExportPage';
 
 // ============================================================
 // Auth Context (simple module-level state shared via props)
@@ -178,6 +179,7 @@ export default function App() {
             <Route path="officers" element={<FieldOfficersPage />} />
             <Route path="master-data" element={<MasterDataPage />} />
             <Route path="ai-analytics" element={<AIAnalyticsPage />} />
+            <Route path="exports" element={<ExportPage />} />
             <Route path="my-tasks" element={<FieldOfficerTasksPage />} />
           </Route>
 

@@ -14,6 +14,7 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
         { label: 'Manajemen Aset', icon: 'apartment', to: '/dashboard/assets' },
         { label: 'Master Data', icon: 'database', to: '/dashboard/master-data' },
         { label: 'Analitik AI', icon: 'smart_toy', to: '/dashboard/ai-analytics' },
+        { label: 'Ekspor Laporan', icon: 'cloud_download', to: '/dashboard/exports' },
     ];
 
     const officerItems = [

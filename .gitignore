@@ -9,3 +9,9 @@ setup-supabase.js
 run-migrations.js
 setup-users.js
 check-tables.js
+
+# Export outputs
+public/exports/
+
+# Agent artifacts & logs
+artifacts/
