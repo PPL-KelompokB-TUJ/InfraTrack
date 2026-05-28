@@ -10,7 +10,8 @@ import {
   CheckCircle2, 
   XCircle, 
   AlertCircle,
-  Clock
+  Clock,
+  Trash2
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNotification } from '../context/NotificationContext';
@@ -31,6 +32,8 @@ export default function ExportPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [history, setHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Polling reference
   const pollingRef = useRef(null);
@@ -158,6 +161,58 @@ export default function ExportPage() {
       addNotification(error.message, 'error', 4000);
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleToggleSelect = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.length === history.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(history.map((job) => job.id));
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.length === 0) return;
+    setShowConfirmModal(true);
+  };
+
+  const confirmDelete = async () => {
+    setShowConfirmModal(false);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      if (!token) {
+        throw new Error('Sesi anda telah berakhir. Silakan login kembali.');
+      }
+
+      const res = await fetch('/api/export/delete-bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Gagal menghapus riwayat ekspor');
+      }
+
+      addNotification(data.message || 'Riwayat ekspor berhasil dihapus.', 'success', 4000);
+      setSelectedIds([]);
+      await loadHistory();
+    } catch (error) {
+      addNotification(error.message, 'error', 4000);
     }
   };
 
@@ -403,6 +458,30 @@ export default function ExportPage() {
             <h2 className="text-lg font-bold text-slate-800 mb-1">Riwayat Ekspor</h2>
             <p className="text-xs text-slate-500 mb-6">Tautan unduhan tetap aktif selama server berjalan.</p>
 
+            {history.length > 0 && (
+              <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={history.length > 0 && selectedIds.length === history.length}
+                    onChange={handleSelectAll}
+                    className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 h-4 w-4"
+                  />
+                  Pilih Semua
+                </label>
+
+                {selectedIds.length > 0 && (
+                  <button
+                    onClick={handleDeleteSelected}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 transition hover:bg-rose-100"
+                  >
+                    <Trash2 size={13} />
+                    Hapus ({selectedIds.length})
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
               {isLoadingHistory ? (
                 <div className="py-12 text-center text-sm text-slate-400">
@@ -417,20 +496,33 @@ export default function ExportPage() {
                 history.map((job) => (
                   <div
                     key={job.id}
-                    className="group relative rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-cyan-100 hover:shadow-sm"
+                    className={`group relative rounded-2xl border p-4 transition ${
+                      selectedIds.includes(job.id)
+                        ? 'border-cyan-200 bg-cyan-50/10 shadow-sm'
+                        : 'border-slate-100 bg-white hover:border-cyan-100 hover:shadow-sm'
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-800 group-hover:text-cyan-800">
-                          {getReportName(job.report_type)}
-                        </h4>
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(job.id)}
+                        onChange={() => handleToggleSelect(job.id)}
+                        className="mt-0.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 h-4 w-4 cursor-pointer"
+                      />
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-xs font-bold text-slate-800 group-hover:text-cyan-800 truncate">
+                            {getReportName(job.report_type)}
+                          </h4>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex-shrink-0">
+                            {job.format}
+                          </span>
+                        </div>
                         <p className="mt-1 text-[10px] text-slate-400">
                           {new Date(job.created_at).toLocaleString('id-ID')}
                         </p>
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        {job.format}
-                      </span>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-50 pt-3">
@@ -462,6 +554,45 @@ export default function ExportPage() {
           </div>
         </section>
       </div>
+
+      {/* Confirmation Modal Overlay */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+          <div className="w-full max-w-md scale-in rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl mx-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-600 mb-4">
+                <Trash2 size={24} />
+              </div>
+              
+              <h3 className="text-lg font-bold text-slate-800">
+                Hapus Riwayat Ekspor
+              </h3>
+              
+              <p className="mt-2 text-sm text-slate-500 leading-relaxed">
+                Apakah Anda yakin ingin menghapus <strong>{selectedIds.length}</strong> riwayat ekspor terpilih secara permanen? 
+                Tindakan ini juga akan menghapus file fisik yang tersimpan di server dan tidak dapat dibatalkan.
+              </p>
+            </div>
+            
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="flex-1 rounded-xl bg-gradient-to-r from-rose-500 to-red-500 py-3 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
