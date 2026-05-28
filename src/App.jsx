@@ -32,6 +32,8 @@ import FieldOfficerTasksPage from './pages/FieldOfficerTasksPage';
 import MasterDataPage from './pages/MasterDataPage';
 import AIAnalyticsPage from './pages/AIAnalyticsPage';
 import ExportPage from './pages/ExportPage';
+import AssetDetailPage from './pages/AssetDetailPage';
+import ProfileSettingsPage from './pages/ProfileSettingsPage';
 
 // ============================================================
 // Auth Context (simple module-level state shared via props)
