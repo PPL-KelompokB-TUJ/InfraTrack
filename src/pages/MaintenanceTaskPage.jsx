@@ -20,6 +20,8 @@ import {
   createMaintenanceTask,
   deleteMaintenanceTask,
   getMaintenanceTaskById,
+  updateMaintenanceTask,
+  updateMaintenanceTaskStatus,
 } from '../lib/maintenanceTaskService';
 import { getAllDamageReports } from '../lib/damageReportService';
 import { getInfrastructureAssets } from '../lib/infrastructureAssetsService';
@@ -80,11 +82,51 @@ export default function MaintenanceTaskPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [detailModal, setDetailModal] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [actualCost, setActualCost] = useState('');
+  const [completionNotes, setCompletionNotes] = useState('');
+  const [isSavingStatus, setIsSavingStatus] = useState(false);
+
+  useEffect(() => {
+    if (detailModal) {
+      setNewStatus(detailModal.status || 'assigned');
+      const budgetObj = Array.isArray(detailModal.budget) ? detailModal.budget[0] : detailModal.budget;
+      setActualCost(budgetObj?.actual_cost !== undefined && budgetObj?.actual_cost !== null ? String(budgetObj.actual_cost) : '');
+      setCompletionNotes(detailModal.notes || '');
+    }
+  }, [detailModal]);
+
+  async function handleUpdateTaskStatus() {
+    if (!detailModal) return;
+
+    if (newStatus === 'completed' && actualCost.trim() === '') {
+      addNotification('Masukkan realisasi biaya untuk status Selesai', 'error', 3000);
+      return;
+    }
+
+    setIsSavingStatus(true);
+    try {
+      await updateMaintenanceTaskStatus(
+        detailModal.id,
+        newStatus,
+        completionNotes,
+        newStatus === 'completed' ? parseFloat(actualCost) : null
+      );
+      addNotification('Status dan anggaran berhasil diperbarui', 'success', 3000);
+      setDetailModal(null);
+      await loadData();
+    } catch (err) {
+      addNotification(err.message || 'Gagal memperbarui status', 'error', 3000);
+    } finally {
+      setIsSavingStatus(false);
+    }
+  }
 
   // Calendar states
   const [calendarView, setCalendarView] = useState('month');
@@ -265,6 +307,7 @@ export default function MaintenanceTaskPage() {
     setIsModalOpen(false);
     setSelectedReport(null);
     setSelectedAsset(null);
+    setEditingTask(null);
   }
 
   // Handle form submit
@@ -272,34 +315,46 @@ export default function MaintenanceTaskPage() {
     setIsSaving(true);
 
     try {
-      if (!selectedReport) {
-        addNotification(
-          'Tidak ada laporan yang dipilih untuk ditugaskan. Klik "Buat Penugasan" lagi untuk memilih laporan yang tersedia.',
-          'error',
-          3000
+      if (editingTask) {
+        // Edit Mode
+        await updateMaintenanceTask(editingTask.id, {
+          assigned_to: formValues.assigned_to,
+          scheduled_date: formValues.scheduled_date,
+          estimated_cost: formValues.estimated_cost,
+          instructions: formValues.instructions,
+        });
+        addNotification('Penugasan berhasil diperbarui', 'success', 3000);
+      } else {
+        // Create Mode
+        if (!selectedReport) {
+          addNotification(
+            'Tidak ada laporan yang dipilih untuk ditugaskan. Klik "Buat Penugasan" lagi untuk memilih laporan yang tersedia.',
+            'error',
+            3000
+          );
+          return;
+        }
+
+        await createMaintenanceTask(
+          {
+            report_id: selectedReport.id,
+            asset_id: selectedReport.asset_id,
+            ...formValues,
+          },
+          null
         );
-        return;
+        addNotification('Penugasan berhasil dibuat dan notifikasi telah dikirim ke petugas', 'success', 3000);
       }
 
-      await createMaintenanceTask(
-        {
-          report_id: selectedReport.id,
-          asset_id: selectedReport.asset_id,
-          ...formValues,
-        },
-        // Assuming current user ID - replace with actual auth context
-        null
-      );
-
-      addNotification('Penugasan berhasil dibuat dan notifikasi telah dikirim ke petugas', 'success', 3000);
       setIsModalOpen(false);
       setSelectedReport(null);
       setSelectedAsset(null);
+      setEditingTask(null);
 
       // Reload data
       await loadData();
     } catch (error) {
-      addNotification(error.message || 'Gagal membuat penugasan', 'error', 3000);
+      addNotification(error.message || 'Gagal menyimpan penugasan', 'error', 3000);
     } finally {
       setIsSaving(false);
     }
@@ -327,6 +382,14 @@ export default function MaintenanceTaskPage() {
 
   // Handle detail view
   async function handleViewDetail(taskId) {
+    if (String(taskId).startsWith('mock-')) {
+      const mockTask = tasks.find(t => t.id === taskId);
+      if (mockTask) {
+        setDetailModal(mockTask);
+        return;
+      }
+    }
+
     try {
       const detail = await getMaintenanceTaskById(taskId);
       setDetailModal(detail);
@@ -526,6 +589,7 @@ export default function MaintenanceTaskPage() {
         asset={selectedAsset}
         onSubmit={handleSubmitTask}
         isSaving={isSaving}
+        editingTask={editingTask}
       />
 
       {detailModal ? (
@@ -564,9 +628,25 @@ export default function MaintenanceTaskPage() {
                 <p className="mt-1 text-slate-700">{formatDate(detailModal.scheduled_date)}</p>
               </div>
 
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Biaya Estimasi</p>
-                <p className="mt-1 text-slate-700">{formatCurrency(detailModal.estimated_cost)}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Biaya Estimasi</p>
+                  <p className="mt-1 text-slate-700 font-semibold">
+                    {formatCurrency(
+                      (Array.isArray(detailModal.budget) ? detailModal.budget[0] : detailModal.budget)?.estimated_cost ?? 
+                      detailModal.estimated_cost
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Biaya Realisasi</p>
+                  <p className="mt-1 text-emerald-600 font-bold">
+                    {formatCurrency(
+                      (Array.isArray(detailModal.budget) ? detailModal.budget[0] : detailModal.budget)?.actual_cost ?? 
+                      detailModal.actual_cost
+                    )}
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -574,21 +654,91 @@ export default function MaintenanceTaskPage() {
                 <p className="mt-1 whitespace-pre-wrap text-slate-700">{detailModal.instructions || '-'}</p>
               </div>
 
-              {detailModal.notes ? (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Catatan</p>
-                  <p className="mt-1 whitespace-pre-wrap text-slate-700">{detailModal.notes}</p>
+              {/* Status Update & Realization Input Form */}
+              <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-2xl">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-600 mb-2">Pembaruan Status (Admin Only)</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Status Pekerjaan</label>
+                    <select
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                    >
+                      <option value="assigned">Ditugaskan (Assigned)</option>
+                      <option value="in_progress">Sedang Dikerjakan (In Progress)</option>
+                      <option value="completed">Selesai (Completed)</option>
+                      <option value="cancelled">Dibatalkan (Cancelled)</option>
+                    </select>
+                  </div>
+
+                  {newStatus === 'completed' && (
+                    <div className="fade-in">
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Realisasi Biaya (Rp) *</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1000"
+                        value={actualCost}
+                        onChange={(e) => setActualCost(e.target.value)}
+                        placeholder="Masukkan realisasi biaya..."
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400 font-medium"
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1">Catatan Tambahan</label>
+                    <textarea
+                      value={completionNotes}
+                      onChange={(e) => setCompletionNotes(e.target.value)}
+                      placeholder="Catatan pengerjaan atau alasan pembatalan..."
+                      rows="2"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                    />
+                  </div>
                 </div>
-              ) : null}
+              </div>
             </div>
 
-            <div className="border-t border-cyan-100 px-6 py-5">
+            <div className="flex gap-2 border-t border-cyan-100 px-6 py-5 bg-slate-50/30">
+              {!String(detailModal.id).startsWith('mock-') ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingTask(detailModal);
+                      setSelectedReport(detailModal.report);
+                      setSelectedAsset(detailModal.asset);
+                      setDetailModal(null);
+                      setIsModalOpen(true);
+                    }}
+                    className="flex-1 rounded-xl border border-cyan-200 bg-white px-3 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                  >
+                    Edit Detail
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleUpdateTaskStatus}
+                    disabled={isSavingStatus}
+                    className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-3 py-2 text-sm font-semibold text-white shadow-md transition hover:brightness-110 disabled:opacity-50"
+                  >
+                    {isSavingStatus ? 'Menyimpan...' : 'Simpan Status'}
+                  </button>
+                </>
+              ) : (
+                <div className="flex-1 text-center py-2 text-sm font-semibold text-slate-400">
+                  Aksi tidak tersedia untuk data simulasi/mockup
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={() => setDetailModal(null)}
-                className="w-full rounded-xl border border-cyan-200 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
               >
-                Tutup
+                Batal
               </button>
             </div>
           </div>

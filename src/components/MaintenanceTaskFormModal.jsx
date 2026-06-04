@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AlertCircle, Calendar, DollarSign, User, FileText, X } from 'lucide-react';
 import { getActiveFieldOfficers } from '../lib/maintenanceTaskService';
 
-export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asset, onSubmit, isSaving }) {
+export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asset, onSubmit, isSaving, editingTask }) {
   const [formData, setFormData] = useState({
     scheduled_date: '',
     estimated_cost: '',
@@ -18,16 +18,27 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
     if (isOpen) {
       loadFieldOfficers();
 
-      // Set default scheduled_date ke esok hari.
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      setFormData((prev) => ({
-        ...prev,
-        scheduled_date: tomorrow.toISOString().split('T')[0],
-      }));
+      if (editingTask) {
+        setFormData({
+          scheduled_date: editingTask.scheduled_date ? editingTask.scheduled_date.split('T')[0] : '',
+          estimated_cost: editingTask.estimated_cost || '',
+          assigned_to: editingTask.assigned_to || '',
+          instructions: editingTask.instructions || '',
+        });
+      } else {
+        // Set default scheduled_date ke esok hari.
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        setFormData({
+          scheduled_date: tomorrow.toISOString().split('T')[0],
+          estimated_cost: '',
+          assigned_to: '',
+          instructions: '',
+        });
+      }
       setErrorMessage('');
     }
-  }, [isOpen]);
+  }, [isOpen, editingTask]);
 
   async function loadFieldOfficers() {
     setIsLoadingOfficers(true);
@@ -39,7 +50,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
       if (officers.length > 0) {
         setFormData((prev) => ({
           ...prev,
-          assigned_to: prev.assigned_to || officers[0].id,
+          assigned_to: prev.assigned_to || (editingTask ? editingTask.assigned_to : officers[0].id),
         }));
       }
     } catch (error) {
@@ -76,7 +87,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (scheduledDate < today) {
+    if (!editingTask && scheduledDate < today) {
       setErrorMessage('Tanggal terjadwal tidak boleh lebih awal dari hari ini');
       return false;
     }
@@ -93,7 +104,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
 
     onSubmit({
       ...formData,
-      estimated_cost: formData.estimated_cost ? parseFloat(formData.estimated_cost) : null,
+      estimated_cost: formData.estimated_cost !== '' ? parseFloat(formData.estimated_cost) : null,
     });
   }
 
@@ -108,7 +119,9 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
       <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-2xl overflow-auto rounded-3xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-cyan-100 px-6 py-5">
-          <h2 className="text-xl font-extrabold text-slate-800">Buat Penugasan Pemeliharaan</h2>
+          <h2 className="text-xl font-extrabold text-slate-800">
+            {editingTask ? 'Edit Penugasan Pemeliharaan' : 'Buat Penugasan Pemeliharaan'}
+          </h2>
           <button
             onClick={onClose}
             disabled={isSaving}
@@ -269,7 +282,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
             disabled={isSaving}
             className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
           >
-            {isSaving ? 'Menyimpan...' : 'Buat Penugasan'}
+            {isSaving ? 'Menyimpan...' : (editingTask ? 'Simpan Perubahan' : 'Buat Penugasan')}
           </button>
         </div>
       </div>
