@@ -10,6 +10,7 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
         { label: 'Laporan Aktif', icon: 'report_problem', to: '/dashboard/reports' },
         { label: 'Penugasan Pemeliharaan', icon: 'construction', to: '/dashboard/maintenance' },
         { label: 'Jadwal Preventif', icon: 'event_note', to: '/dashboard/preventive' },
+        { label: 'Manajemen Anggaran', icon: 'payments', to: '/dashboard/budgets' },
         { label: 'Manajemen Petugas', icon: 'groups', to: '/dashboard/officers' },
         { label: 'Manajemen Aset', icon: 'apartment', to: '/dashboard/assets' },
         { label: 'Master Data', icon: 'database', to: '/dashboard/master-data' },

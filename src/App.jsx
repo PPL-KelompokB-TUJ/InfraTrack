@@ -34,7 +34,7 @@ import AIAnalyticsPage from './pages/AIAnalyticsPage';
 import ExportPage from './pages/ExportPage';
 import AssetDetailPage from './pages/AssetDetailPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
-
+import BudgetMonitoringPage from './pages/BudgetMonitoringPage';
 // ============================================================
 // Auth Context (simple module-level state shared via props)
 // ============================================================
@@ -179,6 +179,7 @@ export default function App() {
             <Route path="assets/:id" element={<AssetDetailPage />} />
             <Route path="maintenance" element={<MaintenanceTaskPage />} />
             <Route path="preventive" element={<PreventiveSchedulePage />} />
+            <Route path="budgets" element={<BudgetMonitoringPage />} />
             <Route path="officers" element={<FieldOfficersPage />} />
             <Route path="master-data" element={<MasterDataPage />} />
             <Route path="ai-analytics" element={<AIAnalyticsPage />} />
