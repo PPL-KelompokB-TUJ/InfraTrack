@@ -26,7 +26,7 @@ const redisOptions = {
 /**
  * High-performance report generation worker
  */
-export const processExport = async (data) => {
+const processExport = async (data) => {
   const { jobId, reportType, format, filters, accessToken } = data;
   console.log(`Processing export job: ${jobId} (${reportType} - ${format})`);
 
@@ -84,7 +84,7 @@ export const processExport = async (data) => {
       throw new Error(`Unsupported export format: ${format}`);
     }
 
-    // 4. File Storage Upload (S3/MinIO vs Supabase Storage vs Local Fallback)
+    // 4. File Storage Upload (S3/MinIO vs Local Fallback)
     let fileUrl = '';
     const hasS3Config = process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY;
 
@@ -117,56 +117,20 @@ export const processExport = async (data) => {
         : `${process.env.S3_ENDPOINT}/`;
       fileUrl = `${s3BaseUrl}${bucketName}/${filename}`;
     } else {
-      // Attempt to upload to Supabase Storage bucket 'exports'
-      let uploadedToSupabase = false;
-      try {
-        console.log(`Attempting to upload ${filename} to Supabase Storage bucket 'exports'...`);
-        
-        // Try to create bucket if it doesn't exist
-        try {
-          await supabase.storage.createBucket('exports', { public: true });
-        } catch (e) {
-          // Ignore
-        }
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('exports')
-          .upload(filename, buffer, {
-            contentType: contentType,
-            upsert: true
-          });
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('exports')
-          .getPublicUrl(filename);
-
-        fileUrl = publicUrl;
-        uploadedToSupabase = true;
-        console.log(`✅ Uploaded successfully to Supabase Storage: ${fileUrl}`);
-      } catch (supabaseError) {
-        console.warn(`⚠️ Supabase Storage upload failed: ${supabaseError.message}. Falling back to local storage.`);
+      console.log(`S3 keys missing. Storing ${filename} locally in public/exports fallback folder...`);
+      // Save locally to public/exports/
+      const publicExportsDir = path.join(__dirname, '..', '..', 'public', 'exports');
+      
+      if (!fs.existsSync(publicExportsDir)) {
+        fs.mkdirSync(publicExportsDir, { recursive: true });
       }
 
-      if (!uploadedToSupabase) {
-        console.log(`Storing ${filename} locally in public/exports fallback folder...`);
-        // Save locally to public/exports/
-        const publicExportsDir = path.join(__dirname, '..', '..', 'public', 'exports');
-        
-        if (!fs.existsSync(publicExportsDir)) {
-          fs.mkdirSync(publicExportsDir, { recursive: true });
-        }
+      const localFilePath = path.join(publicExportsDir, filename);
+      fs.writeFileSync(localFilePath, buffer);
 
-        const localFilePath = path.join(publicExportsDir, filename);
-        fs.writeFileSync(localFilePath, buffer);
-
-        const serverPort = process.env.PORT || 5000;
-        const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_BACKEND_URL || `http://localhost:${serverPort}`;
-        fileUrl = `${baseUrl}/exports/${filename}`;
-      }
+      const serverPort = process.env.PORT || 5000;
+      const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_BACKEND_URL || `http://localhost:${serverPort}`;
+      fileUrl = `${baseUrl}/exports/${filename}`;
     }
 
     // 5. Update history status to 'completed' with download link
