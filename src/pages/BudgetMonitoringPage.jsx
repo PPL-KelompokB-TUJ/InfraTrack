@@ -70,24 +70,87 @@ export default function BudgetMonitoringPage() {
     setIsLoading(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-      if (!token) return;
+      if (!sessionData?.session) return;
 
-      // 1. Fetch Aggregation
-      const aggRes = await fetch(`${API_BASE_URL}/api/budgets/aggregation?period=${period}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!aggRes.ok) throw new Error('Gagal memuat agregasi anggaran');
-      const aggData = await aggRes.json();
-      setChartData(aggData.items || []);
+      // 1. Fetch budgets from Supabase
+      const { data: budgets, error: budgetsError } = await supabase
+        .from('budgets')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      // 2. Fetch All Budgets detail
-      const listRes = await fetch(`${API_BASE_URL}/api/budgets`, {
-        headers: { Authorization: `Bearer ${token}` }
+      if (budgetsError) throw budgetsError;
+
+      if (!budgets || budgets.length === 0) {
+        setBudgetsList([]);
+        setChartData([]);
+        return;
+      }
+
+      // 2. Fetch corresponding maintenance tasks with relationships
+      const taskIds = budgets.map(b => b.task_id);
+      const { data: tasks, error: tasksError } = await supabase
+        .from('maintenance_tasks')
+        .select(`
+          id,
+          scheduled_date,
+          status,
+          instructions,
+          asset:infrastructure_assets!maintenance_tasks_asset_id_fkey(id, name),
+          report:damage_reports!maintenance_tasks_report_id_fkey(id, ticket_code)
+        `)
+        .in('id', taskIds);
+
+      if (tasksError) throw tasksError;
+
+      // 3. Map tasks by ID for quick access
+      const tasksMap = new Map();
+      if (tasks) {
+        tasks.forEach(t => {
+          tasksMap.set(t.id, t);
+        });
+      }
+
+      // 4. Merge budgets with their task details
+      const mergedBudgets = budgets.map(b => ({
+        ...b,
+        task: tasksMap.get(b.task_id) || null
+      }));
+      setBudgetsList(mergedBudgets);
+
+      // 5. Aggregate costs per period (monthly/yearly)
+      const periodsMap = {};
+      mergedBudgets.forEach((b) => {
+        const dateStr = b.task?.scheduled_date;
+        if (!dateStr) return;
+
+        const date = new Date(dateStr);
+        let periodKey = '';
+
+        if (period === 'yearly') {
+          periodKey = `${date.getFullYear()}`;
+        } else {
+          // monthly: e.g. "2024-10"
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          periodKey = `${year}-${month}`;
+        }
+
+        if (!periodsMap[periodKey]) {
+          periodsMap[periodKey] = {
+            period: periodKey,
+            estimated: 0,
+            actual: 0,
+          };
+        }
+
+        periodsMap[periodKey].estimated += Number(b.estimated_cost || 0);
+        periodsMap[periodKey].actual += Number(b.actual_cost || 0);
       });
-      if (!listRes.ok) throw new Error('Gagal memuat daftar anggaran');
-      const listData = await listRes.json();
-      setBudgetsList(listData.budgets || []);
+
+      const aggregatedItems = Object.values(periodsMap).sort((a, b) =>
+        a.period.localeCompare(b.period)
+      );
+      setChartData(aggregatedItems);
 
     } catch (error) {
       console.error(error);

@@ -40,8 +40,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
 
-// Start listening
-app.listen(PORT, () => {
-  console.log(`🚀 Report Export Backend running on http://localhost:${PORT}`);
-  console.log(`📂 Fallback download path configured at: ${publicExportsPath}`);
-});
+// Start listening if not in serverless environment
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Report Export Backend running on http://localhost:${PORT}`);
+    console.log(`📂 Fallback download path configured at: ${publicExportsPath}`);
+  });
+}
+
+export default app;
