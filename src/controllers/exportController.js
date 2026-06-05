@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSupabaseClient } from '../services/exportService.js';
-import { exportQueue, processExport } from '../queues/exportQueue.js';
+import { exportQueue } from '../queues/exportQueue.js';
 
 /**
  * Helper to check if caller is an Admin in Supabase
@@ -69,56 +69,27 @@ export async function triggerExport(req, res) {
       return res.status(500).json({ error: `Gagal membuat record ekspor: ${insertError.message}` });
     }
 
-    // 3. Queue Bull job to execute async, or run synchronously in serverless/no-Redis environments
-    if (process.env.VERCEL || !process.env.REDIS_HOST) {
-      console.log(`Running export job synchronously for Job ID ${jobRecord.id}`);
-      try {
-        await processExport({
-          jobId: jobRecord.id,
-          reportType,
-          format,
-          filters,
-          accessToken: token,
-        });
+    // 3. Queue Bull job to execute async
+    await exportQueue.add({
+      jobId: jobRecord.id,
+      reportType,
+      format,
+      filters,
+      accessToken: token,
+    }, {
+      jobId: jobRecord.id, // Assign matching job ID for easy monitoring if needed
+      removeOnComplete: true, // Auto clean Bull job on success
+      removeOnFail: false,   // Keep on fail to investigate errors
+    });
 
-        // Fetch the updated completed record
-        const { data: updatedRecord } = await supabase
-          .from('export_history')
-          .select('*')
-          .eq('id', jobRecord.id)
-          .single();
+    console.log(`Export job queued in Bull: Job ID ${jobRecord.id}`);
 
-        return res.status(200).json({
-          success: true,
-          message: 'Proses ekspor telah selesai.',
-          job: updatedRecord
-        });
-      } catch (err) {
-        console.error('Synchronous export failed:', err);
-        return res.status(500).json({ error: `Gagal memproses ekspor: ${err.message}` });
-      }
-    } else {
-      await exportQueue.add({
-        jobId: jobRecord.id,
-        reportType,
-        format,
-        filters,
-        accessToken: token,
-      }, {
-        jobId: jobRecord.id, // Assign matching job ID for easy monitoring if needed
-        removeOnComplete: true, // Auto clean Bull job on success
-        removeOnFail: false,   // Keep on fail to investigate errors
-      });
-
-      console.log(`Export job queued in Bull: Job ID ${jobRecord.id}`);
-
-      // Respond immediately with the job ID and details to prevent UI block
-      return res.status(202).json({
-        success: true,
-        message: 'Proses ekspor telah dijadwalkan di background.',
-        job: jobRecord
-      });
-    }
+    // Respond immediately with the job ID and details to prevent UI block
+    return res.status(202).json({
+      success: true,
+      message: 'Proses ekspor telah dijadwalkan di background.',
+      job: jobRecord
+    });
 
   } catch (error) {
     console.error('Error triggering export:', error.message);
