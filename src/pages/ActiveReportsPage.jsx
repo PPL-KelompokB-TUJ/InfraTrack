@@ -268,16 +268,6 @@ export default function ActiveReportsPage() {
                         }`}>
                           {report.status === 'sedang_dikerjakan' ? 'Terverifikasi' : getStatusLabel(report.status)}
                         </span>
-                        {report.status === 'terverifikasi' && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
-                            Ditugaskan
-                          </span>
-                        )}
-                        {report.status === 'sedang_dikerjakan' && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-100">
-                            Sedang Dikerjakan
-                          </span>
-                        )}
                       </div>
                     </td>
                     <td className="py-4 px-6 text-slate-600 text-xs">
@@ -435,8 +425,8 @@ function ReportDetailModal({ report, onClose }) {
                 : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
             }`}>
               {report.status === 'pending' && 'Pending'}
-              {report.status === 'terverifikasi' && 'Terverifikasi (Ditugaskan)'}
-              {report.status === 'sedang_dikerjakan' && 'Terverifikasi (Sedang Dikerjakan)'}
+              {report.status === 'terverifikasi' && 'Terverifikasi'}
+              {report.status === 'sedang_dikerjakan' && 'Terverifikasi'}
               {report.status === 'ditolak' && 'Ditolak'}
               {report.status === 'selesai' && 'Selesai'}
             </span>
