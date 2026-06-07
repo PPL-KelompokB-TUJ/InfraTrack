@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import puppeteer from 'puppeteer';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -50,7 +49,6 @@ export async function generatePdfReport(reportType, data, filters = {}) {
   try {
     // 1. Read the template file
     const templateFileName = `${reportType}.html`;
-    // We expect templates to be located at src/templates/
     const templatePath = path.join(__dirname, '..', 'templates', templateFileName);
 
     if (!fs.existsSync(templatePath)) {
@@ -74,10 +72,27 @@ export async function generatePdfReport(reportType, data, filters = {}) {
     const compiledHtml = compileTemplate(htmlContent, renderData);
 
     // 4. Launch headless browser and print to PDF
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    let browser;
+    if (process.env.NODE_ENV === 'production') {
+      // Use sparticuz/chromium for serverless / Render environments
+      const chromium = (await import('@sparticuz/chromium')).default;
+      const puppeteer = (await import('puppeteer-core')).default;
+      
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
+      });
+    } else {
+      // Use standard puppeteer for local development
+      const puppeteer = (await import('puppeteer')).default;
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+    }
 
     const page = await browser.newPage();
     await page.setContent(compiledHtml, { waitUntil: 'networkidle0' });

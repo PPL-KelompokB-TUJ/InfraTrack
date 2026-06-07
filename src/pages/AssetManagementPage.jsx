@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ImageOff, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, ImageOff, Pencil, Plus, Trash2 } from 'lucide-react';
 import AssetFormModal from '../components/AssetFormModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useNotification } from '../context/NotificationContext';
@@ -24,6 +25,7 @@ function formatCoordinate(lat, lng) {
 
 export default function AssetManagementPage() {
   const { addNotification } = useNotification();
+  const navigate = useNavigate();
   const [categoryOptions, setCategoryOptions] = useState(['Jalan', 'Jembatan', 'Saluran Drainase', 'Air Bersih', 'Listrik']);
   const [assets, setAssets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -234,6 +236,14 @@ export default function AssetManagementPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/dashboard/assets/${asset.id}`)}
+                            className="inline-flex items-center gap-1 rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-50"
+                          >
+                            <Eye size={13} />
+                            Detail
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(asset)}

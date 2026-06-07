@@ -130,8 +130,6 @@ export async function getMaintenanceRecapData(supabase, filters = {}) {
       scheduled_date,
       instructions,
       status,
-      estimated_cost,
-      actual_cost,
       assigned_to,
       asset:infrastructure_assets!maintenance_tasks_asset_id_fkey(name)
     `)
@@ -139,6 +137,22 @@ export async function getMaintenanceRecapData(supabase, filters = {}) {
 
   const { data: tasks, error: tasksError } = await query;
   if (tasksError) throw new Error(`Error fetching maintenance tasks: ${tasksError.message}`);
+
+  // Fetch budgets separately to avoid relationship schema cache errors
+  const budgetsMap = new Map();
+  try {
+    const { data: budgets, error: budgetError } = await supabase
+      .from('budgets')
+      .select('task_id, estimated_cost, actual_cost');
+    
+    if (!budgetError && budgets) {
+      budgets.forEach(b => {
+        budgetsMap.set(b.task_id, b);
+      });
+    }
+  } catch (err) {
+    console.error('Failed to fetch budgets for export:', err);
+  }
 
   // Apply filters in JS for reliability
   let filteredTasks = tasks || [];
@@ -178,8 +192,9 @@ export async function getMaintenanceRecapData(supabase, filters = {}) {
   let totalAct = 0;
 
   const items = filteredTasks.map((task, index) => {
-    const est = Number(task.estimated_cost || 0);
-    const act = Number(task.actual_cost || 0);
+    const budget = budgetsMap.get(task.id);
+    const est = Number(budget?.estimated_cost || 0);
+    const act = Number(budget?.actual_cost || 0);
     totalEst += est;
     totalAct += act;
 

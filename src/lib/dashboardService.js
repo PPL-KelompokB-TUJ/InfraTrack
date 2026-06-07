@@ -165,17 +165,20 @@ export async function getDamageTrend(period = 'monthly', monthsBack = 6) {
     reports?.forEach(report => {
       const date = new Date(report.created_at);
       let key;
+      let sortKey;
 
       if (period === 'weekly') {
         const year = date.getFullYear();
         const week = Math.ceil((date.getDate() + new Date(year, date.getMonth(), 1).getDay()) / 7);
         key = `Week ${week} ${date.toLocaleString('id-ID', { month: 'short' })}`;
+        sortKey = new Date(year, date.getMonth(), date.getDate()).getTime();
       } else {
         key = date.toLocaleString('id-ID', { year: 'numeric', month: 'short' });
+        sortKey = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
       }
 
       if (!trendData[key]) {
-        trendData[key] = { total: 0, completed: 0, pending: 0 };
+        trendData[key] = { period: key, total: 0, completed: 0, pending: 0, sortKey };
       }
 
       trendData[key].total++;
@@ -186,11 +189,10 @@ export async function getDamageTrend(period = 'monthly', monthsBack = 6) {
       }
     });
 
-    // Convert to array format for charts
-    const trendArray = Object.entries(trendData).map(([period, data]) => ({
-      period,
-      ...data,
-    }));
+    // Convert to array format for charts and sort chronologically (oldest to newest)
+    const trendArray = Object.values(trendData)
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .map(({ sortKey, ...data }) => data);
 
     return {
       success: true,

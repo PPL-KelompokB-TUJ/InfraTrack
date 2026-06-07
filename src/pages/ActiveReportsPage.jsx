@@ -223,6 +223,7 @@ export default function ActiveReportsPage() {
                   <th className="text-left py-4 px-6 font-bold text-slate-700">Jenis Kerusakan</th>
                   <th className="text-left py-4 px-6 font-bold text-slate-700">Lokasi</th>
                   <th className="text-left py-4 px-6 font-bold text-slate-700">Urgensi</th>
+                  <th className="text-left py-4 px-6 font-bold text-slate-700">Prioritas</th>
                   <th className="text-left py-4 px-6 font-bold text-slate-700">Status</th>
                   <th className="text-left py-4 px-6 font-bold text-slate-700">Tanggal</th>
                   <th className="text-center py-4 px-6 font-bold text-slate-700">Aksi</th>
@@ -244,6 +245,19 @@ export default function ActiveReportsPage() {
                       <span className={`inline-block px-3 py-1 rounded text-xs font-bold ${getUrgencyColor(report.urgency_level)}`}>
                         {getUrgencyLabel(report.urgency_level)}
                       </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      {report.priority_score ? (
+                        <span className={`inline-block px-3 py-1 rounded text-xs font-bold border ${
+                          report.priority_score >= 80 ? 'bg-red-100 text-red-700 border-red-200' :
+                          report.priority_score >= 60 ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                          'bg-blue-100 text-blue-700 border-blue-200'
+                        }`}>
+                          Skor {report.priority_score}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-xs">-</span>
+                      )}
                     </td>
                     <td className="py-4 px-6">
                       <div className="flex flex-col gap-1 items-start">
@@ -306,6 +320,13 @@ function ReportDetailModal({ report, onClose }) {
   const [verificationAction, setVerificationAction] = useState(null); // 'approve' or 'reject'
   const [aiResult, setAiResult] = useState(null);
   const [isLoadingAi, setIsLoadingAi] = useState(true);
+
+  // Set priority level from recommendation
+  useEffect(() => {
+    if (report?.priority_recommendation === 'Sangat Mendesak') setPriorityLevel('sangat_tinggi');
+    else if (report?.priority_recommendation === 'Mendesak') setPriorityLevel('tinggi');
+    else setPriorityLevel('sedang');
+  }, [report]);
 
   // Fetch AI analysis result when modal opens
   useEffect(() => {
@@ -616,6 +637,16 @@ function ReportDetailModal({ report, onClose }) {
                     {verificationAction === 'approve' ? 'Proses Persetujuan Laporan' : 'Proses Penolakan Laporan'}
                   </p>
                 </div>
+
+                {verificationAction === 'approve' && report.priority_score && (
+                  <div className="p-3 rounded-lg border border-cyan-200 bg-cyan-50 flex items-start gap-3">
+                    <Info className="text-cyan-600 flex-shrink-0 mt-0.5" size={18} />
+                    <div>
+                      <p className="text-sm font-semibold text-cyan-900">Rekomendasi Prioritas (Skor: {report.priority_score}/100)</p>
+                      <p className="text-xs text-cyan-700 mt-1">Sistem menyarankan prioritas: <strong>{report.priority_recommendation}</strong></p>
+                    </div>
+                  </div>
+                )}
 
                 {verificationAction === 'approve' && (
                   <div>

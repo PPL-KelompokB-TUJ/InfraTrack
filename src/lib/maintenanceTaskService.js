@@ -64,11 +64,33 @@ export async function getMaintenanceTasks(filters = {}) {
     if (error) throw new Error(error.message);
 
     const rows = data || [];
+
+    // Fetch budgets separately to avoid relationship schema cache errors
+    const budgetsMap = new Map();
+    try {
+      const { data: budgets } = await supabase
+        .from('budgets')
+        .select('*');
+      if (budgets) {
+        budgets.forEach(b => {
+          budgetsMap.set(b.task_id, b);
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load budgets separately:', err);
+    }
+
     const usersMap = await getUsersMapByIds(
       rows.flatMap((task) => [task.assigned_to, task.assigned_by])
     );
 
-    return rows.map((task) => hydrateTaskUsers(task, usersMap));
+    return rows.map((task) => {
+      const taskWithUsers = hydrateTaskUsers(task, usersMap);
+      return {
+        ...taskWithUsers,
+        budget: budgetsMap.get(task.id) || null
+      };
+    });
   } catch (error) {
     throw new Error(`Failed to fetch maintenance tasks: ${error.message}`);
   }
@@ -91,8 +113,25 @@ export async function getMaintenanceTaskById(id) {
 
     if (error) throw new Error(error.message);
 
+    // Fetch budget separately
+    let budget = null;
+    try {
+      const { data: budgetData } = await supabase
+        .from('budgets')
+        .select('*')
+        .eq('task_id', id)
+        .maybeSingle();
+      budget = budgetData || null;
+    } catch (err) {
+      console.error('Failed to fetch budget separately:', err);
+    }
+
     const usersMap = await getUsersMapByIds([data?.assigned_to, data?.assigned_by]);
-    return hydrateTaskUsers(data, usersMap);
+    const taskWithUsers = hydrateTaskUsers(data, usersMap);
+    return {
+      ...taskWithUsers,
+      budget
+    };
   } catch (error) {
     throw new Error(`Failed to fetch maintenance task: ${error.message}`);
   }
@@ -122,6 +161,19 @@ export async function createMaintenanceTask(taskData, userId) {
       .single();
 
     if (error) throw new Error(error.message);
+
+    // Create budget record
+    try {
+      await supabase
+        .from('budgets')
+        .insert({
+          task_id: data.id,
+          estimated_cost: taskData.estimated_cost || 0,
+          actual_cost: null
+        });
+    } catch (budgetErr) {
+      console.error('Failed to create budget record:', budgetErr);
+    }
 
     // Create notification for assigned officer
     if (taskData.assigned_to) {
@@ -158,6 +210,19 @@ export async function updateMaintenanceTask(id, taskData) {
       .single();
 
     if (error) throw new Error(error.message);
+
+    // Update budget record
+    try {
+      await supabase
+        .from('budgets')
+        .upsert({
+          task_id: id,
+          estimated_cost: taskData.estimated_cost || 0
+        }, { onConflict: 'task_id' });
+    } catch (budgetErr) {
+      console.error('Failed to update budget record:', budgetErr);
+    }
+
     return data;
   } catch (error) {
     throw new Error(`Failed to update maintenance task: ${error.message}`);
@@ -167,7 +232,7 @@ export async function updateMaintenanceTask(id, taskData) {
 /**
  * Update maintenance task status
  */
-export async function updateMaintenanceTaskStatus(id, status, notes = '') {
+export async function updateMaintenanceTaskStatus(id, status, notes = '', actualCost = null) {
   try {
     const updateData = {
       status,
@@ -186,6 +251,21 @@ export async function updateMaintenanceTaskStatus(id, status, notes = '') {
       .single();
 
     if (error) throw new Error(error.message);
+
+    // Update actual cost in budgets table if provided
+    if (actualCost !== null) {
+      try {
+        await supabase
+          .from('budgets')
+          .upsert({
+            task_id: id,
+            actual_cost: parseFloat(actualCost)
+          }, { onConflict: 'task_id' });
+      } catch (budgetErr) {
+        console.error('Failed to update actual cost in budget:', budgetErr);
+      }
+    }
+
     return data;
   } catch (error) {
     throw new Error(`Failed to update maintenance task status: ${error.message}`);

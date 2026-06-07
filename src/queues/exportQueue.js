@@ -129,7 +129,8 @@ const processExport = async (data) => {
       fs.writeFileSync(localFilePath, buffer);
 
       const serverPort = process.env.PORT || 5000;
-      fileUrl = `http://localhost:${serverPort}/exports/${filename}`;
+      const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_BACKEND_URL || `http://localhost:${serverPort}`;
+      fileUrl = `${baseUrl}/exports/${filename}`;
     }
 
     // 5. Update history status to 'completed' with download link

@@ -32,7 +32,9 @@ import FieldOfficerTasksPage from './pages/FieldOfficerTasksPage';
 import MasterDataPage from './pages/MasterDataPage';
 import AIAnalyticsPage from './pages/AIAnalyticsPage';
 import ExportPage from './pages/ExportPage';
-
+import AssetDetailPage from './pages/AssetDetailPage';
+import ProfileSettingsPage from './pages/ProfileSettingsPage';
+import BudgetMonitoringPage from './pages/BudgetMonitoringPage';
 // ============================================================
 // Auth Context (simple module-level state shared via props)
 // ============================================================
@@ -174,13 +176,16 @@ export default function App() {
             <Route index element={auth.isOfficer ? <Navigate to="/dashboard/my-tasks" replace /> : <DashboardPage />} />
             <Route path="reports" element={<ActiveReportsPage />} />
             <Route path="assets" element={<AssetManagementPage />} />
+            <Route path="assets/:id" element={<AssetDetailPage />} />
             <Route path="maintenance" element={<MaintenanceTaskPage />} />
             <Route path="preventive" element={<PreventiveSchedulePage />} />
+            <Route path="budgets" element={<BudgetMonitoringPage />} />
             <Route path="officers" element={<FieldOfficersPage />} />
             <Route path="master-data" element={<MasterDataPage />} />
             <Route path="ai-analytics" element={<AIAnalyticsPage />} />
             <Route path="exports" element={<ExportPage />} />
             <Route path="my-tasks" element={<FieldOfficerTasksPage />} />
+            <Route path="profile" element={<ProfileSettingsPage />} />
           </Route>
 
           {/* Catch-all → redirect to landing */}
