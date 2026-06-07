@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Custom lightweight template engine to compile variables and loops in HTML templates
+ * Custom lightweight template engine to compile variables and loops in HTML templates (v1.0.1)
  */
 export function compileTemplate(html, data) {
   let compiled = html;
