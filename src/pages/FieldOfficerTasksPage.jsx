@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   AlertCircle,
   CheckCircle,
@@ -22,6 +23,7 @@ import {
   getOfficerTaskStats,
 } from '../lib/fieldOfficerTaskService';
 import { useNotification } from '../context/NotificationContext';
+import NotificationBell from '../components/layout/NotificationBell';
 
 const statusOptions = [
   { value: 'pending', label: 'Menunggu', color: 'slate', icon: AlertCircle },
@@ -89,6 +91,18 @@ export default function FieldOfficerTasksPage() {
       addNotification('Gagal memuat detail penugasan', 'error');
     }
   };
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.openTaskId && tasks.length > 0) {
+      const task = tasks.find(t => t.id === location.state.openTaskId);
+      if (task) {
+        handleTaskClick(task);
+        // Clear state so it doesn't re-open on refresh
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, tasks]);
 
   const handlePhotoSelect = (e) => {
     const file = e.target.files?.[0];
@@ -176,11 +190,16 @@ export default function FieldOfficerTasksPage() {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-800">Penugasan Saya</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Kelola dan perbarui status pekerjaan Anda
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-800">Penugasan Saya</h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Kelola dan perbarui status pekerjaan Anda
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+        </div>
       </div>
 
       {/* Stats Cards */}

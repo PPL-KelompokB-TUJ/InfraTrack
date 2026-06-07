@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Outlet, Navigate, useNavigate } from 'rea
 import TopNavBar from './components/layout/TopNavBar';
 import SideNavBar from './components/layout/SideNavBar';
 import NotificationContainer from './components/NotificationContainer';
-import { NotificationProvider } from './context/NotificationContext';
+import { NotificationProvider, InAppNotificationProvider } from './context/NotificationContext';
 
 // Auth
 import {
@@ -35,6 +35,7 @@ import ExportPage from './pages/ExportPage';
 import AssetDetailPage from './pages/AssetDetailPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import BudgetMonitoringPage from './pages/BudgetMonitoringPage';
+import NotificationsPage from './pages/NotificationsPage';
 // ============================================================
 // Auth Context (simple module-level state shared via props)
 // ============================================================
@@ -149,7 +150,8 @@ export default function App() {
 
   return (
     <NotificationProvider>
-      <BrowserRouter>
+      <InAppNotificationProvider>
+        <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route element={<PublicLayout />}>
@@ -186,6 +188,7 @@ export default function App() {
             <Route path="exports" element={<ExportPage />} />
             <Route path="my-tasks" element={<FieldOfficerTasksPage />} />
             <Route path="profile" element={<ProfileSettingsPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
           </Route>
 
           {/* Catch-all → redirect to landing */}
@@ -194,6 +197,7 @@ export default function App() {
       </BrowserRouter>
 
       <NotificationContainer />
+      </InAppNotificationProvider>
     </NotificationProvider>
   );
 }
