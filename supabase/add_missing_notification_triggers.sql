@@ -73,3 +73,48 @@ create trigger trg_on_task_assigned
 after insert or update of assigned_to on public.maintenance_tasks
 for each row
 execute function public.fn_on_task_assigned();
+
+-- Trigger for task completed -> admin
+create or replace function public.fn_on_task_completed()
+returns trigger
+security definer
+language plpgsql
+as $$
+declare
+  admin_rec record;
+  v_ticket_code text;
+  v_officer_name text;
+begin
+  -- Hanya eksekusi jika status berubah menjadi 'completed'
+  if NEW.status = 'completed' and OLD.status <> 'completed' then
+    select ticket_code into v_ticket_code from public.damage_reports where id = NEW.report_id;
+    select name into v_officer_name from public.users where id = NEW.assigned_to;
+
+    for admin_rec in 
+      select id from public.users 
+      where role = 'admin' and is_active = true
+    loop
+      insert into public.notifications (user_id, type, title, message, related_id)
+      values (
+        admin_rec.id,
+        'task_completed',
+        'Tugas Selesai: ' || COALESCE(v_ticket_code, NEW.id::text),
+        E'Pekerjaan pemeliharaan telah diselesaikan.\n\n' ||
+        E'ID Penugasan : ' || NEW.id || E'\n' ||
+        E'Petugas      : ' || COALESCE(v_officer_name, 'Petugas Lapangan') || E'\n' ||
+        E'Catatan      : ' || COALESCE(NEW.notes, '-'),
+        NEW.id
+      );
+    end loop;
+  end if;
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_on_maintenance_task_completed on public.maintenance_tasks;
+drop trigger if exists trg_on_task_completed on public.maintenance_tasks;
+
+create trigger trg_on_task_completed
+after update of status on public.maintenance_tasks
+for each row
+execute function public.fn_on_task_completed();

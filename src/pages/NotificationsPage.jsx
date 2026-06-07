@@ -153,8 +153,10 @@ export default function NotificationsPage() {
   const handleActionClick = (notif) => {
     if (notif.type === 'new_report' || notif.type === 'preventive_overdue') {
       navigate('/dashboard/reports', { state: { openReportId: notif.related_id } });
-    } else if (notif.type === 'task_assigned' || notif.type === 'task_completed') {
+    } else if (notif.type === 'task_assigned') {
       navigate('/dashboard/my-tasks', { state: { openTaskId: notif.related_id } });
+    } else if (notif.type === 'task_completed') {
+      navigate('/dashboard/maintenance', { state: { openTaskId: notif.related_id } });
     }
   };
 

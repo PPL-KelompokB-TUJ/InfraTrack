@@ -675,19 +675,8 @@ export async function updateTaskStatusWithLog(taskId, newStatus, officerId, logD
       photo_url: logData.photo_url || null,
     });
 
-    // If task is completed, create notification for admin
-    if (newStatus === 'completed') {
-      const taskDetails = await getMaintenanceTaskById(taskId);
-      if (taskDetails?.assigned_by_user?.id) {
-        await createNotification({
-          user_id: taskDetails.assigned_by_user.id,
-          type: 'task_completed',
-          title: 'Pekerjaan Pemeliharaan Selesai',
-          message: `Pekerjaan pemeliharaan untuk aset ${taskDetails.asset?.name} telah selesai`,
-          related_id: taskId,
-        });
-      }
-    }
+    // If task is completed, notification for admin is handled automatically 
+    // by the database trigger (trg_on_task_completed).
 
     return {
       task: updatedTask,

@@ -11,6 +11,7 @@ import {
   X,
   MapPin
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import MaintenanceTaskFormModal from '../components/MaintenanceTaskFormModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import MaintenanceCalendar from '../components/MaintenanceCalendar';
@@ -71,6 +72,7 @@ function formatCurrency(value) {
 }
 
 export default function MaintenanceTaskPage() {
+  const location = useLocation();
   const { addNotification } = useNotification();
   const [tasks, setTasks] = useState([]);
   const [reports, setReports] = useState([]);
@@ -205,6 +207,15 @@ export default function MaintenanceTaskPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Handle auto-open task from notification
+  useEffect(() => {
+    if (location.state?.openTaskId && tasks.length > 0) {
+      handleViewDetail(location.state.openTaskId);
+      // Clean up state so it doesn't reopen on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state?.openTaskId, tasks.length]);
 
   // Filter tasks
   const filteredTasks = useMemo(() => {
