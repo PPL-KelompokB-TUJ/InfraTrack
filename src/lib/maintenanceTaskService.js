@@ -175,16 +175,8 @@ export async function createMaintenanceTask(taskData, userId) {
       console.error('Failed to create budget record:', budgetErr);
     }
 
-    // Create notification for assigned officer
-    if (taskData.assigned_to) {
-      await createNotification({
-        user_id: taskData.assigned_to,
-        type: 'maintenance_assigned',
-        title: 'Penugasan Pemeliharaan Baru',
-        message: `Anda telah ditugaskan untuk pekerjaan pemeliharaan dengan estimasi tanggal ${new Date(taskData.scheduled_date).toLocaleDateString('id-ID')}`,
-        related_id: data.id,
-      });
-    }
+    // Notifikasi untuk petugas sekarang ditangani otomatis oleh Database Trigger 
+    // (trg_on_task_assigned), sehingga kode manual di sini dihapus untuk mencegah duplikat.
 
     return data;
   } catch (error) {

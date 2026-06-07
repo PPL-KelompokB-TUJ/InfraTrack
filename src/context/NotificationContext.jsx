@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback, useContext } from 'react';
+import { createContext, useState, useCallback, useContext, useEffect } from 'react';
 
 /**
  * Notification Context
@@ -43,12 +43,59 @@ export function NotificationProvider({ children }) {
 }
 
 /**
- * Hook to use notifications
+ * Hook to use toast notifications
  */
 export function useNotification() {
   const context = useContext(NotificationContext);
   if (!context) {
     throw new Error('useNotification must be used within NotificationProvider');
+  }
+  return context;
+}
+
+/**
+ * In-App Notification Context for Database Notifications
+ */
+const InAppNotificationContext = createContext();
+
+export function InAppNotificationProvider({ children }) {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const { supabase } = await import('../lib/supabaseClient');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+
+      if (error) throw error;
+      setUnreadCount(count || 0);
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+    }
+  }, []);
+
+  // Fetch only once on mount
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
+
+  return (
+    <InAppNotificationContext.Provider value={{ unreadCount, setUnreadCount, fetchUnreadCount }}>
+      {children}
+    </InAppNotificationContext.Provider>
+  );
+}
+
+export function useInAppNotification() {
+  const context = useContext(InAppNotificationContext);
+  if (!context) {
+    throw new Error('useInAppNotification must be used within InAppNotificationProvider');
   }
   return context;
 }

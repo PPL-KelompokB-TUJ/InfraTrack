@@ -16,6 +16,7 @@ import {
 } from '../lib/dashboardService';
 import MapVisualization from '../components/MapVisualization';
 import { useNotification } from '../context/NotificationContext';
+import NotificationBell from '../components/layout/NotificationBell';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -104,17 +105,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadStats();
-
-    // Set up auto-refresh every 30 seconds
-    intervalRef.current = setInterval(() => {
-      loadStats();
-    }, 30000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
   }, [loadStats]);
 
   const handleViewDetail = (report) => {
@@ -159,9 +149,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Bell size={20} className="text-slate-600" />
-              </button>
+              <NotificationBell />
               <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                 <Settings size={20} className="text-slate-600" />
               </button>

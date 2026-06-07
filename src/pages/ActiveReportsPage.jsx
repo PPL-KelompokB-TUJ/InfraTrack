@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, ChevronLeft, Eye, AlertCircle, Filter, X, Brain, Loader2, Info, Target } from 'lucide-react';
 import { getRecentDamageReports, verifyDamageReport, rejectDamageReport } from '../lib/damageReportService';
 import { getAnalysisResult, SEVERITY_CONFIG } from '../lib/aiAnalysisService';
@@ -45,6 +45,18 @@ export default function ActiveReportsPage() {
     setIsDetailModalOpen(false);
     setSelectedReport(null);
   };
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.openReportId && reports.length > 0) {
+      const report = reports.find(r => r.id === location.state.openReportId);
+      if (report) {
+        handleViewDetail(report);
+        // Clear state so it doesn't re-open on refresh
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state, reports]);
 
   // Filter reports
   const filteredReports = reports.filter((report) => {
