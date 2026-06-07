@@ -8,20 +8,10 @@ const __dirname = path.dirname(__filename);
 /**
  * Custom lightweight template engine to compile variables and loops in HTML templates
  */
-function compileTemplate(html, data) {
+export function compileTemplate(html, data) {
   let compiled = html;
 
-  // 1. Compile simple variables: {{name}}
-  Object.keys(data).forEach((key) => {
-    if (key !== 'items') {
-      const val = data[key] !== undefined && data[key] !== null ? String(data[key]) : '';
-      // Escape special characters in key for regex safety
-      const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-      compiled = compiled.replace(new RegExp(`{{${escapedKey}}}`, 'g'), val);
-    }
-  });
-
-  // 2. Compile array loops: {{#each items}} ... {{/each}}
+  // 1. Compile array loops: {{#each items}} ... {{/each}}
   const eachRegex = /\{\{#each items\}\}([\s\S]*?)\{\{\/each\}\}/g;
   compiled = compiled.replace(eachRegex, (match, blockTemplate) => {
     if (!data.items || !Array.isArray(data.items)) return '';
@@ -37,6 +27,16 @@ function compileTemplate(html, data) {
         return blockHtml;
       })
       .join('');
+  });
+
+  // 2. Compile simple variables: {{name}}
+  Object.keys(data).forEach((key) => {
+    if (key !== 'items') {
+      const val = data[key] !== undefined && data[key] !== null ? String(data[key]) : '';
+      // Escape special characters in key for regex safety
+      const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      compiled = compiled.replace(new RegExp(`{{${escapedKey}}}`, 'g'), val);
+    }
   });
 
   return compiled;

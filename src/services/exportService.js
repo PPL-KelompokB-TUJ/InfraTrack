@@ -249,6 +249,18 @@ export async function getOfficerPerformanceData(supabase, filters = {}) {
     .select('id, assigned_to, status, scheduled_date');
   if (tasksError) throw new Error(`Error fetching tasks: ${tasksError.message}`);
 
+  // Apply date filters in JS for reliability
+  let filteredTasks = tasks || [];
+  if (filters.fromDate) {
+    const fromDate = new Date(filters.fromDate);
+    filteredTasks = filteredTasks.filter(t => new Date(t.scheduled_date) >= fromDate);
+  }
+  if (filters.toDate) {
+    const toDate = new Date(filters.toDate);
+    toDate.setHours(23, 59, 59, 999);
+    filteredTasks = filteredTasks.filter(t => new Date(t.scheduled_date) <= toDate);
+  }
+
   // 3. Fetch completed progress logs to compute completion time
   const { data: progressLogs, error: logError } = await supabase
     .from('task_progress')
@@ -269,7 +281,7 @@ export async function getOfficerPerformanceData(supabase, filters = {}) {
   let completedCountWithDuration = 0;
 
   const items = (officers || []).map((officer, index) => {
-    const officerTasks = (tasks || []).filter(t => t.assigned_to === officer.id);
+    const officerTasks = (filteredTasks || []).filter(t => t.assigned_to === officer.id);
     const completedTasks = officerTasks.filter(t => t.status === 'completed');
 
     let totalDurationDays = 0;
