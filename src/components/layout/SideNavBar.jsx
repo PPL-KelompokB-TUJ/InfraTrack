@@ -13,6 +13,7 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
         { label: 'Manajemen Anggaran', icon: 'payments', to: '/dashboard/budgets' },
         { label: 'Manajemen Petugas', icon: 'groups', to: '/dashboard/officers' },
         { label: 'Manajemen Aset', icon: 'apartment', to: '/dashboard/assets' },
+        { label: 'Manajemen Inventaris', icon: 'inventory_2', to: '/dashboard/inventory' },
         { label: 'Master Data', icon: 'database', to: '/dashboard/master-data' },
         { label: 'Analitik AI', icon: 'smart_toy', to: '/dashboard/ai-analytics' },
         { label: 'Ekspor Laporan', icon: 'cloud_download', to: '/dashboard/exports' },
