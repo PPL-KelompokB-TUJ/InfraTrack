@@ -151,50 +151,7 @@ export default function MaintenanceTaskPage() {
         getInfrastructureAssets(),
       ]);
 
-      // Inject mockup tasks to ensure they match the image perfectly
-      const mockupTasks = [
-        {
-          id: 'mock-1',
-          scheduled_date: '2024-10-03T08:00:00+07:00',
-          estimated_cost: 0,
-          status: 'assigned',
-          report: {
-            ticket_code: 'INF-202410-8821',
-            urgency_level: 'sangat_tinggi',
-            location_description: 'Sektor B, Jembatan Merah',
-          },
-          asset: { name: 'Struktur Jembatan Merah' },
-          assigned_officer: { name: 'Budi Santoso', email: 'budi' }
-        },
-        {
-          id: 'mock-2',
-          scheduled_date: '2024-10-07T11:30:00+07:00',
-          estimated_cost: 0,
-          status: 'assigned',
-          report: {
-            ticket_code: 'INF-202410-8940',
-            urgency_level: 'sedang',
-            location_description: 'Jl. Sudirman No. 12',
-          },
-          asset: { name: 'Drainase Primer Sektor B' },
-          assigned_officer: { name: 'Siti Aminah', email: 'siti' }
-        },
-        {
-          id: 'mock-3',
-          scheduled_date: '2024-10-15T14:00:00+07:00',
-          estimated_cost: 0,
-          status: 'assigned',
-          report: {
-            ticket_code: 'INF-202410-9221',
-            urgency_level: 'rendah',
-            location_description: 'Area Terbuka Hijau C-1',
-          },
-          asset: { name: 'Penerangan Taman Kota' },
-          assigned_officer: { name: 'Agus Salim', email: 'agus' }
-        }
-      ];
-
-      setTasks([...mockupTasks, ...tasksData]);
+      setTasks(tasksData || []);
       setReports(reportsResponse.reports || []);
       setAssets(assetsData);
     } catch (error) {
