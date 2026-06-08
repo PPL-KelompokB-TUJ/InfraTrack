@@ -152,7 +152,7 @@ export default function MaintenanceTaskPage() {
 
   // Calendar states
   const [calendarView, setCalendarView] = useState('month');
-  const [currentDate, setCurrentDate] = useState(new Date('2024-10-01T00:00:00'));
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   // Confirmation modal state
   const [confirmationModal, setConfirmationModal] = useState({
@@ -667,10 +667,9 @@ export default function MaintenanceTaskPage() {
                 </div>
               )}
 
-              {/* Progress Photos */}
               {taskProgress.length > 0 && (
                 <div className="mt-4 border-t border-slate-100 pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Foto Progress Pekerjaan Terbaru</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Foto Lapangan</p>
                   <div className="relative overflow-hidden rounded-xl border border-slate-200 inline-block">
                     <img 
                       src={taskProgress[0].photo_url} 
