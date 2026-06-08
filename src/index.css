@@ -5,22 +5,147 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — Light Mode (default)
+   Material Design 3 color system exposed as CSS custom properties.
+   Tailwind references these via var(--color-*) in tailwind.config.js,
+   so every component automatically reacts when we swap values in html.dark.
+   ══════════════════════════════════════════════════════════════════════════════ */
 :root {
-  --surface-plain: #ffffff;
-  --surface-soft: #f7fdff;
-  --ink-primary: #0f172a;
-  --ink-secondary: #334155;
-  --brand-cyan: #06b6d4;
-  --brand-teal: #14b8a6;
-  --brand-navy: #0f3a52;
+  /* Surface hierarchy */
+  --color-background:                #f8f9ff;
+  --color-on-background:             #0b1c30;
+  --color-surface:                   #f8f9ff;
+  --color-surface-dim:               #cbdbf5;
+  --color-surface-bright:            #f8f9ff;
+  --color-surface-container-lowest:  #ffffff;
+  --color-surface-container-low:     #eff4ff;
+  --color-surface-container:         #e5eeff;
+  --color-surface-container-high:    #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-surface-variant:           #d3e4fe;
+
+  /* On-surface */
+  --color-on-surface:                #0b1c30;
+  --color-on-surface-variant:        #3e484d;
+  --color-inverse-surface:           #213145;
+  --color-inverse-on-surface:        #eaf1ff;
+
+  /* Outline */
+  --color-outline:                   #6e797e;
+  --color-outline-variant:           #bdc8ce;
+
+  /* Primary */
+  --color-surface-tint:              #006780;
+  --color-primary:                   #00647c;
+  --color-on-primary:                #ffffff;
+  --color-primary-container:         #007f9d;
+  --color-on-primary-container:      #fafdff;
+  --color-inverse-primary:           #6cd3f7;
+
+  /* Secondary */
+  --color-secondary:                 #006a61;
+  --color-on-secondary:              #ffffff;
+  --color-secondary-container:       #86f2e4;
+  --color-on-secondary-container:    #006f66;
+
+  /* Tertiary */
+  --color-tertiary:                  #4648d4;
+  --color-on-tertiary:               #ffffff;
+  --color-tertiary-container:        #6063ee;
+  --color-on-tertiary-container:     #fffbff;
+
+  /* Error */
+  --color-error:                     #ba1a1a;
+  --color-on-error:                  #ffffff;
+  --color-error-container:           #ffdad6;
+  --color-on-error-container:        #93000a;
+
+  /* Legacy surface tokens (used by glass-panel etc.) */
+  --surface-plain:  #ffffff;
+  --surface-soft:   #f7fdff;
+  --ink-primary:    #0f172a;
+  --ink-secondary:  #334155;
+  --brand-cyan:     #06b6d4;
+  --brand-teal:     #14b8a6;
+  --brand-navy:     #0f3a52;
+
   font-family: 'Inter', 'Manrope', 'Segoe UI', sans-serif;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — Dark Mode
+   Only the CSS variables are redefined here. Every Tailwind utility class
+   that references var(--color-*) automatically picks up the new values.
+   No component files need to be touched.
+   ══════════════════════════════════════════════════════════════════════════════ */
+html.dark {
+  color-scheme: dark;
+
+  /* Surface hierarchy — deep navy palette */
+  --color-background:                #0d1b2e;
+  --color-on-background:             #dce8f5;
+  --color-surface:                   #111d30;
+  --color-surface-dim:               #0a1320;
+  --color-surface-bright:            #1a2d46;
+  --color-surface-container-lowest:  #090f1c;
+  --color-surface-container-low:     #111d2f;
+  --color-surface-container:         #172034;
+  --color-surface-container-high:    #1e2c40;
+  --color-surface-container-highest: #253448;
+  --color-surface-variant:           #1e2c40;
+
+  /* On-surface — light readable text */
+  --color-on-surface:                #dce8f5;
+  --color-on-surface-variant:        #8faacc;
+  --color-inverse-surface:           #dce8f5;
+  --color-inverse-on-surface:        #172034;
+
+  /* Outline — subtle borders */
+  --color-outline:                   #3d5068;
+  --color-outline-variant:           #243448;
+
+  /* Primary — bright cyan for dark bg */
+  --color-surface-tint:              #6cd3f7;
+  --color-primary:                   #6cd3f7;
+  --color-on-primary:                #003546;
+  --color-primary-container:         #00495c;
+  --color-on-primary-container:      #b7eaff;
+  --color-inverse-primary:           #00647c;
+
+  /* Secondary — teal */
+  --color-secondary:                 #6bd8cb;
+  --color-on-secondary:             #003732;
+  --color-secondary-container:       #004f49;
+  --color-on-secondary-container:    #89f5e7;
+
+  /* Tertiary — soft purple */
+  --color-tertiary:                  #c0c1ff;
+  --color-on-tertiary:               #1e1e82;
+  --color-tertiary-container:        #3537b9;
+  --color-on-tertiary-container:     #e1e0ff;
+
+  /* Error — muted red for dark bg */
+  --color-error:                     #ffb4ab;
+  --color-on-error:                  #690005;
+  --color-error-container:           #93000a;
+  --color-on-error-container:        #ffdad6;
+
+  /* Legacy tokens */
+  --surface-plain:  #111d30;
+  --surface-soft:   #172034;
+  --ink-primary:    #dce8f5;
+  --ink-secondary:  #8faacc;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ══════════════════════════════════════════════════════════════════════════════ */
 body {
   margin: 0;
   min-height: 100vh;
-  background: #f8f9ff;
-  color: var(--ink-primary);
+  background: var(--color-background);
+  color: var(--color-on-surface);
 }
 
 body::before {
@@ -36,16 +161,33 @@ body::before {
   background-size: 72px 72px;
 }
 
+html.dark body::before {
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(108, 211, 247, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 211, 247, 0.04) 1px, transparent 1px);
+}
+
 #root {
   min-height: 100vh;
 }
 
-/* Legacy Glass Panels (used by admin pages) */
+/* ══════════════════════════════════════════════════════════════════════════════
+   COMPONENT HELPERS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Glass Panels */
 .glass-panel {
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(8, 145, 178, 0.2);
   box-shadow: 0 18px 35px rgba(14, 116, 144, 0.12);
   backdrop-filter: blur(6px);
+}
+
+html.dark .glass-panel {
+  background: rgba(17, 29, 48, 0.88);
+  border-color: rgba(108, 211, 247, 0.12);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.4);
 }
 
 .surface-panel {
@@ -55,68 +197,78 @@ body::before {
   backdrop-filter: blur(8px);
 }
 
+html.dark .surface-panel {
+  background: linear-gradient(180deg, rgba(23, 32, 52, 0.97), rgba(13, 27, 46, 0.95));
+  border-color: rgba(108, 211, 247, 0.1);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
+}
+
 .surface-card {
   background: var(--surface-plain);
   border: 1px solid rgba(148, 223, 238, 0.55);
   box-shadow: 0 10px 24px rgba(15, 58, 82, 0.08);
 }
 
-/* Animations */
-.fade-slide-in {
-  animation: fade-slide-in 260ms ease-out;
+html.dark .surface-card {
+  border-color: rgba(36, 52, 72, 0.8);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
 }
 
-.hero-rise {
-  animation: hero-rise 420ms ease-out;
+/* TopNavBar: hardcoded bg-white/70 → override for dark mode */
+html.dark nav.fixed.top-0 {
+  background: rgba(13, 27, 46, 0.85) !important;
+  border-color: rgba(36, 52, 72, 0.6) !important;
 }
+
+/* Inputs */
+html.dark input:not([type='checkbox']):not([type='radio']),
+html.dark textarea,
+html.dark select {
+  background-color: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  border-color: var(--color-outline-variant);
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--color-on-surface-variant);
+  opacity: 0.7;
+}
+
+/* Scrollbar */
+html.dark ::-webkit-scrollbar-track { background: var(--color-surface-dim); }
+html.dark ::-webkit-scrollbar-thumb { background: var(--color-outline); border-radius: 4px; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: var(--color-outline-variant); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════════ */
+.fade-slide-in { animation: fade-slide-in 260ms ease-out; }
+.hero-rise     { animation: hero-rise 420ms ease-out; }
 
 .stagger-fade > * {
   opacity: 0;
   transform: translateY(8px);
   animation: fade-slide-in 320ms ease-out forwards;
 }
-
-.stagger-fade > *:nth-child(1) {
-  animation-delay: 40ms;
-}
-
-.stagger-fade > *:nth-child(2) {
-  animation-delay: 90ms;
-}
-
-.stagger-fade > *:nth-child(3) {
-  animation-delay: 140ms;
-}
-
-.stagger-fade > *:nth-child(4) {
-  animation-delay: 190ms;
-}
+.stagger-fade > *:nth-child(1) { animation-delay: 40ms; }
+.stagger-fade > *:nth-child(2) { animation-delay: 90ms; }
+.stagger-fade > *:nth-child(3) { animation-delay: 140ms; }
+.stagger-fade > *:nth-child(4) { animation-delay: 190ms; }
 
 @keyframes fade-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Material Symbols */
+/* ══════════════════════════════════════════════════════════════════════════════
+   MATERIAL SYMBOLS
+   ══════════════════════════════════════════════════════════════════════════════ */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
@@ -125,86 +277,26 @@ body::before {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* ── Dark Mode Overrides (PBI-19) ────────────────────────────────────────────
-   When html.dark is active (set by ThemeContext), these rules override the
-   default light-mode colors without changing any component structure.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-html.dark body {
-  background: #0d1b2e;
-  color: #e2eaf5;
+/* ══════════════════════════════════════════════════════════════════════════════
+   SMOOTH THEME TRANSITION
+   Apply only to properties that change on theme switch to avoid slowing
+   CSS animations and transforms.
+   ══════════════════════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
 }
 
-html.dark body::before {
-  background-image:
-    linear-gradient(rgba(108, 211, 247, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(108, 211, 247, 0.03) 1px, transparent 1px);
+/* Reset transition for elements that animate intentionally */
+.animate-spin,
+.animate-bounce,
+.animate-pulse,
+.fade-slide-in,
+.hero-rise,
+.stagger-fade > *,
+[class*='animate-'] {
+  transition: none;
 }
-
-/* Tailwind custom color token overrides for dark mode */
-html.dark .bg-background       { background-color: #0d1b2e !important; }
-html.dark .bg-surface           { background-color: #131f32 !important; }
-html.dark .bg-surface-dim       { background-color: #0a1525 !important; }
-html.dark .bg-surface-bright    { background-color: #1a2d46 !important; }
-html.dark .bg-surface-container-lowest { background-color: #080f1c !important; }
-html.dark .bg-surface-container-low    { background-color: #111d2f !important; }
-html.dark .bg-surface-container        { background-color: #172034 !important; }
-html.dark .bg-surface-container-high   { background-color: #1e2b3f !important; }
-html.dark .bg-surface-container-highest{ background-color: #24334a !important; }
-html.dark .bg-surface-variant   { background-color: #1e2b3f !important; }
-html.dark .bg-primary-container { background-color: #004f63 !important; }
-html.dark .bg-secondary-container { background-color: #004f49 !important; }
-html.dark .bg-error-container   { background-color: #690005 !important; }
-
-html.dark .text-on-surface         { color: #e2eaf5 !important; }
-html.dark .text-on-surface-variant { color: #9fb4cc !important; }
-html.dark .text-on-background      { color: #e2eaf5 !important; }
-html.dark .text-on-primary-container { color: #b7eaff !important; }
-html.dark .text-on-secondary-container { color: #89f5e7 !important; }
-html.dark .text-on-error-container { color: #ffdad6 !important; }
-html.dark .text-primary            { color: #6cd3f7 !important; }
-html.dark .text-secondary          { color: #6bd8cb !important; }
-
-html.dark .border-outline-variant  { border-color: #2a3a52 !important; }
-html.dark .border-outline          { border-color: #3d5068 !important; }
-
-/* Inputs and interactive elements */
-html.dark input:not([type='checkbox']):not([type='radio']),
-html.dark textarea,
-html.dark select {
-  background-color: #172034;
-  color: #e2eaf5;
-  border-color: #2a3a52;
-}
-
-html.dark input::placeholder,
-html.dark textarea::placeholder {
-  color: #5a7290;
-}
-
-/* Glass / surface helper classes */
-html.dark .glass-panel {
-  background: rgba(19, 31, 50, 0.88);
-  border-color: rgba(108, 211, 247, 0.15);
-}
-
-html.dark .surface-panel {
-  background: linear-gradient(180deg, rgba(19, 31, 50, 0.95), rgba(13, 27, 46, 0.92));
-  border-color: rgba(108, 211, 247, 0.15);
-}
-
-html.dark .surface-card {
-  background: #131f32;
-  border-color: rgba(42, 58, 82, 0.8);
-}
-
-/* Scrollbar subtle styling for dark mode */
-html.dark ::-webkit-scrollbar-track { background: #0d1b2e; }
-html.dark ::-webkit-scrollbar-thumb { background: #2a3a52; border-radius: 4px; }
-html.dark ::-webkit-scrollbar-thumb:hover { background: #3d5068; }
-
-/* Transition for smooth theme switch */
-html, body, * {
-  transition: background-color 0.25s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
