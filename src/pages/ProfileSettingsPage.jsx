@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '../lib/utils';
+import { useTheme } from '../context/ThemeContext';
 import {
   getProfile,
   updateProfile,
@@ -144,6 +145,7 @@ function PasswordStrength({ password }) {
 // ── main page ─────────────────────────────────────────────────────────────────
 
 export default function ProfileSettingsPage() {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [profile, setProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -580,6 +582,59 @@ export default function ProfileSettingsPage() {
               </p>
             </div>
           )}
+        </div>
+
+        {/* ── Preferensi Tampilan (PBI-19: Dark Mode) ── */}
+        <div className="p-6 md:p-7 space-y-4">
+          <SectionHeader icon="palette" title="Preferensi Tampilan" />
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[22px] text-on-surface-variant">
+                {isDarkMode ? 'dark_mode' : 'light_mode'}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-on-surface">
+                  {isDarkMode ? 'Mode Gelap' : 'Mode Terang'}
+                </p>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  {isDarkMode
+                    ? 'Tampilan saat ini menggunakan tema gelap'
+                    : 'Tampilan saat ini menggunakan tema terang'}
+                </p>
+              </div>
+            </div>
+
+            {/* Toggle Switch */}
+            <button
+              id="dark-mode-toggle"
+              type="button"
+              role="switch"
+              aria-checked={isDarkMode}
+              aria-label="Toggle dark mode"
+              onClick={toggleTheme}
+              className={cn(
+                'relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2',
+                isDarkMode ? 'bg-primary' : 'bg-outline-variant',
+              )}
+            >
+              <span
+                className={cn(
+                  'pointer-events-none inline-flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200',
+                  isDarkMode ? 'translate-x-5' : 'translate-x-0',
+                )}
+              >
+                <span
+                  className={cn(
+                    'material-symbols-outlined text-[12px] transition-colors',
+                    isDarkMode ? 'text-primary' : 'text-outline-variant',
+                  )}
+                >
+                  {isDarkMode ? 'dark_mode' : 'light_mode'}
+                </span>
+              </span>
+            </button>
+          </div>
         </div>
 
       </div>

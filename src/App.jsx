@@ -6,6 +6,7 @@ import TopNavBar from './components/layout/TopNavBar';
 import SideNavBar from './components/layout/SideNavBar';
 import NotificationContainer from './components/NotificationContainer';
 import { NotificationProvider, InAppNotificationProvider } from './context/NotificationContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Auth
 import {
@@ -149,10 +150,11 @@ export default function App() {
   const auth = useAuth();
 
   return (
-    <NotificationProvider>
-      <InAppNotificationProvider>
-        <BrowserRouter>
-        <Routes>
+    <ThemeProvider>
+      <NotificationProvider>
+        <InAppNotificationProvider>
+          <BrowserRouter>
+          <Routes>
           {/* Public Routes */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
@@ -196,8 +198,9 @@ export default function App() {
         </Routes>
       </BrowserRouter>
 
-      <NotificationContainer />
-      </InAppNotificationProvider>
-    </NotificationProvider>
+        <NotificationContainer />
+          </InAppNotificationProvider>
+        </NotificationProvider>
+    </ThemeProvider>
   );
 }
