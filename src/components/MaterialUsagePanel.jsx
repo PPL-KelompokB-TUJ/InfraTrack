@@ -13,11 +13,25 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
 
   // Form state
   const [showForm, setShowForm] = useState(false);
-  const [selectedMaterialId, setSelectedMaterialId] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [notes, setNotes] = useState('');
+  const [formData, setFormData] = useState([{ materialId: '', quantity: '', notes: '' }]);
 
   const canEdit = taskStatus === 'in_progress' && userRole === 'officer';
+
+  const handleAddRow = () => {
+    setFormData([...formData, { materialId: '', quantity: '', notes: '' }]);
+  };
+
+  const handleRemoveRow = (index) => {
+    const newForm = [...formData];
+    newForm.splice(index, 1);
+    setFormData(newForm);
+  };
+
+  const handleChangeRow = (index, field, value) => {
+    const newForm = [...formData];
+    newForm[index][field] = value;
+    setFormData(newForm);
+  };
 
   useEffect(() => {
     if (taskId) {
@@ -44,17 +58,27 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
   const handleAddUsage = async (e) => {
     e.preventDefault();
     
-    if (!selectedMaterialId || !quantity) {
-      addNotification('Material dan jumlah harus diisi', 'error');
-      return;
+    // Validasi kosong
+    for (let i = 0; i < formData.length; i++) {
+      if (!formData[i].materialId || !formData[i].quantity) {
+        addNotification(`Baris ${i + 1}: Material dan jumlah harus diisi`, 'error');
+        return;
+      }
     }
 
-    const material = materials.find(m => m.id === selectedMaterialId);
-    if (!material) return;
+    // Hitung total quantity per material untuk cek stok
+    const materialCounts = {};
+    for (const row of formData) {
+      materialCounts[row.materialId] = (materialCounts[row.materialId] || 0) + Number(row.quantity);
+    }
 
-    if (Number(quantity) > Number(material.stock)) {
-      addNotification(`Stok tidak cukup. Sisa stok: ${material.stock}`, 'error');
-      return;
+    // Cek stok
+    for (const [mId, totalQty] of Object.entries(materialCounts)) {
+      const material = materials.find(m => m.id === mId);
+      if (material && totalQty > Number(material.stock)) {
+        addNotification(`Stok ${material.name} tidak cukup. Dibutuhkan: ${totalQty}, Sisa stok: ${material.stock}`, 'error');
+        return;
+      }
     }
 
     try {
@@ -62,28 +86,32 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
       const { data: sessionData } = await supabase.auth.getSession();
       const officerId = sessionData.session.user.id;
 
-      const q = Number(quantity);
-      const price = Number(material.unit_price);
-      const totalCost = (q * price);
+      // Submit all rows
+      const bulkData = formData.map(row => {
+        const material = materials.find(m => m.id === row.materialId);
+        const q = Number(row.quantity);
+        const price = Number(material.unit_price);
+        const totalCost = q * price;
 
-      await addMaterialUsage({
-        task_id: taskId,
-        material_id: material.id,
-        quantity_used: q,
-        unit_price_at_usage: price,
-        additional_cost: 0,
-        total_cost: totalCost,
-        notes: notes,
-        reported_by: officerId
+        return {
+          task_id: taskId,
+          material_id: material.id,
+          quantity_used: q,
+          unit_price_at_usage: price,
+          additional_cost: 0,
+          total_cost: totalCost,
+          notes: row.notes,
+          reported_by: officerId
+        };
       });
+
+      await addMaterialUsage(bulkData);
 
       addNotification('Pemakaian material berhasil dicatat', 'success');
       
       // Reset form
       setShowForm(false);
-      setSelectedMaterialId('');
-      setQuantity('');
-      setNotes('');
+      setFormData([{ materialId: '', quantity: '', notes: '' }]);
       
       // Reload data
       loadData();
@@ -131,7 +159,10 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
         {canEdit && (
           <button
             type="button"
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setShowForm(true);
+              setFormData([{ materialId: '', quantity: '', notes: '' }]);
+            }}
             className="inline-flex items-center gap-1 rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-cyan-700"
           >
             <Plus size={14} />
@@ -143,53 +174,83 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
       {/* 2. Form Pemakaian Material (Inline) */}
       {showForm && (
         <div className="mb-6 rounded-2xl border border-cyan-100 bg-cyan-50/50 p-5 shadow-inner">
-          <h3 className="mb-4 text-sm font-bold text-slate-800">Catat Pemakaian Baru</h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-800">Catat Pemakaian Baru</h3>
+            <button
+              type="button"
+              onClick={handleAddRow}
+              className="rounded-full bg-cyan-100 p-1.5 text-cyan-600 hover:bg-cyan-200 transition shadow-sm"
+              title="Tambah Baris Material"
+            >
+              <Plus size={18} />
+            </button>
+          </div>
           <form onSubmit={handleAddUsage}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Pilih Material</label>
-                <select
-                  required
-                  value={selectedMaterialId}
-                  onChange={(e) => setSelectedMaterialId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
-                >
-                  <option value="">-- Pilih Material --</option>
-                  {materials.map(m => (
-                    <option key={m.id} value={m.id} disabled={m.stock <= 0}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Jumlah Dipakai</label>
-                <input
-                  required
-                  type="number"
-                  min="0.1"
-                  step="any"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
-                  placeholder="Contoh: 2"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="mb-1.5 block text-xs font-semibold text-slate-600">Catatan (Opsional)</label>
-                <input
-                  type="text"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
-                  placeholder="Keterangan material ini..."
-                />
-              </div>
+            <div className="space-y-4">
+              {formData.map((row, index) => (
+                <div key={index} className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  {formData.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveRow(index)}
+                      className="absolute right-2 top-2 rounded-lg p-1 text-rose-500 hover:bg-rose-50 transition"
+                      title="Hapus baris"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">Pilih Material</label>
+                      <select
+                        required
+                        value={row.materialId}
+                        onChange={(e) => handleChangeRow(index, 'materialId', e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                      >
+                        <option value="">-- Pilih Material --</option>
+                        {materials.map(m => (
+                          <option key={m.id} value={m.id} disabled={m.stock <= 0}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">Jumlah Dipakai</label>
+                      <input
+                        required
+                        type="number"
+                        min="0.1"
+                        step="any"
+                        value={row.quantity}
+                        onChange={(e) => handleChangeRow(index, 'quantity', e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                        placeholder="Contoh: 2"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">Catatan (Opsional)</label>
+                      <input
+                        type="text"
+                        value={row.notes}
+                        onChange={(e) => handleChangeRow(index, 'notes', e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                        placeholder="Keterangan material ini..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+            
             <div className="mt-4 flex gap-3 justify-end border-t border-cyan-100/50 pt-4">
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={() => {
+                  setShowForm(false);
+                  setFormData([{ materialId: '', quantity: '', notes: '' }]);
+                }}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
               >
                 Batal

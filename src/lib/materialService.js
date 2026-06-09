@@ -80,15 +80,19 @@ export async function getMaterialUsages(taskId) {
   return data;
 }
 
-export async function addMaterialUsage(usageData) {
+export async function addMaterialUsage(usageDataArray) {
+  // Check if it's an array for bulk insert, if not, wrap it in array
+  const dataToInsert = Array.isArray(usageDataArray) ? usageDataArray : [usageDataArray];
+  
   const { data, error } = await supabase
     .from('material_usages')
-    .insert([usageData])
-    .select()
-    .single();
+    .insert(dataToInsert)
+    .select();
 
   if (error) throw error;
-  return data;
+  
+  // Return single if it was not an array initially (backward compatibility), else return array
+  return Array.isArray(usageDataArray) ? data : data[0];
 }
 
 export async function getMaterialById(id) {
