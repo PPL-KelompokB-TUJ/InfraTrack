@@ -84,11 +84,67 @@ declare
   admin_rec record;
   v_ticket_code text;
   v_officer_name text;
+  v_material_list text;
+  v_material_row record;
+  v_clean_notes text;
+  v_biaya_lainnya text;
+  v_final_message text;
 begin
   -- Hanya eksekusi jika status berubah menjadi 'completed'
   if NEW.status = 'completed' and OLD.status <> 'completed' then
     select ticket_code into v_ticket_code from public.damage_reports where id = NEW.report_id;
     select name into v_officer_name from public.users where id = NEW.assigned_to;
+
+    -- Extract "Biaya Lainnya" and Clean Notes
+    v_clean_notes := COALESCE(NEW.notes, '-');
+    v_biaya_lainnya := '';
+    
+    if v_clean_notes ~ 'Biaya Lainnya: Rp' then
+      v_biaya_lainnya := substring(v_clean_notes from 'Biaya Lainnya: Rp.*$');
+      v_clean_notes := regexp_replace(v_clean_notes, E'\\n*Biaya Lainnya: Rp.*$', '');
+    end if;
+    
+    if trim(v_clean_notes) = '' then
+      v_clean_notes := '-';
+    end if;
+
+    -- Get materials used
+    v_material_list := '';
+    for v_material_row in 
+      select m.name, mu.quantity_used, m.unit, mu.total_cost, mu.notes as m_notes
+      from public.material_usages mu
+      join public.materials m on m.id = mu.material_id
+      where mu.task_id = NEW.id
+    loop
+      v_material_list := v_material_list || v_material_row.name || ': ' || 
+                         v_material_row.quantity_used || ' ' || v_material_row.unit || 
+                         ' (Rp ' || REPLACE(to_char(v_material_row.total_cost, 'FM999G999G999'), ',', '.') || ')';
+      
+      if v_material_row.m_notes is not null and trim(v_material_row.m_notes) <> '' then
+        v_material_list := v_material_list || ' – ' || v_material_row.m_notes;
+      end if;
+      
+      v_material_list := v_material_list || E'\n';
+    end loop;
+    
+    if v_material_list = '' then
+      v_material_list := 'Tidak ada pemakaian material' || E'\n';
+    end if;
+
+    -- Format final message
+    v_final_message := E'Pekerjaan pemeliharaan telah diselesaikan.\n\n' ||
+                       E'ID Penugasan: ' || NEW.id || E'\n' ||
+                       E'Petugas: ' || COALESCE(v_officer_name, 'Petugas Lapangan') || E'\n' ||
+                       E'Catatan: ' || v_clean_notes || E'\n\n' ||
+                       E'Ringkasan Pemakaian Material:\n' || v_material_list;
+                       
+    if v_biaya_lainnya <> '' then
+      v_final_message := v_final_message || E'\n' || v_biaya_lainnya || E'\n';
+    else
+      v_final_message := v_final_message || E'\n';
+    end if;
+    
+    v_final_message := v_final_message || E'Total Realisasi: Rp ' || COALESCE(REPLACE(to_char(NEW.actual_cost, 'FM999G999G999'), ',', '.'), '0');
 
     for admin_rec in 
       select id from public.users 
@@ -99,10 +155,7 @@ begin
         admin_rec.id,
         'task_completed',
         'Tugas Selesai: ' || COALESCE(v_ticket_code, NEW.id::text),
-        E'Pekerjaan pemeliharaan telah diselesaikan.\n\n' ||
-        E'ID Penugasan : ' || NEW.id || E'\n' ||
-        E'Petugas      : ' || COALESCE(v_officer_name, 'Petugas Lapangan') || E'\n' ||
-        E'Catatan      : ' || COALESCE(NEW.notes, '-'),
+        v_final_message,
         NEW.id
       );
     end loop;
