@@ -28,6 +28,7 @@ import MaterialUsagePanel from '../components/MaterialUsagePanel';
 
 const statusOptions = [
   { value: 'pending', label: 'Menunggu', color: 'slate', icon: AlertCircle },
+  { value: 'scheduled', label: 'Dijadwalkan', color: 'purple', icon: Calendar },
   { value: 'assigned', label: 'Ditugaskan', color: 'blue', icon: Clock },
   { value: 'in_progress', label: 'Sedang Dikerjakan', color: 'amber', icon: Play },
   { value: 'completed', label: 'Selesai', color: 'emerald', icon: CheckCircle },
@@ -227,10 +228,10 @@ export default function FieldOfficerTasksPage() {
           {[
             { label: 'Total', value: stats.total, color: 'slate' },
             { label: 'Menunggu', value: stats.pending, color: 'slate' },
+            { label: 'Dijadwalkan', value: stats.scheduled, color: 'purple' },
             { label: 'Ditugaskan', value: stats.assigned, color: 'blue' },
             { label: 'Sedang Dikerjakan', value: stats.in_progress, color: 'amber' },
             { label: 'Selesai', value: stats.completed, color: 'emerald' },
-            { label: 'Dibatalkan', value: stats.cancelled, color: 'rose' },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -397,7 +398,24 @@ export default function FieldOfficerTasksPage() {
             )}
 
             {/* Update Form */}
-            {taskDetails.status === 'pending' || taskDetails.status === 'cancelled' || taskDetails.status === 'completed' ? (
+            {taskDetails.status === 'scheduled' ? (
+              <div className="rounded-2xl border border-purple-200 bg-purple-50 p-6 text-center mt-6">
+                <Calendar size={32} className="mx-auto mb-3 text-purple-500" />
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Tugas Dijadwalkan</h3>
+                <p className="text-sm text-slate-600 mb-6">
+                  Tugas ini dijadwalkan pada {new Date(taskDetails.scheduled_date).toLocaleDateString('id-ID')}. Formulir pengerjaan akan otomatis terbuka pada hari penugasan.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetailModal(false)}
+                    className="flex-1 rounded-xl border border-purple-200 px-4 py-2.5 font-semibold text-purple-700 bg-white transition hover:bg-purple-100"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            ) : taskDetails.status === 'pending' || taskDetails.status === 'cancelled' || taskDetails.status === 'completed' ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
                 <AlertCircle size={24} className="mx-auto mb-2 text-slate-500" />
                 <p className="text-sm font-semibold text-slate-700">

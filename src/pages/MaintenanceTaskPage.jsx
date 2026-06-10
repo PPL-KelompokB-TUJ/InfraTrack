@@ -9,13 +9,15 @@ import {
   Search,
   Trash2,
   X,
-  MapPin
+  MapPin,
+  Calendar
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import MaintenanceTaskFormModal from '../components/MaintenanceTaskFormModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import MaintenanceCalendar from '../components/MaintenanceCalendar';
 import MaterialUsagePanel from '../components/MaterialUsagePanel';
+import AllSchedulesModal from '../components/AllSchedulesModal';
 import { useNotification } from '../context/NotificationContext';
 import {
   getMaintenanceTasks,
@@ -30,6 +32,7 @@ import { getInfrastructureAssets } from '../lib/infrastructureAssetsService';
 
 const statusLabelStyles = {
   pending: 'border-slate-200 bg-slate-100 text-slate-700',
+  scheduled: 'border-purple-200 bg-purple-100 text-purple-700',
   assigned: 'border-cyan-200 bg-cyan-100 text-cyan-700',
   in_progress: 'border-amber-200 bg-amber-100 text-amber-700',
   completed: 'border-emerald-200 bg-emerald-100 text-emerald-700',
@@ -38,6 +41,7 @@ const statusLabelStyles = {
 
 const statusLabels = {
   pending: 'Pending',
+  scheduled: 'Dijadwalkan',
   assigned: 'Ditugaskan',
   in_progress: 'Sedang Dikerjakan',
   completed: 'Selesai',
@@ -46,6 +50,7 @@ const statusLabels = {
 
 const statusIcons = {
   pending: AlertCircle,
+  scheduled: Calendar,
   assigned: Clock3,
   in_progress: Clock3,
   completed: CheckCircle2,
@@ -150,9 +155,14 @@ export default function MaintenanceTaskPage() {
     }
   }
 
+
+
   // Calendar states
   const [calendarView, setCalendarView] = useState('month');
   const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // All Schedules Modal State
+  const [isAllSchedulesModalOpen, setIsAllSchedulesModalOpen] = useState(false);
 
   // Confirmation modal state
   const [confirmationModal, setConfirmationModal] = useState({
@@ -212,6 +222,7 @@ export default function MaintenanceTaskPage() {
   const stats = useMemo(() => {
     return {
       total: tasks.length,
+      scheduled: tasks.filter((task) => task.status === 'scheduled').length,
       pending: tasks.filter((task) => task.status === 'pending').length,
       assigned: tasks.filter((task) => task.status === 'assigned').length,
       in_progress: tasks.filter((task) => task.status === 'in_progress').length,
@@ -440,6 +451,7 @@ export default function MaintenanceTaskPage() {
             >
               <option value="">Semua Status</option>
               <option value="pending">Pending</option>
+              <option value="scheduled">Dijadwalkan</option>
               <option value="assigned">Ditugaskan</option>
               <option value="in_progress">Sedang Dikerjakan</option>
               <option value="completed">Selesai</option>
@@ -490,6 +502,7 @@ export default function MaintenanceTaskPage() {
               onNavigate={handleNavigate}
               onView={setCalendarView}
               view={calendarView}
+              onTaskClick={handleViewDetail}
             />
           )}
         </div>
@@ -523,10 +536,15 @@ export default function MaintenanceTaskPage() {
                       className="bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-cyan-300 hover:shadow-sm transition-all"
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${style.badge}`}>
-                          {urgency}
-                        </span>
-                        <span className="text-xs font-medium text-slate-600">
+                        <div className="flex gap-2 flex-wrap">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${style.badge}`}>
+                            {urgency}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${statusLabelStyles[task.status] || 'border-slate-200 bg-slate-100 text-slate-700'}`}>
+                            {statusLabels[task.status] || task.status}
+                          </span>
+                        </div>
+                        <span className="text-xs font-medium text-slate-600 whitespace-nowrap ml-2">
                           {new Date(task.scheduled_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
                         </span>
                       </div>
@@ -537,7 +555,11 @@ export default function MaintenanceTaskPage() {
                       
                       <div className="flex items-start gap-1.5 text-slate-500 mb-4">
                         <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                        <span className="text-xs line-clamp-2">{task.report?.location_description || '-'}</span>
+                        <span className="text-xs line-clamp-2">
+                          {task.report?.latitude && task.report?.longitude 
+                            ? `${task.report.latitude}, ${task.report.longitude}`
+                            : task.report?.location_description || '-'}
+                        </span>
                       </div>
                       
                       <div className="flex items-center justify-between pt-3 border-t border-slate-100">
@@ -562,7 +584,10 @@ export default function MaintenanceTaskPage() {
             </div>
             
             <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-              <button className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors">
+              <button 
+                onClick={() => setIsAllSchedulesModalOpen(true)}
+                className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors"
+              >
                 Lihat Semua Jadwal
               </button>
             </div>
@@ -718,7 +743,7 @@ export default function MaintenanceTaskPage() {
                 onClick={() => setDetailModal(null)}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
               >
-                Batal
+                Tutup
               </button>
             </div>
           </div>
@@ -731,6 +756,13 @@ export default function MaintenanceTaskPage() {
         message="Hapus penugasan ini? Data yang dihapus tidak dapat dikembalikan."
         onConfirm={confirmDeleteTask}
         onCancel={() => setConfirmationModal((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      <AllSchedulesModal
+        isOpen={isAllSchedulesModalOpen}
+        onClose={() => setIsAllSchedulesModalOpen(false)}
+        tasks={tasks}
+        onViewDetail={handleViewDetail}
       />
 
       {/* Lightbox Modal */}
