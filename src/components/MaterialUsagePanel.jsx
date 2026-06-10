@@ -140,10 +140,15 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Stok Material Tersedia</h4>
           <div className="flex flex-wrap gap-2">
             {materials.map((m) => (
-              <div key={m.id} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-sm">
-                <span className="text-sm font-semibold text-slate-700">{m.name}</span>
-                <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
-                  {m.stock} {m.unit}
+              <div key={m.id} className="flex flex-col justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm min-w-[140px]">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-semibold text-slate-700">{m.name}</span>
+                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-bold text-slate-600">
+                    {m.stock} {m.unit}
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 mt-1 font-medium">
+                  Rp {Number(m.unit_price).toLocaleString('id-ID')} / {m.unit}
                 </span>
               </div>
             ))}

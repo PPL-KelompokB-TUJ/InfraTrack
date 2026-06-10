@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useInAppNotification } from '../context/NotificationContext';
-import { Check, CheckCheck, Bell, Clock, Info, CheckCircle2, AlertTriangle, Hammer, Trash2, ListChecks, X, ArrowRight } from 'lucide-react';
+import { Check, CheckCheck, Bell, Clock, Info, CheckCircle2, AlertTriangle, Hammer, Trash2, ListChecks, X, ArrowRight, CalendarClock, Ban, CalendarSync, PackageMinus } from 'lucide-react';
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -153,12 +153,14 @@ export default function NotificationsPage() {
   const handleActionClick = (notif) => {
     if (notif.type === 'new_report') {
       navigate('/dashboard/reports', { state: { openReportId: notif.related_id } });
-    } else if (notif.type === 'task_assigned') {
+    } else if (['task_assigned', 'task_scheduled', 'task_rescheduled', 'task_cancelled'].includes(notif.type)) {
       navigate('/dashboard/my-tasks', { state: { openTaskId: notif.related_id } });
     } else if (notif.type === 'task_completed' || notif.type === 'material_added') {
       navigate('/dashboard/maintenance', { state: { openTaskId: notif.related_id } });
     } else if (notif.type === 'preventive_reminder' || notif.type === 'preventive_overdue') {
       navigate('/dashboard/preventive');
+    } else if (notif.type === 'low_stock') {
+      navigate('/dashboard/inventory');
     }
   };
 
@@ -166,8 +168,12 @@ export default function NotificationsPage() {
     switch(type) {
       case 'new_report': return <AlertTriangle className="text-orange-500" size={24} />;
       case 'task_assigned': return <Hammer className="text-blue-500" size={24} />;
+      case 'task_scheduled': return <CalendarClock className="text-purple-500" size={24} />;
+      case 'task_cancelled': return <Ban className="text-rose-500" size={24} />;
+      case 'task_rescheduled': return <CalendarSync className="text-amber-500" size={24} />;
       case 'task_completed': return <CheckCircle2 className="text-emerald-500" size={24} />;
       case 'preventive_overdue': return <Clock className="text-red-500" size={24} />;
+      case 'low_stock': return <PackageMinus className="text-rose-600" size={24} />;
       default: return <Info className="text-cyan-500" size={24} />;
     }
   };
@@ -348,15 +354,18 @@ export default function NotificationsPage() {
                 >
                   Tutup
                 </button>
-                <button 
-                  onClick={() => handleActionClick(viewingNotification)}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors shadow-sm"
-                >
-                  {viewingNotification.type === 'new_report' ? 'Lihat Detail Laporan' : 
-                   (viewingNotification.type === 'preventive_overdue' || viewingNotification.type === 'preventive_reminder') ? 'Lihat Jadwal Preventif' : 
-                   'Lihat Detail Penugasan'}
-                  <ArrowRight size={16} />
-                </button>
+                {viewingNotification.type !== 'task_cancelled' && (
+                  <button 
+                    onClick={() => handleActionClick(viewingNotification)}
+                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors shadow-sm"
+                  >
+                    {viewingNotification.type === 'new_report' ? 'Lihat Detail Laporan' : 
+                     (viewingNotification.type === 'preventive_overdue' || viewingNotification.type === 'preventive_reminder') ? 'Lihat Jadwal Preventif' : 
+                     viewingNotification.type === 'low_stock' ? 'Lihat Inventaris' :
+                     'Lihat Detail Penugasan'}
+                    <ArrowRight size={16} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
