@@ -142,18 +142,6 @@ export async function getMaintenanceTaskById(id) {
  */
 export async function createMaintenanceTask(taskData, userId) {
   try {
-    let initialStatus = 'assigned';
-    if (taskData.scheduled_date) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const scheduledDateObj = new Date(taskData.scheduled_date);
-      scheduledDateObj.setHours(0, 0, 0, 0);
-      
-      if (scheduledDateObj > today) {
-        initialStatus = 'scheduled';
-      }
-    }
-
     const payload = {
       report_id: taskData.report_id,
       asset_id: taskData.asset_id,
@@ -161,7 +149,7 @@ export async function createMaintenanceTask(taskData, userId) {
       assigned_by: userId || null,
       scheduled_date: taskData.scheduled_date,
       estimated_cost: taskData.estimated_cost || null,
-      status: initialStatus,
+      status: 'assigned', // This will be automatically overridden by Supabase trigger if scheduled in the future
       instructions: taskData.instructions || '',
       notes: taskData.notes || '',
     };
@@ -215,15 +203,8 @@ export async function updateMaintenanceTask(id, taskData) {
       updated_at: new Date().toISOString(),
     };
 
-    // Recalculate status if scheduled_date is updated and current status is pending/assigned/scheduled
-    if (taskData.scheduled_date && ['pending', 'assigned', 'scheduled'].includes(currentTask.status)) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const scheduledDateObj = new Date(taskData.scheduled_date);
-      scheduledDateObj.setHours(0, 0, 0, 0);
-      
-      payload.status = scheduledDateObj > today ? 'scheduled' : 'assigned';
-    }
+    // Logika penentuan status otomatis untuk tanggal di masa depan
+    // kini ditangani oleh Database Trigger di Supabase.
 
     const { data, error } = await supabase
       .from('maintenance_tasks')
