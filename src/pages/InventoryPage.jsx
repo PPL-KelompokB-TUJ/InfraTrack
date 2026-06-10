@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Package, Plus, Pencil, ArrowUpCircle, Trash2, Search } from 'lucide-react';
+import { Package, Plus, Pencil, ArrowUpCircle, Trash2, Search, History } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
 import {
   getMaterials,
@@ -21,7 +22,7 @@ export default function InventoryPage() {
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
   
   const [formData, setFormData] = useState({ id: null, name: '', unit: '', stock: '', unit_price: '', is_active: true });
-  const [restockData, setRestockData] = useState({ id: null, name: '', currentStock: 0, additionalStock: '' });
+  const [restockData, setRestockData] = useState({ id: null, name: '', currentStock: 0, additionalStock: '', referenceNote: '' });
 
   const [confirmationModal, setConfirmationModal] = useState({
     isOpen: false,
@@ -59,7 +60,7 @@ export default function InventoryPage() {
   };
 
   const handleOpenRestock = (material) => {
-    setRestockData({ id: material.id, name: material.name, currentStock: material.stock, additionalStock: '' });
+    setRestockData({ id: material.id, name: material.name, currentStock: material.stock, additionalStock: '', referenceNote: '' });
     setIsRestockModalOpen(true);
   };
 
@@ -95,7 +96,8 @@ export default function InventoryPage() {
     e.preventDefault();
     try {
       const newStock = Number(restockData.currentStock) + (Number(restockData.additionalStock) || 0);
-      await restockMaterial(restockData.id, newStock);
+      const note = restockData.referenceNote || 'Restok manual';
+      await restockMaterial(restockData.id, newStock, note);
       addNotification(`Stok ${restockData.name} berhasil ditambah`, 'success');
       setIsRestockModalOpen(false);
       loadMaterials();
@@ -135,13 +137,22 @@ export default function InventoryPage() {
               Kelola daftar material pemeliharaan, stok, dan harga satuan.
             </p>
           </div>
-          <button
-            onClick={() => handleOpenForm()}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow hover:brightness-110"
-          >
-            <Plus size={18} />
-            Tambah Material
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/dashboard/inventory/history"
+              className="inline-flex items-center gap-2 rounded-xl bg-white border border-cyan-200 px-4 py-2.5 text-sm font-bold text-cyan-700 shadow-sm hover:bg-cyan-50"
+            >
+              <History size={18} />
+              Riwayat Inventaris
+            </Link>
+            <button
+              onClick={() => handleOpenForm()}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow hover:brightness-110"
+            >
+              <Plus size={18} />
+              Tambah Material
+            </button>
+          </div>
         </div>
 
         <div className="mb-6">
@@ -344,6 +355,16 @@ export default function InventoryPage() {
                   min="1"
                   value={restockData.additionalStock}
                   onChange={e => setRestockData({ ...restockData, additionalStock: e.target.value })}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-slate-700">Catatan / Alasan Restok</label>
+                <input
+                  type="text"
+                  placeholder="Opsional (misal: No. Invoice / Pemasok)"
+                  value={restockData.referenceNote}
+                  onChange={e => setRestockData({ ...restockData, referenceNote: e.target.value })}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
                 />
               </div>
