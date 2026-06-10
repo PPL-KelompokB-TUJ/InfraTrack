@@ -32,7 +32,11 @@ export async function getOfficerTasks(officerId) {
       if (task.report) {
         const repStatus = task.report.status;
         if (repStatus === 'pending') taskStatus = 'pending';
-        else if (repStatus === 'terverifikasi') taskStatus = 'assigned';
+        else if (repStatus === 'terverifikasi') {
+          if (task.status === 'scheduled') taskStatus = 'scheduled';
+          else if (task.status === 'cancelled') taskStatus = 'cancelled';
+          else taskStatus = 'assigned';
+        }
         else if (repStatus === 'sedang_dikerjakan') taskStatus = 'in_progress';
         else if (repStatus === 'selesai') taskStatus = 'completed';
         else if (repStatus === 'ditolak') taskStatus = 'cancelled';
@@ -86,7 +90,11 @@ export async function getTaskDetails(taskId, officerId) {
     if (task.report) {
       const repStatus = task.report.status;
       if (repStatus === 'pending') taskStatus = 'pending';
-      else if (repStatus === 'terverifikasi') taskStatus = 'assigned';
+      else if (repStatus === 'terverifikasi') {
+        if (task.status === 'scheduled') taskStatus = 'scheduled';
+        else if (task.status === 'cancelled') taskStatus = 'cancelled';
+        else taskStatus = 'assigned';
+      }
       else if (repStatus === 'sedang_dikerjakan') taskStatus = 'in_progress';
       else if (repStatus === 'selesai') taskStatus = 'completed';
       else if (repStatus === 'ditolak') taskStatus = 'cancelled';
@@ -224,6 +232,7 @@ export async function getOfficerTaskStats(officerId) {
 
     const stats = {
       total: tasks.length,
+      scheduled: tasks.filter(t => t.status === 'scheduled').length,
       pending: tasks.filter(t => t.status === 'pending').length,
       assigned: tasks.filter(t => t.status === 'assigned').length,
       in_progress: tasks.filter(t => t.status === 'in_progress').length,
