@@ -151,12 +151,14 @@ export default function NotificationsPage() {
   };
 
   const handleActionClick = (notif) => {
-    if (notif.type === 'new_report' || notif.type === 'preventive_overdue') {
+    if (notif.type === 'new_report') {
       navigate('/dashboard/reports', { state: { openReportId: notif.related_id } });
     } else if (notif.type === 'task_assigned') {
       navigate('/dashboard/my-tasks', { state: { openTaskId: notif.related_id } });
-    } else if (notif.type === 'task_completed') {
+    } else if (notif.type === 'task_completed' || notif.type === 'material_added') {
       navigate('/dashboard/maintenance', { state: { openTaskId: notif.related_id } });
+    } else if (notif.type === 'preventive_reminder' || notif.type === 'preventive_overdue') {
+      navigate('/dashboard/preventive');
     }
   };
 
@@ -350,7 +352,9 @@ export default function NotificationsPage() {
                   onClick={() => handleActionClick(viewingNotification)}
                   className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors shadow-sm"
                 >
-                  {(viewingNotification.type === 'new_report' || viewingNotification.type === 'preventive_overdue') ? 'Lihat Detail Laporan' : 'Lihat Detail Penugasan'}
+                  {viewingNotification.type === 'new_report' ? 'Lihat Detail Laporan' : 
+                   (viewingNotification.type === 'preventive_overdue' || viewingNotification.type === 'preventive_reminder') ? 'Lihat Jadwal Preventif' : 
+                   'Lihat Detail Penugasan'}
                   <ArrowRight size={16} />
                 </button>
               </div>
