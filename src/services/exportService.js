@@ -330,3 +330,53 @@ export async function getOfficerPerformanceData(supabase, filters = {}) {
     }
   };
 }
+
+/**
+ * Fetch and format data for Laporan Manajemen Inventaris (Rekapitulasi)
+ */
+export async function getInventoryRecapData(supabase, filters = {}) {
+  // 1. Fetch materials
+  let query = supabase.from('materials').select('*').order('name', { ascending: true });
+  
+  const { data: materials, error: materialsError } = await query;
+  if (materialsError) throw new Error(`Error fetching materials: ${materialsError.message}`);
+
+  // Apply filters in JS if needed, though for inventory we usually want current state.
+  // We can filter out inactive if necessary, but typically a recap shows everything or just active.
+  let filteredMaterials = materials || [];
+
+  let totalItems = 0;
+  let emptyItems = 0;
+  let totalValuation = 0;
+
+  const items = filteredMaterials.map((item, index) => {
+    const stock = Number(item.stock || 0);
+    const price = Number(item.unit_price || 0);
+    const totalValue = stock * price;
+
+    totalItems++;
+    if (stock === 0) emptyItems++;
+    totalValuation += totalValue;
+
+    return {
+      no: index + 1,
+      material_name: item.name,
+      stock: stock,
+      unit: item.unit || '-',
+      unit_price: price.toLocaleString('id-ID'),
+      total_value: totalValue.toLocaleString('id-ID'),
+      status_label: item.is_active ? 'Aktif' : 'Non-aktif',
+      status_class: item.is_active ? 'aktif' : 'nonaktif'
+    };
+  });
+
+  return {
+    items,
+    summary: {
+      total_materials: totalItems,
+      empty_materials: emptyItems,
+      total_valuation: `Rp ${totalValuation.toLocaleString('id-ID')}`,
+      raw_total_valuation: totalValuation
+    }
+  };
+}

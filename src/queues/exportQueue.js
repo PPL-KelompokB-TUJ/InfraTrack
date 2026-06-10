@@ -8,7 +8,8 @@ import {
   getSupabaseClient, 
   getAssetConditionData, 
   getMaintenanceRecapData, 
-  getOfficerPerformanceData 
+  getOfficerPerformanceData,
+  getInventoryRecapData
 } from '../services/exportService.js';
 import { generatePdfReport } from '../services/pdfTemplateService.js';
 import { generateExcelReport } from '../services/excelGeneratorService.js';
@@ -52,6 +53,8 @@ const processExport = async (data) => {
       reportData = await getMaintenanceRecapData(supabase, filters);
     } else if (reportType === 'officer-performance') {
       reportData = await getOfficerPerformanceData(supabase, filters);
+    } else if (reportType === 'inventory-recap') {
+      reportData = await getInventoryRecapData(supabase, filters);
     } else {
       throw new Error(`Invalid report type: ${reportType}`);
     }
@@ -61,7 +64,8 @@ const processExport = async (data) => {
     const typeMap = {
       'asset-condition': 'AssetCondition',
       'maintenance-recap': 'MaintenanceRecap',
-      'officer-performance': 'OfficerPerformance'
+      'officer-performance': 'OfficerPerformance',
+      'inventory-recap': 'InventoryRecap'
     };
     const pascalType = typeMap[reportType] || 'Report';
 

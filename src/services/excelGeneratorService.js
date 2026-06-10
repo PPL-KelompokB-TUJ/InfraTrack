@@ -23,6 +23,8 @@ export async function generateExcelReport(reportType, data, filters = {}) {
     generateMaintenanceRecapSheet(sheet, data, filters, headerFillColor, zebraFillColor, borderStyle);
   } else if (reportType === 'officer-performance') {
     generateOfficerPerformanceSheet(sheet, data, filters, headerFillColor, zebraFillColor, borderStyle);
+  } else if (reportType === 'inventory-recap') {
+    generateInventoryRecapSheet(sheet, data, filters, headerFillColor, zebraFillColor, borderStyle);
   }
 
   // Adjust column widths automatically
@@ -188,6 +190,65 @@ function generateOfficerPerformanceSheet(sheet, data, filters, headerBg, zebraBg
 
   // Apply Styling
   styleSheetLayout(sheet, 8, 14, headerBg, zebraBg, borderStyle);
+}
+
+/**
+ * Build Inventory Recap report sheet
+ */
+function generateInventoryRecapSheet(sheet, data, filters, headerBg, zebraBg, borderStyle) {
+  // Title Rows
+  sheet.addRow(['LAPORAN REKAPITULASI MANAJEMEN INVENTARIS']);
+  sheet.addRow([`Dicetak pada: ${new Date().toLocaleString('id-ID')}`]);
+  sheet.addRow([]);
+
+  // Summary Metrics
+  sheet.addRow(['SUMMARY METRICS']);
+  sheet.addRow(['Total Jenis Material', data.summary.total_materials, 'Estimasi Total Nilai Aset', data.summary.raw_total_valuation]);
+  sheet.addRow(['Material Habis (Stok 0)', data.summary.empty_materials]);
+  sheet.addRow([]);
+
+  // Setup Table Header
+  sheet.addRow([
+    'No',
+    'Nama Material',
+    'Stok Saat Ini',
+    'Satuan',
+    'Harga Satuan (Rp)',
+    'Total Nilai (Rp)',
+    'Status'
+  ]);
+
+  // Insert Data Rows
+  data.items.forEach((item) => {
+    // We used toLocaleString in the service for the HTML template, but Excel needs numbers for summation
+    // Let's strip the formatting back to raw numbers for Excel if needed, 
+    // OR we can just use the raw numbers if we parse them.
+    // Wait, in exportService, unit_price and total_value are returned as formatted strings.
+    // Excel needs raw numbers to sum correctly.
+    // I will parse the formatted string back to number just for Excel.
+    const rawPrice = typeof item.unit_price === 'string' ? Number(item.unit_price.replace(/\./g, '')) : item.unit_price;
+    const rawTotal = typeof item.total_value === 'string' ? Number(item.total_value.replace(/\./g, '')) : item.total_value;
+
+    sheet.addRow([
+      item.no,
+      item.material_name,
+      Number(item.stock),
+      item.unit,
+      rawPrice,
+      rawTotal,
+      item.status_label
+    ]);
+  });
+
+  // Apply Styling
+  styleSheetLayout(sheet, 8, 14, headerBg, zebraBg, borderStyle);
+
+  // Format Currency Columns
+  sheet.getColumn(5).numFmt = '#,##0';
+  sheet.getColumn(6).numFmt = '#,##0';
+
+  // Apply currency formatting to summary cell (Row 5, Col D)
+  sheet.getCell('D5').numFmt = 'Rp #,##0';
 }
 
 /**
