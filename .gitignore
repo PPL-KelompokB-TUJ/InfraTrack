@@ -15,3 +15,36 @@ public/exports/
 
 # Agent artifacts & logs
 artifacts/
+
+# Scratch and temporary developer scripts
+scratch/
+
+# Supabase local state and CLI temp files
+supabase/.temp/
+
+# Temporary files and logs
+temp_*
+*.tmp
+*.temp
+*.log
+*_OUTPUT.txt
+temp_main_master.sql
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Accidental files/typos
+({
+0
+1
+2
+3
+4
+{
+getPriorityLevel(calculatePriorityScore(r))
+marker.remove())
+setSelectedReport(report))
+
+# Duplicates / backups
+InfraTrack-CC/
