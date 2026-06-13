@@ -24,9 +24,11 @@ import {
 } from '../lib/fieldOfficerTaskService';
 import { useNotification } from '../context/NotificationContext';
 import NotificationBell from '../components/layout/NotificationBell';
+import MaterialUsagePanel from '../components/MaterialUsagePanel';
 
 const statusOptions = [
   { value: 'pending', label: 'Menunggu', color: 'slate', icon: AlertCircle },
+  { value: 'scheduled', label: 'Dijadwalkan', color: 'purple', icon: Calendar },
   { value: 'assigned', label: 'Ditugaskan', color: 'blue', icon: Clock },
   { value: 'in_progress', label: 'Sedang Dikerjakan', color: 'amber', icon: Play },
   { value: 'completed', label: 'Selesai', color: 'emerald', icon: CheckCircle },
@@ -46,6 +48,12 @@ export default function FieldOfficerTasksPage() {
   const [updatePhoto, setUpdatePhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Complete Modal state
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [completeNotes, setCompleteNotes] = useState('');
+  const [completeAdditionalCost, setCompleteAdditionalCost] = useState('');
+  const [completeAdditionalCostDesc, setCompleteAdditionalCostDesc] = useState('');
   const [activePhotoUrl, setActivePhotoUrl] = useState(null);
 
   const { addNotification } = useNotification();
@@ -114,9 +122,11 @@ export default function FieldOfficerTasksPage() {
     }
   };
 
-  const handleUpdateStatus = async (e) => {
+  const handleUpdateStatus = async (e, targetStatus) => {
     e.preventDefault();
     setIsUpdating(true);
+
+    const finalStatus = targetStatus || updateStatus;
 
     try {
       let photoUrl = null;
@@ -128,13 +138,23 @@ export default function FieldOfficerTasksPage() {
       }
 
       // Update status
-      const result = await updateTaskStatus(selectedTask.id, updateStatus, updateNotes, photoUrl);
+      let notesToSave = updateNotes;
+      if (finalStatus === 'completed' && Number(completeAdditionalCost) > 0) {
+        const costDesc = completeAdditionalCostDesc ? ` (${completeAdditionalCostDesc})` : '';
+        const extraNote = `Biaya Lainnya: Rp ${Number(completeAdditionalCost).toLocaleString('id-ID')}${costDesc}`;
+        notesToSave = notesToSave ? `${notesToSave}\n\n${extraNote}` : extraNote;
+      }
+      
+      const result = await updateTaskStatus(selectedTask.id, finalStatus, notesToSave, photoUrl, completeAdditionalCost);
       const finalTaskId = result?.taskId || selectedTask.id;
 
-      addNotification('Penugasan berhasil diperbarui', 'success');
+      addNotification(finalStatus === 'completed' ? 'Tugas berhasil diselesaikan' : 'Progress berhasil disimpan', 'success');
 
-      // Reset form
       setUpdateNotes('');
+      setCompleteNotes('');
+      setCompleteAdditionalCost('');
+      setCompleteAdditionalCostDesc('');
+      setShowCompleteModal(false);
       setUpdatePhoto(null);
       setPhotoPreview(null);
 
@@ -143,7 +163,7 @@ export default function FieldOfficerTasksPage() {
       const officerId = sessionData.session.user.id;
 
       // Update selectedTask state with the new real ID
-      setSelectedTask(prev => ({ ...prev, id: finalTaskId }));
+      setSelectedTask(prev => ({ ...prev, id: finalTaskId, status: finalStatus }));
 
       // Refetch task details to update the timeline instantly
       const details = await getTaskDetails(finalTaskId, officerId);
@@ -208,10 +228,10 @@ export default function FieldOfficerTasksPage() {
           {[
             { label: 'Total', value: stats.total, color: 'slate' },
             { label: 'Menunggu', value: stats.pending, color: 'slate' },
+            { label: 'Dijadwalkan', value: stats.scheduled, color: 'purple' },
             { label: 'Ditugaskan', value: stats.assigned, color: 'blue' },
             { label: 'Sedang Dikerjakan', value: stats.in_progress, color: 'amber' },
             { label: 'Selesai', value: stats.completed, color: 'emerald' },
-            { label: 'Dibatalkan', value: stats.cancelled, color: 'rose' },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -364,17 +384,46 @@ export default function FieldOfficerTasksPage() {
               </div>
             )}
 
+            {/* Material Usage Panel */}
+            {(taskDetails.status === 'in_progress' || taskDetails.status === 'completed') && (
+              <div className="mb-6 border-t border-slate-200 pt-6">
+                <MaterialUsagePanel 
+                  taskId={taskDetails.id} 
+                  taskStatus={taskDetails.status} 
+                  userRole="officer"
+                  taskActualCost={taskDetails.actual_cost}
+                  taskAdditionalCostDesc={taskDetails.notes?.match(/Biaya Lainnya: Rp .*?\((.*?)\)/)?.[1] || ''}
+                />
+              </div>
+            )}
+
             {/* Update Form */}
-            {taskDetails.isExternalReport && (taskDetails.status === 'pending' || taskDetails.status === 'cancelled') ? (
+            {taskDetails.status === 'scheduled' ? (
+              <div className="rounded-2xl border border-purple-200 bg-purple-50 p-6 text-center mt-6">
+                <Calendar size={32} className="mx-auto mb-3 text-purple-500" />
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Tugas Dijadwalkan</h3>
+                <p className="text-sm text-slate-600 mb-6">
+                  Tugas ini dijadwalkan pada {new Date(taskDetails.scheduled_date).toLocaleDateString('id-ID')}. Formulir pengerjaan akan otomatis terbuka pada hari penugasan.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetailModal(false)}
+                    className="flex-1 rounded-xl border border-purple-200 px-4 py-2.5 font-semibold text-purple-700 bg-white transition hover:bg-purple-100"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            ) : taskDetails.status === 'pending' || taskDetails.status === 'cancelled' || taskDetails.status === 'completed' ? (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
                 <AlertCircle size={24} className="mx-auto mb-2 text-slate-500" />
                 <p className="text-sm font-semibold text-slate-700">
                   {taskDetails.status === 'pending'
                     ? 'Laporan masih menunggu verifikasi admin. Tugas belum aktif.'
-                    : 'Laporan ini telah ditolak oleh admin. Tugas dibatalkan.'}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Anda tidak dapat memperbarui status pekerjaan untuk laporan ini.
+                    : taskDetails.status === 'cancelled'
+                    ? 'Laporan ini telah dibatalkan.'
+                    : 'Pekerjaan ini telah selesai. Akses perubahan status dan input material dikunci.'}
                 </p>
                 <div className="flex gap-3 pt-6">
                   <button
@@ -386,93 +435,145 @@ export default function FieldOfficerTasksPage() {
                   </button>
                 </div>
               </div>
-            ) : (
-              <form onSubmit={handleUpdateStatus} className="space-y-4">
-              {/* Status Dropdown */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700">Status Pekerjaan</label>
-                <select
-                  value={updateStatus}
-                  onChange={(e) => setUpdateStatus(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
-                >
-                  {statusOptions
-                    .filter((opt) => opt.value !== 'pending' && opt.value !== 'cancelled')
-                    .map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700">Catatan Lapangan</label>
-                <textarea
-                  value={updateNotes}
-                  onChange={(e) => setUpdateNotes(e.target.value)}
-                  placeholder="Tambahkan catatan tentang progress pekerjaan..."
-                  rows={4}
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
-                />
-              </div>
-
-              {/* Photo Upload */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700">Foto Progress</label>
-                <div className="mt-2">
-                  {photoPreview ? (
-                    <div className="relative">
-                      <img
-                        src={photoPreview}
-                        alt="Preview"
-                        className="max-h-48 rounded-xl object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUpdatePhoto(null);
-                          setPhotoPreview(null);
-                        }}
-                        className="absolute right-2 top-2 rounded-lg bg-rose-500 p-2 text-white hover:bg-rose-600"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 transition hover:border-cyan-400">
-                      <Upload size={20} className="text-slate-600" />
-                      <span className="text-sm font-medium text-slate-700">Pilih foto</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoSelect}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
+            ) : taskDetails.status === 'assigned' ? (
+              <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 text-center mt-6">
+                <Clock size={32} className="mx-auto mb-3 text-blue-500" />
+                <h3 className="text-lg font-bold text-slate-800 mb-1">Tugas Baru Diterima</h3>
+                <p className="text-sm text-slate-600 mb-6">Silakan konfirmasi untuk mulai mengerjakan tugas ini dan mengakses formulir pemakaian material.</p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetailModal(false)}
+                    className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Nanti Saja
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleUpdateStatus(e, 'in_progress')}
+                    disabled={isUpdating}
+                    className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white hover:bg-blue-700 transition shadow-lg shadow-blue-200 disabled:opacity-70"
+                  >
+                    {isUpdating ? 'Memproses...' : 'Terima & Kerjakan'}
+                  </button>
                 </div>
               </div>
+            ) : (
+              <div className="mt-6 border-t border-slate-200 pt-6">
+                <form onSubmit={(e) => handleUpdateStatus(e, 'in_progress')} className="space-y-4 mb-8">
+                  {/* Notes */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700">Catatan Lapangan</label>
+                    <textarea
+                      value={updateNotes}
+                      onChange={(e) => setUpdateNotes(e.target.value)}
+                      placeholder="Catat progress saat ini..."
+                      rows={3}
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                    />
+                  </div>
 
-              {/* Buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowDetailModal(false)}
-                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-100"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isUpdating}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
-                >
-                  {isUpdating ? 'Menyimpan...' : 'Simpan Perubahan'}
-                </button>
+                  {/* Photo Upload */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700">Foto Lapangan</label>
+                    <div className="mt-2">
+                      {photoPreview ? (
+                        <div className="relative">
+                          <img
+                            src={photoPreview}
+                            alt="Preview"
+                            className="max-h-48 rounded-xl object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUpdatePhoto(null);
+                              setPhotoPreview(null);
+                            }}
+                            className="absolute right-2 top-2 rounded-lg bg-rose-500 p-2 text-white hover:bg-rose-600"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 transition hover:border-cyan-400">
+                          <Upload size={20} className="text-slate-600" />
+                          <span className="text-sm font-medium text-slate-700">Pilih foto</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoSelect}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={isUpdating}
+                      className="rounded-xl bg-amber-500 px-6 py-2.5 font-semibold text-white shadow-lg transition hover:bg-amber-600 disabled:opacity-70"
+                    >
+                      {isUpdating ? 'Menyimpan...' : 'Simpan Progress'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCompleteModal(true)}
+                      disabled={!updateNotes.trim() || !updatePhoto}
+                      className="rounded-xl bg-emerald-500 px-6 py-2.5 font-bold text-white shadow-lg transition hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Selesaikan Tugas
+                    </button>
+                  </div>
+                </form>
+
+                {showCompleteModal && (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 mt-4 shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <form onSubmit={(e) => handleUpdateStatus(e, 'completed')} className="text-left">
+                      <div className="mb-4">
+                        <label className="block text-sm font-semibold text-slate-700">Biaya Lainnya (Rp) (Opsional)</label>
+                        <div className="mt-1 flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="number"
+                            min="0"
+                            value={completeAdditionalCost}
+                            onChange={(e) => setCompleteAdditionalCost(e.target.value)}
+                            placeholder="Nominal"
+                            className="w-full sm:w-1/3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-emerald-400"
+                          />
+                          <input
+                            type="text"
+                            value={completeAdditionalCostDesc}
+                            onChange={(e) => setCompleteAdditionalCostDesc(e.target.value)}
+                            placeholder="Keterangan biaya (Bensin, Konsumsi, dll)"
+                            className="w-full sm:w-2/3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-emerald-400"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          type="button"
+                          onClick={() => setShowCompleteModal(false)}
+                          className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-600 hover:bg-slate-100 transition"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isUpdating}
+                          className="flex-1 rounded-xl bg-emerald-600 px-4 py-2.5 font-bold text-white shadow-lg hover:bg-emerald-700 transition disabled:opacity-70"
+                        >
+                          {isUpdating ? 'Memproses...' : 'Konfirmasi & Selesai'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
               </div>
-            </form>
           )}
 
             {/* Progress History */}
@@ -491,7 +592,7 @@ export default function FieldOfficerTasksPage() {
                         </span>
                       </div>
                       {progress.notes && (
-                        <p className="mt-2 text-sm text-slate-700">{progress.notes}</p>
+                        <p className="mt-2 text-sm text-slate-700">{progress.notes.replace(/Biaya Lainnya: Rp .*/g, '').trim()}</p>
                       )}
                       {progress.photo_url && (
                         <button

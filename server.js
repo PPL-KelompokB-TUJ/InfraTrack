@@ -4,8 +4,6 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import exportRoutes from './src/routes/exportRoutes.js';
-import budgetRoutes from './src/routes/budgetRoutes.js';
-import notificationRoutes from './src/routes/notificationRoutes.js';
 
 // Load environment configurations
 dotenv.config();
@@ -27,11 +25,7 @@ app.use('/exports', express.static(publicExportsPath));
 // Bind report export routing
 app.use('/api/export', exportRoutes);
 
-// Bind budget management routing
-app.use('/api/budgets', budgetRoutes);
 
-// Bind notifications routing
-app.use('/api/notifications', notificationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

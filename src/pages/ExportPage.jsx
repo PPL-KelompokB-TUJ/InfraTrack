@@ -11,7 +11,8 @@ import {
   XCircle, 
   AlertCircle,
   Clock,
-  Trash2
+  Trash2,
+  Package
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNotification } from '../context/NotificationContext';
@@ -228,6 +229,8 @@ export default function ExportPage() {
         return 'Rekapitulasi Pemeliharaan Periodik';
       case 'officer-performance':
         return 'Laporan Kinerja Petugas';
+      case 'inventory-recap':
+        return 'Laporan Manajemen Inventaris';
       default:
         return type;
     }
@@ -290,7 +293,7 @@ export default function ExportPage() {
               {/* Step 1: Select Report Type */}
               <div className="space-y-3">
                 <label className="text-sm font-bold text-slate-700">1. Pilih Jenis Laporan</label>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <button
                     type="button"
                     onClick={() => setReportType('asset-condition')}
@@ -303,7 +306,7 @@ export default function ExportPage() {
                     <Database className={reportType === 'asset-condition' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
                     <div>
                       <p className="text-sm font-semibold">Kondisi Aset</p>
-                      <p className="mt-1 text-[10px] leading-normal opacity-85">Kondisi fisik, lokasi koordinat, & aduan kerusakan</p>
+                      <p className="mt-1 text-[10px] leading-normal opacity-85">Kondisi fisik, lokasi, & aduan</p>
                     </div>
                   </button>
 
@@ -319,7 +322,7 @@ export default function ExportPage() {
                     <FileText className={reportType === 'maintenance-recap' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
                     <div>
                       <p className="text-sm font-semibold">Pemeliharaan</p>
-                      <p className="mt-1 text-[10px] leading-normal opacity-85">Realisasi biaya & rekap penugasan periodik</p>
+                      <p className="mt-1 text-[10px] leading-normal opacity-85">Realisasi & rekap penugasan</p>
                     </div>
                   </button>
 
@@ -335,7 +338,23 @@ export default function ExportPage() {
                     <Users className={reportType === 'officer-performance' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
                     <div>
                       <p className="text-sm font-semibold">Kinerja Petugas</p>
-                      <p className="mt-1 text-[10px] leading-normal opacity-85">Total tugas, status penyelesaian, & durasi kerja</p>
+                      <p className="mt-1 text-[10px] leading-normal opacity-85">Total tugas & durasi kerja</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setReportType('inventory-recap')}
+                    className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-5 text-center transition ${
+                      reportType === 'inventory-recap'
+                        ? 'border-cyan-500 bg-cyan-50/50 text-cyan-900 shadow-glow'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Package className={reportType === 'inventory-recap' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
+                    <div>
+                      <p className="text-sm font-semibold">Manajemen Inventaris</p>
+                      <p className="mt-1 text-[10px] leading-normal opacity-85">Stok, harga & total nilai material</p>
                     </div>
                   </button>
                 </div>

@@ -32,7 +32,11 @@ export async function getOfficerTasks(officerId) {
       if (task.report) {
         const repStatus = task.report.status;
         if (repStatus === 'pending') taskStatus = 'pending';
-        else if (repStatus === 'terverifikasi') taskStatus = 'assigned';
+        else if (repStatus === 'terverifikasi') {
+          if (task.status === 'scheduled') taskStatus = 'scheduled';
+          else if (task.status === 'cancelled') taskStatus = 'cancelled';
+          else taskStatus = 'assigned';
+        }
         else if (repStatus === 'sedang_dikerjakan') taskStatus = 'in_progress';
         else if (repStatus === 'selesai') taskStatus = 'completed';
         else if (repStatus === 'ditolak') taskStatus = 'cancelled';
@@ -86,7 +90,11 @@ export async function getTaskDetails(taskId, officerId) {
     if (task.report) {
       const repStatus = task.report.status;
       if (repStatus === 'pending') taskStatus = 'pending';
-      else if (repStatus === 'terverifikasi') taskStatus = 'assigned';
+      else if (repStatus === 'terverifikasi') {
+        if (task.status === 'scheduled') taskStatus = 'scheduled';
+        else if (task.status === 'cancelled') taskStatus = 'cancelled';
+        else taskStatus = 'assigned';
+      }
       else if (repStatus === 'sedang_dikerjakan') taskStatus = 'in_progress';
       else if (repStatus === 'selesai') taskStatus = 'completed';
       else if (repStatus === 'ditolak') taskStatus = 'cancelled';
@@ -115,7 +123,7 @@ export async function getTaskDetails(taskId, officerId) {
 /**
  * Update task status with notes and photo
  */
-export async function updateTaskStatus(taskId, status, notes = '', photoUrl = null) {
+export async function updateTaskStatus(taskId, status, notes = '', photoUrl = null, additionalCost = 0) {
   try {
     const { data: session, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !session.session) {
@@ -137,16 +145,30 @@ export async function updateTaskStatus(taskId, status, notes = '', photoUrl = nu
 
     if (progressError) throw progressError;
 
+    let updateData = {
+      status,
+      notes,
+      last_status_update: new Date().toISOString(),
+      last_officer_notes: notes,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (Number(additionalCost) > 0 && status === 'completed') {
+      const { data: taskData } = await supabase.from('maintenance_tasks').select('actual_cost').eq('id', taskId).single();
+      const newCost = (taskData.actual_cost || 0) + Number(additionalCost);
+      updateData.actual_cost = newCost;
+
+      // Update budgets table as well
+      const { data: budgetData } = await supabase.from('budgets').select('actual_cost').eq('task_id', taskId).single();
+      if (budgetData) {
+        await supabase.from('budgets').update({ actual_cost: (budgetData.actual_cost || 0) + Number(additionalCost) }).eq('task_id', taskId);
+      }
+    }
+
     // Update the task status and details
     const { error: updateError } = await supabase
       .from('maintenance_tasks')
-      .update({
-        status,
-        notes,
-        last_status_update: new Date().toISOString(),
-        last_officer_notes: notes,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', taskId)
       .eq('assigned_to', officerId);
 
@@ -210,6 +232,7 @@ export async function getOfficerTaskStats(officerId) {
 
     const stats = {
       total: tasks.length,
+      scheduled: tasks.filter(t => t.status === 'scheduled').length,
       pending: tasks.filter(t => t.status === 'pending').length,
       assigned: tasks.filter(t => t.status === 'assigned').length,
       in_progress: tasks.filter(t => t.status === 'in_progress').length,

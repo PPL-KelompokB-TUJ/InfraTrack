@@ -40,7 +40,7 @@ export async function getMaintenanceTasks(filters = {}) {
       .from('maintenance_tasks')
       .select(`
         *,
-        report:damage_reports!maintenance_tasks_report_id_fkey(id, ticket_code, urgency_level, description),
+        report:damage_reports!maintenance_tasks_report_id_fkey(id, ticket_code, urgency_level, description, latitude, longitude),
         asset:infrastructure_assets!maintenance_tasks_asset_id_fkey(id, name)
       `)
       .order('created_at', { ascending: false });
@@ -149,7 +149,7 @@ export async function createMaintenanceTask(taskData, userId) {
       assigned_by: userId || null,
       scheduled_date: taskData.scheduled_date,
       estimated_cost: taskData.estimated_cost || null,
-      status: 'assigned',
+      status: 'assigned', // This will be automatically overridden by Supabase trigger if scheduled in the future
       instructions: taskData.instructions || '',
       notes: taskData.notes || '',
     };
@@ -189,10 +189,22 @@ export async function createMaintenanceTask(taskData, userId) {
  */
 export async function updateMaintenanceTask(id, taskData) {
   try {
+    // First fetch current task to check status
+    const { data: currentTask, error: fetchError } = await supabase
+      .from('maintenance_tasks')
+      .select('status')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw new Error(fetchError.message);
+
     const payload = {
       ...taskData,
       updated_at: new Date().toISOString(),
     };
+
+    // Logika penentuan status otomatis untuk tanggal di masa depan
+    // kini ditangani oleh Database Trigger di Supabase.
 
     const { data, error } = await supabase
       .from('maintenance_tasks')
@@ -293,7 +305,7 @@ export async function getMaintenanceTasksByOfficer(officerId) {
         asset:infrastructure_assets!maintenance_tasks_asset_id_fkey(id, name)
       `)
       .eq('assigned_to', officerId)
-      .in('status', ['assigned', 'in_progress'])
+      .in('status', ['scheduled', 'assigned', 'in_progress'])
       .order('scheduled_date', { ascending: true });
 
     if (error) throw new Error(error.message);

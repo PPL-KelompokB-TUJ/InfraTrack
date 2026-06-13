@@ -119,11 +119,11 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800">
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-cyan-200 border-t-cyan-600"></div>
-            <p className="mt-4 text-slate-600">Memuat dashboard...</p>
+            <p className="mt-4 text-slate-600 dark:text-slate-400">Memuat dashboard...</p>
           </div>
         </div>
       </main>
@@ -131,27 +131,27 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pb-12">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 pb-12">
       {/* Top Bar */}
-      <div className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <div className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-700 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   placeholder="Cari aset, laporan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full max-w-sm pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full max-w-sm pl-10 pr-4 py-2 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
             <div className="flex items-center gap-3">
               <NotificationBell />
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Settings size={20} className="text-slate-600" />
+              <button className="p-2 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <Settings size={20} className="text-slate-600 dark:text-slate-400" />
               </button>
             </div>
           </div>
@@ -161,19 +161,19 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900">Dashboard</h1>
-          <p className="mt-1 text-slate-600">Infratrack / Dashboard</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">Dashboard</h1>
+          <p className="mt-1 text-slate-600 dark:text-slate-400">Infratrack / Dashboard</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {/* Total Assets */}
-          <div className="glass-panel rounded-2xl p-6 border border-cyan-100 bg-white">
+          <div className="glass-panel rounded-2xl p-6 border border-cyan-100 dark:border-cyan-900/30 bg-white dark:bg-gray-800">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600 mb-1">TOTAL ASET</p>
-                <p className="text-4xl font-bold text-slate-900">{stats.totalAssets.toLocaleString('id-ID')}</p>
-                <p className="text-xs text-slate-500 mt-2">+{stats.assetsChange} bulan ini</p>
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">TOTAL ASET</p>
+                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{stats.totalAssets.toLocaleString('id-ID')}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">+{stats.assetsChange} bulan ini</p>
               </div>
               <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-100 to-cyan-50 text-cyan-600">
                 <Building2 size={24} />
@@ -184,13 +184,13 @@ export default function DashboardPage() {
           {/* Damage Reports - Clickable */}
           <button
             onClick={() => navigate('/dashboard/reports')}
-            className="glass-panel rounded-2xl p-6 border border-red-100 bg-white hover:bg-red-50 hover:border-red-200 transition-colors cursor-pointer"
+            className="glass-panel rounded-2xl p-6 border border-red-100 dark:border-red-900/30 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-200 transition-colors cursor-pointer"
           >
             <div className="flex items-start justify-between">
               <div className="text-left">
-                <p className="text-sm font-semibold text-slate-600 mb-1">LAPORAN AKTIF</p>
-                <p className="text-4xl font-bold text-slate-900">{stats.totalReports}</p>
-                <p className="text-xs text-slate-500 mt-2">{stats.reportsChange} terlaksanakan</p>
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">LAPORAN AKTIF</p>
+                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{stats.totalReports}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{stats.reportsChange} terlaksanakan</p>
               </div>
               <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-red-100 to-red-50 text-red-600">
                 <AlertCircle size={24} />
@@ -199,12 +199,12 @@ export default function DashboardPage() {
           </button>
 
           {/* Maintenance Done */}
-          <div className="glass-panel rounded-2xl p-6 border border-emerald-100 bg-white">
+          <div className="glass-panel rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-gray-800">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600 mb-1">MAINTENANCE DONE</p>
-                <p className="text-4xl font-bold text-slate-900">{stats.completedTasks}</p>
-                <p className="text-xs text-emerald-600 font-semibold mt-2">+{stats.tasksChange}% vs target</p>
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">MAINTENANCE DONE</p>
+                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{stats.completedTasks}</p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-2">+{stats.tasksChange}% vs target</p>
               </div>
               <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600">
                 <CheckCircle2 size={24} />
@@ -213,15 +213,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Budget */}
-          <div className="glass-panel rounded-2xl p-6 border border-amber-100 bg-white">
+          <div className="glass-panel rounded-2xl p-6 border border-amber-100 dark:border-amber-900/30 bg-white dark:bg-gray-800">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-600 mb-1">ANGGARAN TERPAKSI</p>
-                <p className="text-2xl font-bold text-slate-900">Rp {(stats.budgetAllocated / 1000000).toFixed(1)}M</p>
-                <div className="w-full bg-slate-200 rounded-full h-2 mt-3">
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">ANGGARAN TERPAKSI</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">Rp {(stats.budgetAllocated / 1000000).toFixed(1)}M</p>
+                <div className="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-2 mt-3">
                   <div className="bg-amber-500 h-2 rounded-full" style={{width: `${stats.budgetProgress}%`}}></div>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">{stats.budgetProgress}% rencana tahunan</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{stats.budgetProgress}% rencana tahunan</p>
               </div>
               <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-amber-50 text-amber-600">
                 <DollarSign size={24} />
@@ -293,9 +293,9 @@ export default function DashboardPage() {
         {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Reports */}
-          <div className="lg:col-span-2 glass-panel rounded-2xl p-6 bg-white">
+          <div className="lg:col-span-2 glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-900">Laporan Terbaru</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Laporan Terbaru</h2>
               <button
                 type="button"
                 onClick={() => navigate('/dashboard/reports')}
@@ -306,34 +306,34 @@ export default function DashboardPage() {
             </div>
 
             {recentReports.length === 0 ? (
-              <p className="text-slate-600 text-center py-8">Belum ada laporan kerusakan terbaru</p>
+              <p className="text-slate-600 dark:text-slate-400 text-center py-8">Belum ada laporan kerusakan terbaru</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b-2 border-slate-200">
-                      <th className="text-left py-3 px-3 font-bold text-slate-700">ID</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700">KATEGORI</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700">LOKASI</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700">SKOR AI</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700">STATUS</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700">AKSI</th>
+                    <tr className="border-b-2 border-slate-200 dark:border-gray-700">
+                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">ID</th>
+                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">KATEGORI</th>
+                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">LOKASI</th>
+                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">SKOR AI</th>
+                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">STATUS</th>
+                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">AKSI</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentReports.slice(0, 5).map((report) => (
-                      <tr key={report.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                      <tr key={report.id} className="border-b border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="py-3 px-3">
-                          <span className="font-mono font-bold text-cyan-700 text-xs">{report.ticket_code}</span>
+                          <span className="font-mono font-bold text-cyan-700 dark:text-cyan-400 text-xs">{report.ticket_code}</span>
                         </td>
                         <td className="py-3 px-3">
-                          <span className="text-slate-700 font-medium text-xs">{report.damage_type_name}</span>
+                          <span className="text-slate-700 dark:text-slate-300 font-medium text-xs">{report.damage_type_name}</span>
                         </td>
                         <td className="py-3 px-3">
-                          <span className="text-slate-600 text-xs truncate max-w-xs">{report.location_description}</span>
+                          <span className="text-slate-600 dark:text-slate-400 text-xs truncate max-w-xs">{report.location_description}</span>
                         </td>
                         <td className="py-3 px-3">
-                          <span className="text-slate-900 font-bold text-sm">{Math.floor(Math.random() * 40) + 60}</span>
+                          <span className="text-slate-900 dark:text-slate-100 font-bold text-sm">{Math.floor(Math.random() * 40) + 60}</span>
                         </td>
                         <td className="py-3 px-3">
                           <StatusBadge status={report.status} />
@@ -355,43 +355,43 @@ export default function DashboardPage() {
           </div>
 
           {/* Monthly Statistics */}
-          <div className="glass-panel rounded-2xl p-6 bg-white">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Statistik Penanganan Bulanan</h2>
+          <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Statistik Penanganan Bulanan</h2>
             
             <div className="space-y-4">
               {/* Chart */}
-              <div className="h-40 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl flex items-end justify-around p-4 border border-slate-200">
+              <div className="h-40 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 rounded-xl flex items-end justify-around p-4 border border-slate-200 dark:border-gray-700">
                 <div className="flex flex-col items-center gap-1">
                   <div className="bg-cyan-500 rounded" style={{height: '80px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 font-semibold">Jan</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Jan</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <div className="bg-cyan-500 rounded" style={{height: '60px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 font-semibold">Feb</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Feb</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <div className="bg-cyan-500 rounded" style={{height: '100px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 font-semibold">Mar</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Mar</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <div className="bg-cyan-400 rounded opacity-50" style={{height: '45px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 font-semibold">Apr</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Apr</span>
                 </div>
               </div>
 
               {/* Stats */}
-              <div className="space-y-3 pt-3 border-t border-slate-200">
+              <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-gray-700">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-700">Total Laporan</span>
-                  <span className="font-bold text-slate-900">{stats.totalReports}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">Total Laporan</span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">{stats.totalReports}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-700">Tertangani</span>
-                  <span className="font-bold text-emerald-600">{stats.completedTasks}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">Tertangani</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{stats.completedTasks}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-700">Pending</span>
-                  <span className="font-bold text-orange-600">{stats.totalReports - stats.completedTasks}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">Pending</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400">{stats.totalReports - stats.completedTasks}</span>
                 </div>
               </div>
             </div>
@@ -420,17 +420,17 @@ function AssetConditionChart({ data }) {
   const heavyPercent = total > 0 ? (data.heavy_damage / total) * 100 : 0;
 
   return (
-    <div className="glass-panel rounded-2xl p-6 bg-white border border-slate-200">
+    <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700">
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 size={20} className="text-cyan-600" />
-        <h2 className="text-lg font-bold text-slate-900">Kondisi Aset</h2>
+        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Kondisi Aset</h2>
       </div>
 
       <div className="space-y-4">
         {/* Pie Chart Visual */}
         <div className="flex items-center justify-center h-40">
           <svg viewBox="0 0 100 100" className="w-32 h-32">
-            <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" strokeWidth="20" />
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#374151" strokeWidth="20" />
             <circle
               cx="50"
               cy="50"
@@ -468,27 +468,27 @@ function AssetConditionChart({ data }) {
         </div>
 
         {/* Legend */}
-        <div className="space-y-2 pt-2 border-t border-slate-200">
+        <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-              <span className="text-sm text-slate-700">Baik</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Baik</span>
             </div>
-            <span className="font-bold text-slate-900">{data.good} ({goodPercent.toFixed(1)}%)</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{data.good} ({goodPercent.toFixed(1)}%)</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-              <span className="text-sm text-slate-700">Rusak Ringan</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Rusak Ringan</span>
             </div>
-            <span className="font-bold text-slate-900">{data.light_damage} ({lightPercent.toFixed(1)}%)</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{data.light_damage} ({lightPercent.toFixed(1)}%)</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span className="text-sm text-slate-700">Rusak Berat</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">Rusak Berat</span>
             </div>
-            <span className="font-bold text-slate-900">{data.heavy_damage} ({heavyPercent.toFixed(1)}%)</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{data.heavy_damage} ({heavyPercent.toFixed(1)}%)</span>
           </div>
         </div>
       </div>
@@ -503,54 +503,54 @@ function ReportStatusSummary({ data }) {
   const total = data.pending + data.terverifikasi + data.selesai + data.ditolak;
 
   return (
-    <div className="glass-panel rounded-2xl p-6 bg-white border border-slate-200">
+    <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700">
       <div className="flex items-center gap-2 mb-4">
         <FileText size={20} className="text-blue-600" />
-        <h2 className="text-lg font-bold text-slate-900">Status Laporan</h2>
+        <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Status Laporan</h2>
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-700/50 rounded-lg">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-slate-400"></div>
-            <span className="text-sm text-slate-700 font-medium">Pending</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">Pending</span>
           </div>
           <div className="text-right">
-            <span className="text-lg font-bold text-slate-900">{data.pending}</span>
-            <p className="text-xs text-slate-500">{total > 0 ? ((data.pending / total) * 100).toFixed(0) : 0}%</p>
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{data.pending}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{total > 0 ? ((data.pending / total) * 100).toFixed(0) : 0}%</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-sm text-slate-700 font-medium">Terverifikasi</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">Terverifikasi</span>
           </div>
           <div className="text-right">
-            <span className="text-lg font-bold text-slate-900">{data.terverifikasi}</span>
-            <p className="text-xs text-slate-500">{total > 0 ? ((data.terverifikasi / total) * 100).toFixed(0) : 0}%</p>
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{data.terverifikasi}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{total > 0 ? ((data.terverifikasi / total) * 100).toFixed(0) : 0}%</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-            <span className="text-sm text-slate-700 font-medium">Selesai</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">Selesai</span>
           </div>
           <div className="text-right">
-            <span className="text-lg font-bold text-slate-900">{data.selesai}</span>
-            <p className="text-xs text-slate-500">{total > 0 ? ((data.selesai / total) * 100).toFixed(0) : 0}%</p>
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{data.selesai}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{total > 0 ? ((data.selesai / total) * 100).toFixed(0) : 0}%</p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span className="text-sm text-slate-700 font-medium">Ditolak</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">Ditolak</span>
           </div>
           <div className="text-right">
-            <span className="text-lg font-bold text-slate-900">{data.ditolak}</span>
-            <p className="text-xs text-slate-500">{total > 0 ? ((data.ditolak / total) * 100).toFixed(0) : 0}%</p>
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{data.ditolak}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{total > 0 ? ((data.ditolak / total) * 100).toFixed(0) : 0}%</p>
           </div>
         </div>
       </div>
@@ -564,53 +564,53 @@ function ReportStatusSummary({ data }) {
 function MaintenanceKPICards({ kpis }) {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-      <div className="glass-panel rounded-2xl p-6 bg-white border border-blue-200">
+      <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-900/40">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-600 mb-1">Rata-rata Waktu Penyelesaian</p>
-            <p className="text-4xl font-bold text-slate-900">{kpis.avgCompletionTime}</p>
-            <p className="text-xs text-slate-500 mt-2">hari</p>
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">Rata-rata Waktu Penyelesaian</p>
+            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{kpis.avgCompletionTime}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">hari</p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
             <Clock size={20} />
           </div>
         </div>
       </div>
 
-      <div className="glass-panel rounded-2xl p-6 bg-white border border-emerald-200">
+      <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800 border border-emerald-200 dark:border-emerald-900/40">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-600 mb-1">Persentase Tepat Waktu</p>
-            <p className="text-4xl font-bold text-slate-900">{kpis.onTimePercentage}%</p>
-            <p className="text-xs text-slate-500 mt-2">selesai tepat waktu</p>
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">Persentase Tepat Waktu</p>
+            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{kpis.onTimePercentage}%</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">selesai tepat waktu</p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 size={20} />
           </div>
         </div>
       </div>
 
-      <div className="glass-panel rounded-2xl p-6 bg-white border border-purple-200">
+      <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-900/40">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-600 mb-1">Total Selesai</p>
-            <p className="text-4xl font-bold text-slate-900">{kpis.totalCompleted}</p>
-            <p className="text-xs text-slate-500 mt-2">penugasan</p>
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">Total Selesai</p>
+            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{kpis.totalCompleted}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">penugasan</p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
             <CheckCircle2 size={20} />
           </div>
         </div>
       </div>
 
-      <div className="glass-panel rounded-2xl p-6 bg-white border border-orange-200">
+      <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-900/40">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-600 mb-1">Total Penugasan</p>
-            <p className="text-4xl font-bold text-slate-900">{kpis.totalTasks}</p>
-            <p className="text-xs text-slate-500 mt-2">aktif & selesai</p>
+            <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">Total Penugasan</p>
+            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{kpis.totalTasks}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">aktif & selesai</p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400">
             <TrendingUp size={20} />
           </div>
         </div>

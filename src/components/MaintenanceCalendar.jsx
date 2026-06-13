@@ -14,7 +14,7 @@ const PRIORITIES = {
   sangat_tinggi: { bg: 'bg-[#fee2e2]', text: 'text-[#b91c1c]', border: 'border-l-[#b91c1c]' },
 };
 
-export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, onView, view }) {
+export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, onView, view, onTaskClick }) {
   // Map tasks to react-big-calendar event format
   const events = useMemo(() => {
     return tasks.map(task => {
@@ -129,6 +129,7 @@ export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, on
           onNavigate={() => {}} // Controlled manually above
           view={view}
           onView={onView}
+          onSelectEvent={(event) => onTaskClick && onTaskClick(event.id)}
           toolbar={false} // We hid the default toolbar to use our custom one
           messages={{
             showMore: total => `+${total} lagi`

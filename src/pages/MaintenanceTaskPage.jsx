@@ -9,12 +9,15 @@ import {
   Search,
   Trash2,
   X,
-  MapPin
+  MapPin,
+  Calendar
 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import MaintenanceTaskFormModal from '../components/MaintenanceTaskFormModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import MaintenanceCalendar from '../components/MaintenanceCalendar';
+import MaterialUsagePanel from '../components/MaterialUsagePanel';
+import AllSchedulesModal from '../components/AllSchedulesModal';
 import { useNotification } from '../context/NotificationContext';
 import {
   getMaintenanceTasks,
@@ -29,6 +32,7 @@ import { getInfrastructureAssets } from '../lib/infrastructureAssetsService';
 
 const statusLabelStyles = {
   pending: 'border-slate-200 bg-slate-100 text-slate-700',
+  scheduled: 'border-purple-200 bg-purple-100 text-purple-700',
   assigned: 'border-cyan-200 bg-cyan-100 text-cyan-700',
   in_progress: 'border-amber-200 bg-amber-100 text-amber-700',
   completed: 'border-emerald-200 bg-emerald-100 text-emerald-700',
@@ -37,6 +41,7 @@ const statusLabelStyles = {
 
 const statusLabels = {
   pending: 'Pending',
+  scheduled: 'Dijadwalkan',
   assigned: 'Ditugaskan',
   in_progress: 'Sedang Dikerjakan',
   completed: 'Selesai',
@@ -45,6 +50,7 @@ const statusLabels = {
 
 const statusIcons = {
   pending: AlertCircle,
+  scheduled: Calendar,
   assigned: Clock3,
   in_progress: Clock3,
   completed: CheckCircle2,
@@ -94,6 +100,8 @@ export default function MaintenanceTaskPage() {
   const [actualCost, setActualCost] = useState('');
   const [completionNotes, setCompletionNotes] = useState('');
   const [isSavingStatus, setIsSavingStatus] = useState(false);
+  const [taskProgress, setTaskProgress] = useState([]);
+  const [activePhotoUrl, setActivePhotoUrl] = useState(null);
 
   useEffect(() => {
     if (detailModal) {
@@ -101,6 +109,23 @@ export default function MaintenanceTaskPage() {
       const budgetObj = Array.isArray(detailModal.budget) ? detailModal.budget[0] : detailModal.budget;
       setActualCost(budgetObj?.actual_cost !== undefined && budgetObj?.actual_cost !== null ? String(budgetObj.actual_cost) : '');
       setCompletionNotes(detailModal.notes || '');
+
+      // Fetch task progress
+      if (!String(detailModal.id).startsWith('mock-')) {
+        import('../lib/supabaseClient').then(({ supabase }) => {
+          supabase
+            .from('task_progress')
+            .select('*')
+            .eq('task_id', detailModal.id)
+            .not('photo_url', 'is', null)
+            .order('created_at', { ascending: false })
+            .then(({ data }) => {
+              if (data) setTaskProgress(data);
+            });
+        });
+      }
+    } else {
+      setTaskProgress([]);
     }
   }, [detailModal]);
 
@@ -130,9 +155,14 @@ export default function MaintenanceTaskPage() {
     }
   }
 
+
+
   // Calendar states
   const [calendarView, setCalendarView] = useState('month');
-  const [currentDate, setCurrentDate] = useState(new Date('2024-10-01T00:00:00'));
+  const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // All Schedules Modal State
+  const [isAllSchedulesModalOpen, setIsAllSchedulesModalOpen] = useState(false);
 
   // Confirmation modal state
   const [confirmationModal, setConfirmationModal] = useState({
@@ -192,6 +222,7 @@ export default function MaintenanceTaskPage() {
   const stats = useMemo(() => {
     return {
       total: tasks.length,
+      scheduled: tasks.filter((task) => task.status === 'scheduled').length,
       pending: tasks.filter((task) => task.status === 'pending').length,
       assigned: tasks.filter((task) => task.status === 'assigned').length,
       in_progress: tasks.filter((task) => task.status === 'in_progress').length,
@@ -420,6 +451,7 @@ export default function MaintenanceTaskPage() {
             >
               <option value="">Semua Status</option>
               <option value="pending">Pending</option>
+              <option value="scheduled">Dijadwalkan</option>
               <option value="assigned">Ditugaskan</option>
               <option value="in_progress">Sedang Dikerjakan</option>
               <option value="completed">Selesai</option>
@@ -470,6 +502,7 @@ export default function MaintenanceTaskPage() {
               onNavigate={handleNavigate}
               onView={setCalendarView}
               view={calendarView}
+              onTaskClick={handleViewDetail}
             />
           )}
         </div>
@@ -503,10 +536,15 @@ export default function MaintenanceTaskPage() {
                       className="bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-cyan-300 hover:shadow-sm transition-all"
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${style.badge}`}>
-                          {urgency}
-                        </span>
-                        <span className="text-xs font-medium text-slate-600">
+                        <div className="flex gap-2 flex-wrap">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${style.badge}`}>
+                            {urgency}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${statusLabelStyles[task.status] || 'border-slate-200 bg-slate-100 text-slate-700'}`}>
+                            {statusLabels[task.status] || task.status}
+                          </span>
+                        </div>
+                        <span className="text-xs font-medium text-slate-600 whitespace-nowrap ml-2">
                           {new Date(task.scheduled_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
                         </span>
                       </div>
@@ -517,7 +555,11 @@ export default function MaintenanceTaskPage() {
                       
                       <div className="flex items-start gap-1.5 text-slate-500 mb-4">
                         <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                        <span className="text-xs line-clamp-2">{task.report?.location_description || '-'}</span>
+                        <span className="text-xs line-clamp-2">
+                          {task.report?.latitude && task.report?.longitude 
+                            ? `${task.report.latitude}, ${task.report.longitude}`
+                            : task.report?.location_description || '-'}
+                        </span>
                       </div>
                       
                       <div className="flex items-center justify-between pt-3 border-t border-slate-100">
@@ -542,7 +584,10 @@ export default function MaintenanceTaskPage() {
             </div>
             
             <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-              <button className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors">
+              <button 
+                onClick={() => setIsAllSchedulesModalOpen(true)}
+                className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors"
+              >
                 Lihat Semua Jadwal
               </button>
             </div>
@@ -561,20 +606,23 @@ export default function MaintenanceTaskPage() {
       />
 
       {detailModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8">
-          <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-xl overflow-auto rounded-3xl">
-            <div className="flex items-center justify-between border-b border-cyan-100 px-6 py-5">
-              <h2 className="text-xl font-extrabold text-slate-800">Detail Penugasan</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl fade-slide-in">
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Detail Penugasan</h2>
+                <p className="text-cyan-100 text-sm mt-1">{detailModal.report?.ticket_code || 'Tugas Perawatan'}</p>
+              </div>
               <button
                 type="button"
                 onClick={() => setDetailModal(null)}
-                className="rounded-lg p-1 text-slate-400 transition hover:bg-cyan-50 hover:text-slate-600"
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
               >
-                <X className="h-5 w-5" />
+                <X size={24} />
               </button>
             </div>
 
-            <div className="space-y-4 px-6 py-5 text-sm">
+            <div className="space-y-4 px-6 py-6 text-sm">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Laporan</p>
                 <p className="mt-1 font-mono text-cyan-700">{detailModal.report?.ticket_code || '-'}</p>
@@ -594,6 +642,13 @@ export default function MaintenanceTaskPage() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal Terjadwal</p>
                 <p className="mt-1 text-slate-700">{formatDate(detailModal.scheduled_date)}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Status Pekerjaan</p>
+                <span className={`mt-1 inline-block px-2.5 py-1 rounded-md text-xs font-bold border ${statusLabelStyles[detailModal.status] || 'border-slate-200 bg-slate-100 text-slate-700'}`}>
+                  {statusLabels[detailModal.status] || 'Tidak Diketahui'}
+                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -622,54 +677,45 @@ export default function MaintenanceTaskPage() {
                 <p className="mt-1 whitespace-pre-wrap text-slate-700">{detailModal.instructions || '-'}</p>
               </div>
 
-              {/* Status Update & Realization Input Form */}
-              <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-2xl">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-600 mb-2">Pembaruan Status (Admin Only)</p>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Status Pekerjaan</label>
-                    <select
-                      value={newStatus}
-                      onChange={(e) => setNewStatus(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
-                    >
-                      <option value="assigned">Ditugaskan (Assigned)</option>
-                      <option value="in_progress">Sedang Dikerjakan (In Progress)</option>
-                      <option value="completed">Selesai (Completed)</option>
-                      <option value="cancelled">Dibatalkan (Cancelled)</option>
-                    </select>
-                  </div>
 
-                  {newStatus === 'completed' && (
-                    <div className="fade-in">
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Realisasi Biaya (Rp) *</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1000"
-                        value={actualCost}
-                        onChange={(e) => setActualCost(e.target.value)}
-                        placeholder="Masukkan realisasi biaya..."
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400 font-medium"
-                      />
-                    </div>
-                  )}
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Catatan Tambahan</label>
-                    <textarea
-                      value={completionNotes}
-                      onChange={(e) => setCompletionNotes(e.target.value)}
-                      placeholder="Catatan pengerjaan atau alasan pembatalan..."
-                      rows="2"
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+              {/* Material Usage Panel */}
+              {!String(detailModal.id).startsWith('mock-') && (detailModal.status === 'in_progress' || detailModal.status === 'completed') && (
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <MaterialUsagePanel 
+                    taskId={detailModal.id} 
+                    taskStatus={detailModal.status} 
+                    userRole="admin"
+                    taskActualCost={(Array.isArray(detailModal.budget) ? detailModal.budget[0] : detailModal.budget)?.actual_cost ?? detailModal.actual_cost}
+                    taskAdditionalCostDesc={detailModal.notes?.match(/Biaya Lainnya: Rp .*?\((.*?)\)/)?.[1] || ''}
+                  />
+                </div>
+              )}
+
+              {taskProgress.length > 0 && (
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Foto Lapangan</p>
+                  <div className="relative overflow-hidden rounded-xl border border-slate-200 inline-block">
+                    <img 
+                      src={taskProgress[0].photo_url} 
+                      alt="Progress Terbaru" 
+                      className="h-32 w-48 object-cover transition-transform duration-300 hover:scale-110 cursor-pointer"
+                      onClick={() => setActivePhotoUrl(taskProgress[0].photo_url)}
                     />
+                    <div className="absolute bottom-0 inset-x-0 bg-black/60 p-1.5 text-[10px] text-center text-white backdrop-blur-sm">
+                      {new Date(taskProgress[0].created_at).toLocaleDateString('id-ID')}
+                    </div>
                   </div>
                 </div>
+              )}
+
+              <div className="mt-4 border-t border-slate-100 pt-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Catatan Lapangan Terakhir</p>
+                <p className="mt-1 whitespace-pre-wrap text-slate-700">{detailModal.notes ? detailModal.notes.replace(/Biaya Lainnya: Rp .*/g, '').trim() || '-' : '-'}</p>
               </div>
             </div>
 
-            <div className="flex gap-2 border-t border-cyan-100 px-6 py-5 bg-slate-50/30">
+            <div className="flex gap-3 border-t border-slate-100 px-6 py-5 bg-slate-50/50">
               {!String(detailModal.id).startsWith('mock-') ? (
                 <>
                   <button
@@ -681,22 +727,13 @@ export default function MaintenanceTaskPage() {
                       setDetailModal(null);
                       setIsModalOpen(true);
                     }}
-                    className="flex-1 rounded-xl border border-cyan-200 bg-white px-3 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                    className="flex-1 rounded-lg border border-cyan-200 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
                   >
                     Edit Detail
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={handleUpdateTaskStatus}
-                    disabled={isSavingStatus}
-                    className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-3 py-2 text-sm font-semibold text-white shadow-md transition hover:brightness-110 disabled:opacity-50"
-                  >
-                    {isSavingStatus ? 'Menyimpan...' : 'Simpan Status'}
-                  </button>
                 </>
               ) : (
-                <div className="flex-1 text-center py-2 text-sm font-semibold text-slate-400">
+                <div className="flex-1 text-center py-2.5 text-sm font-semibold text-slate-400">
                   Aksi tidak tersedia untuk data simulasi/mockup
                 </div>
               )}
@@ -704,9 +741,9 @@ export default function MaintenanceTaskPage() {
               <button
                 type="button"
                 onClick={() => setDetailModal(null)}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
               >
-                Batal
+                Tutup
               </button>
             </div>
           </div>
@@ -720,6 +757,38 @@ export default function MaintenanceTaskPage() {
         onConfirm={confirmDeleteTask}
         onCancel={() => setConfirmationModal((prev) => ({ ...prev, isOpen: false }))}
       />
+
+      <AllSchedulesModal
+        isOpen={isAllSchedulesModalOpen}
+        onClose={() => setIsAllSchedulesModalOpen(false)}
+        tasks={tasks}
+        onViewDetail={handleViewDetail}
+      />
+
+      {/* Lightbox Modal */}
+      {activePhotoUrl && (
+        <div 
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+          onClick={() => setActivePhotoUrl(null)}
+        >
+          <div className="relative max-h-[95vh] max-w-[95vw]">
+            <img 
+              src={activePhotoUrl} 
+              alt="Preview Full" 
+              className="max-h-[90vh] w-auto rounded-lg object-contain"
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setActivePhotoUrl(null);
+              }}
+              className="absolute -right-12 top-0 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition"
+            >
+              <X size={24} />
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
