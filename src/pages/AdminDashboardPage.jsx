@@ -91,7 +91,7 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-cyan-200 border-t-cyan-600"></div>
-          <p className="mt-2 text-sm text-slate-600">Memuat dashboard...</p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Memuat dashboard...</p>
         </div>
       </main>
     );
@@ -100,8 +100,8 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-900">Dashboard</h1>
-        <p className="mt-2 text-slate-600">Ringkasan aktivitas dan statistik sistem InfraTrack</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">Dashboard</h1>
+        <p className="mt-2 text-slate-600 dark:text-slate-400">Ringkasan aktivitas dan statistik sistem InfraTrack</p>
       </div>
 
       {/* Verification Panel - High Priority */}
@@ -115,8 +115,8 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
         <div className="glass-panel rounded-lg p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Total Aset</p>
-              <p className="text-3xl font-bold text-slate-900 mt-2">{stats.totalAssets}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Aset</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">{stats.totalAssets}</p>
             </div>
             <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-cyan-100">
               <Building2 size={28} className="text-cyan-700" />
@@ -169,35 +169,35 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
 
       {/* Recent Reports Table */}
       <div className="glass-panel rounded-lg p-6">
-        <h2 className="text-xl font-bold text-slate-900 mb-6">Laporan Terbaru</h2>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">Laporan Terbaru</h2>
         
         {recentReports.length === 0 ? (
-          <p className="text-center text-slate-600 py-8">Belum ada laporan kerusakan terbaru</p>
+          <p className="text-center text-slate-600 dark:text-slate-400 py-8">Belum ada laporan kerusakan terbaru</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Tiket</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Jenis Kerusakan</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Lokasi</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Tanggal</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Aksi</th>
+                <tr className="border-b border-slate-200 dark:border-gray-700">
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Tiket</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Jenis Kerusakan</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Lokasi</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Status</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Tanggal</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700 dark:text-slate-300">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {recentReports.map((report) => (
-                  <tr key={report.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <tr key={report.id} className="border-b border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/50">
                     <td className="py-3 px-4">
-                      <span className="font-mono font-semibold text-cyan-700">{report.ticket_code}</span>
+                      <span className="font-mono font-semibold text-cyan-700 dark:text-cyan-400">{report.ticket_code}</span>
                     </td>
-                    <td className="py-3 px-4 text-slate-700">{report.damage_type_name}</td>
-                    <td className="py-3 px-4 text-slate-600 truncate max-w-xs">{report.location_description}</td>
+                    <td className="py-3 px-4 text-slate-700 dark:text-slate-300">{report.damage_type_name}</td>
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 truncate max-w-xs">{report.location_description}</td>
                     <td className="py-3 px-4">
                       <StatusBadge status={report.status} />
                     </td>
-                    <td className="py-3 px-4 text-slate-600 text-xs">
+                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 text-xs">
                       {new Date(report.created_at).toLocaleDateString('id-ID')}
                     </td>
                     <td className="py-3 px-4">
@@ -322,8 +322,8 @@ function ReportDetailModal({ report, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-6 flex items-center justify-between">
           <div>
@@ -343,7 +343,7 @@ function ReportDetailModal({ report, onClose }) {
           {/* Status & Urgency */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm font-semibold text-slate-600 mb-2">Status</p>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-2">Status</p>
               <StatusBadge status={report.status} />
             </div>
           </div>
@@ -352,7 +352,7 @@ function ReportDetailModal({ report, onClose }) {
           {report.photo_url && (
             <div>
               <p className="text-sm font-semibold text-slate-600 mb-3">Foto Laporan</p>
-              <div className="w-full rounded-2xl border border-slate-200 overflow-hidden bg-slate-50">
+              <div className="w-full rounded-2xl border border-slate-200 dark:border-gray-700 overflow-hidden bg-slate-50 dark:bg-gray-800">
                 <img 
                   src={report.photo_url} 
                   alt="Foto laporan" 
@@ -366,34 +366,34 @@ function ReportDetailModal({ report, onClose }) {
           )}
 
           {/* Informasi Pelapor */}
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-            <h3 className="font-semibold text-slate-800 mb-3">Informasi Pelapor</h3>
+          <div className="bg-slate-50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
+            <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">Informasi Pelapor</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-slate-600">Nama:</span>
-                <span className="font-semibold text-slate-800">{report.reporter_name || '-'}</span>
+                <span className="text-slate-600 dark:text-slate-400">Nama:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{report.reporter_name || '-'}</span>
               </div>
             </div>
           </div>
 
           {/* Kerusakan */}
-          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-            <h3 className="font-semibold text-slate-800 mb-3">Informasi Kerusakan</h3>
+          <div className="bg-slate-50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
+            <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">Informasi Kerusakan</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-slate-600">Jenis Kerusakan:</span>
-                <span className="font-semibold text-slate-800">{report.damage_type_name}</span>
+                <span className="text-slate-600 dark:text-slate-400">Jenis Kerusakan:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{report.damage_type_name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">Lokasi (Koordinat):</span>
-                <span className="font-mono text-sm font-semibold text-slate-800">
+                <span className="text-slate-600 dark:text-slate-400">Lokasi (Koordinat):</span>
+                <span className="font-mono text-sm font-semibold text-slate-800 dark:text-slate-200">
                   {report.location_description}
                 </span>
               </div>
               {report.description && (
-                <div className="pt-2 border-t border-slate-200">
-                  <p className="text-slate-600 text-sm font-semibold mb-2">Deskripsi:</p>
-                  <p className="text-slate-700 text-sm leading-relaxed">{report.description}</p>
+                <div className="pt-2 border-t border-slate-200 dark:border-gray-700">
+                  <p className="text-slate-600 dark:text-slate-400 text-sm font-semibold mb-2">Deskripsi:</p>
+                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{report.description}</p>
                 </div>
               )}
             </div>
@@ -401,22 +401,22 @@ function ReportDetailModal({ report, onClose }) {
 
           {/* Aset */}
           {report.asset_name !== '-' && (
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-              <h3 className="font-semibold text-slate-800 mb-3">Aset Terkait</h3>
+            <div className="bg-slate-50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">Aset Terkait</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Nama Aset:</span>
-                  <span className="font-semibold text-slate-800">{report.asset_name}</span>
+                  <span className="text-slate-600 dark:text-slate-400">Nama Aset:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{report.asset_name}</span>
                 </div>
               </div>
             </div>
           )}
 
           {/* Tanggal */}
-          <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-700/40">
             <div className="flex justify-between items-center">
-              <span className="text-slate-600 font-semibold">Dilaporkan:</span>
-              <span className="text-slate-800 font-semibold">
+              <span className="text-slate-600 dark:text-slate-400 font-semibold">Dilaporkan:</span>
+              <span className="text-slate-800 dark:text-slate-200 font-semibold">
                 {new Date(report.created_at).toLocaleDateString('id-ID', {
                   weekday: 'long',
                   year: 'numeric',
@@ -430,7 +430,7 @@ function ReportDetailModal({ report, onClose }) {
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-4 border-t border-slate-200 space-y-4">
+          <div className="pt-4 border-t border-slate-200 dark:border-gray-700 space-y-4">
             {!showVerificationForm ? (
               <div className="flex gap-3">
                 {report.status === 'pending' && (
@@ -451,22 +451,22 @@ function ReportDetailModal({ report, onClose }) {
                 )}
                 <button
                   onClick={onClose}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 text-slate-800 font-semibold hover:bg-slate-300 transition-colors"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-gray-700 text-slate-800 dark:text-slate-200 font-semibold hover:bg-slate-300 dark:hover:bg-gray-600 transition-colors"
                 >
                   Tutup
                 </button>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm font-semibold text-blue-900">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700/40">
+                  <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">
                     {verificationAction === 'approve' ? 'Proses Persetujuan Laporan' : 'Proses Penolakan Laporan'}
                   </p>
                 </div>
 
                 {verificationAction === 'approve' && (
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                       Tingkat Prioritas *
                     </label>
                     <select
@@ -483,14 +483,14 @@ function ReportDetailModal({ report, onClose }) {
                 )}
 
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     Catatan {verificationAction === 'approve' ? 'Persetujuan' : 'Penolakan'} (Opsional)
                   </label>
                   <textarea
                     value={verificationNotes}
                     onChange={(e) => setVerificationNotes(e.target.value)}
                     placeholder={`Masukkan catatan ${verificationAction === 'approve' ? 'persetujuan' : 'penolakan'}...`}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 resize-none"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 dark:text-slate-200 resize-none"
                     rows="3"
                   />
                 </div>
@@ -510,7 +510,7 @@ function ReportDetailModal({ report, onClose }) {
                   <button
                     onClick={handleCancel}
                     disabled={isProcessing}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 text-slate-800 font-semibold hover:bg-slate-300 disabled:opacity-50 transition-colors"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-slate-200 dark:bg-gray-700 text-slate-800 dark:text-slate-200 font-semibold hover:bg-slate-300 dark:hover:bg-gray-600 disabled:opacity-50 transition-colors"
                   >
                     Batal
                   </button>

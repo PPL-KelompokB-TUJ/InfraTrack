@@ -119,14 +119,14 @@ export default function AssetFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8">
-      <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-4xl overflow-auto rounded-3xl p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 dark:bg-slate-900/80 px-4 py-8">
+      <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-4xl overflow-auto rounded-3xl p-6 bg-white dark:bg-slate-800">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
               {isEditMode ? 'Edit Aset Infrastruktur' : 'Tambah Aset Infrastruktur'}
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Isi data aset, pilih titik lokasi di peta, lalu simpan.
             </p>
           </div>
@@ -149,7 +149,7 @@ export default function AssetFormModal({
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, name: event.target.value }))
               }
-              className="rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-400"
+              className="rounded-xl border border-cyan-100 bg-white dark:bg-slate-800 dark:border-cyan-700 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-cyan-400"
               placeholder="Contoh: Jembatan Cempaka"
               required
             />
@@ -162,7 +162,7 @@ export default function AssetFormModal({
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, category: event.target.value }))
               }
-              className="rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-400"
+              className="rounded-xl border border-cyan-100 bg-white dark:bg-slate-800 dark:border-cyan-700 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-cyan-400"
             >
               {resolvedCategoryOptions.map((category) => (
                 <option key={category} value={category}>
@@ -179,7 +179,7 @@ export default function AssetFormModal({
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, condition: event.target.value }))
               }
-              className="rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-400"
+              className="rounded-xl border border-cyan-100 bg-white dark:bg-slate-800 dark:border-cyan-700 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-cyan-400"
             >
               {CONDITION_OPTIONS.map((condition) => (
                 <option key={condition} value={condition}>
@@ -222,7 +222,7 @@ export default function AssetFormModal({
                   value={form.lat}
                   placeholder={String(DEFAULT_POSITION.lat)}
                   readOnly
-                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400"
+                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 dark:bg-cyan-800/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
                 />
               </label>
               <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -231,7 +231,7 @@ export default function AssetFormModal({
                   value={form.lng}
                   placeholder={String(DEFAULT_POSITION.lng)}
                   readOnly
-                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400"
+                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 dark:bg-cyan-800/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
                 />
               </label>
             </div>
@@ -258,7 +258,7 @@ export default function AssetFormModal({
           </div>
 
           {errorMessage ? (
-            <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 lg:col-span-2">
+            <p className="rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-900 dark:border-rose-800 px-3 py-2 text-sm text-rose-700 dark:text-rose-200 lg:col-span-2">
               {errorMessage}
             </p>
           ) : null}
