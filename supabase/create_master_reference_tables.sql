@@ -23,7 +23,7 @@ create table if not exists public.infrastructure_categories (
 
 create table if not exists public.damage_types (
   id uuid primary key default gen_random_uuid(),
-  infrastructure_category_id uuid not null references public.infrastructure_categories(id) on update cascade on delete restrict,
+  infrastructure_category_id uuid not null references public.infrastructure_categories(id) on update cascade on delete cascade,
   name text not null,
   is_default boolean not null default false,
   is_active boolean not null default true,
@@ -273,7 +273,7 @@ begin
       foreign key (infrastructure_category_id)
       references public.infrastructure_categories(id)
       on update cascade
-      on delete restrict;
+      on delete cascade;
   end if;
 
   if not exists (

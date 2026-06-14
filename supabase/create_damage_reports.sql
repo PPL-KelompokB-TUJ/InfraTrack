@@ -40,7 +40,7 @@ begin
       foreign key (damage_type_id)
       references public.damage_types(id)
       on update cascade
-      on delete restrict;
+      on delete cascade;
   end if;
 
   if exists (

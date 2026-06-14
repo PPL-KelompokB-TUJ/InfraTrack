@@ -77,6 +77,24 @@ export default function DashboardPage() {
 
       if (tasksError) throw tasksError;
 
+      // Load budget data
+      const { data: budgetData, error: budgetError } = await supabase
+        .from('budgets')
+        .select('estimated_cost, actual_cost');
+
+      if (budgetError && budgetError.code !== 'PGRST116') throw budgetError;
+
+      // Calculate budget stats
+      let budgetAllocated = 0;
+      let budgetProgress = 0;
+      
+      if (budgetData && budgetData.length > 0) {
+        const totalEstimated = budgetData.reduce((sum, b) => sum + (b.estimated_cost || 0), 0);
+        const totalActual = budgetData.reduce((sum, b) => sum + (b.actual_cost || 0), 0);
+        budgetAllocated = totalEstimated;
+        budgetProgress = totalEstimated > 0 ? Math.round((totalActual / totalEstimated) * 100) : 0;
+      }
+
       const reportsResult = await getRecentDamageReports(10);
       
       // Load comprehensive dashboard data
@@ -87,6 +105,8 @@ export default function DashboardPage() {
         totalAssets: totalAssets || 0,
         totalReports: totalReports || 0,
         completedTasks: completedTasks || 0,
+        budgetAllocated: budgetAllocated,
+        budgetProgress: budgetProgress,
       }));
 
       if (dashResult.success) {
@@ -167,8 +187,11 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          {/* Total Assets */}
-          <div className="glass-panel rounded-2xl p-6 border border-cyan-100 dark:border-cyan-900/30 bg-white dark:bg-gray-800">
+          {/* Total Assets - Clickable */}
+          <button
+            onClick={() => navigate('/dashboard/assets')}
+            className="glass-panel rounded-2xl p-6 border border-cyan-100 dark:border-cyan-900/30 bg-white dark:bg-gray-800 hover:bg-cyan-50 dark:hover:bg-cyan-900/10 hover:border-cyan-200 transition-colors cursor-pointer text-left"
+          >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">TOTAL ASET</p>
@@ -179,15 +202,15 @@ export default function DashboardPage() {
                 <Building2 size={24} />
               </div>
             </div>
-          </div>
+          </button>
 
           {/* Damage Reports - Clickable */}
           <button
             onClick={() => navigate('/dashboard/reports')}
-            className="glass-panel rounded-2xl p-6 border border-red-100 dark:border-red-900/30 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-200 transition-colors cursor-pointer"
+            className="glass-panel rounded-2xl p-6 border border-red-100 dark:border-red-900/30 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-200 transition-colors cursor-pointer text-left"
           >
             <div className="flex items-start justify-between">
-              <div className="text-left">
+              <div>
                 <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">LAPORAN AKTIF</p>
                 <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{stats.totalReports}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{stats.reportsChange} terlaksanakan</p>
@@ -198,8 +221,11 @@ export default function DashboardPage() {
             </div>
           </button>
 
-          {/* Maintenance Done */}
-          <div className="glass-panel rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-gray-800">
+          {/* Maintenance Done - Clickable */}
+          <button
+            onClick={() => navigate('/dashboard/maintenance')}
+            className="glass-panel rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:border-emerald-200 transition-colors cursor-pointer text-left"
+          >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">MAINTENANCE DONE</p>
@@ -210,10 +236,13 @@ export default function DashboardPage() {
                 <CheckCircle2 size={24} />
               </div>
             </div>
-          </div>
+          </button>
 
-          {/* Budget */}
-          <div className="glass-panel rounded-2xl p-6 border border-amber-100 dark:border-amber-900/30 bg-white dark:bg-gray-800">
+          {/* Budget - Clickable */}
+          <button
+            onClick={() => navigate('/dashboard/budgets')}
+            className="glass-panel rounded-2xl p-6 border border-amber-100 dark:border-amber-900/30 bg-white dark:bg-gray-800 hover:bg-amber-50 dark:hover:bg-amber-900/10 hover:border-amber-200 transition-colors cursor-pointer text-left"
+          >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">ANGGARAN TERPAKSI</p>
@@ -227,7 +256,7 @@ export default function DashboardPage() {
                 <DollarSign size={24} />
               </div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Analytics Section - Asset Condition & Report Status */}
