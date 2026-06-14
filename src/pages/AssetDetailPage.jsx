@@ -19,6 +19,7 @@ import {
   CalendarClock,
   TriangleAlert,
   Camera,
+  X,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useNotification } from '../context/NotificationContext';
@@ -196,90 +197,98 @@ function UploadDocumentModal({ assetId, onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6 space-y-5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Upload size={18} className="text-cyan-600" />
-            Unggah Dokumen
-          </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-            <span className="material-symbols-outlined text-[20px]">close</span>
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 bg-slate-900/50 overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center py-8 px-4">
+        <div className="glass-panel fade-slide-in w-full max-w-md rounded-3xl p-6">
+          <h2 className="text-2xl font-extrabold text-slate-800">Unggah Dokumen</h2>
+          <p className="mt-1 text-sm text-slate-600">Tambahkan dokumen pendukung untuk aset ini</p>
 
-        {error && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 text-rose-700 text-sm">
-            <AlertCircle size={15} />
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* File picker */}
-          <div
-            onClick={() => inputRef.current?.click()}
-            className="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/40 transition-colors"
-          >
-            {file ? (
-              <div className="space-y-1">
-                <FileText size={28} className="mx-auto text-cyan-600" />
-                <p className="text-sm font-semibold text-slate-700 truncate max-w-xs mx-auto">{file.name}</p>
-                <p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <Upload size={28} className="mx-auto text-slate-300" />
-                <p className="text-sm text-slate-500">Klik untuk pilih file</p>
-                <p className="text-xs text-slate-400">PDF, JPEG, PNG, DOCX, XLSX — maks. 50 MB</p>
+          <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+            {error && (
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200">
+                <AlertCircle size={16} className="flex-shrink-0" />
+                <span className="text-xs font-medium">{error}</span>
               </div>
             )}
-            <input ref={inputRef} type="file" className="hidden" accept={ACCEPTED_TYPES.join(',')} onChange={handleFileChange} />
-          </div>
 
-          {/* Doc type */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Jenis Dokumen</label>
-            <select
-              value={docType}
-              onChange={(e) => setDocType(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            {/* File picker */}
+            <div
+              onClick={() => inputRef.current?.click()}
+              className="border-2 border-dashed border-cyan-100 rounded-2xl p-4 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/40 transition-all duration-200 bg-slate-50"
             >
-              {DOC_TYPE_OPTIONS.filter((o) => o.value).map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Deskripsi <span className="font-normal text-slate-400">(opsional)</span></label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              placeholder="Keterangan tambahan..."
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-300 resize-none"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 pt-1">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-              Batal
-            </button>
-            <button
-              type="submit"
-              disabled={isUploading}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-sm font-bold shadow-sm hover:brightness-110 disabled:opacity-60 flex items-center gap-2"
-            >
-              {isUploading ? (
-                <><span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>Mengunggah…</>
+              {file ? (
+                <div className="flex items-center gap-3 text-left">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-50 shrink-0">
+                    <FileText size={20} className="text-cyan-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">{file.name}</p>
+                    <p className="text-xs text-slate-500">{formatFileSize(file.size)}</p>
+                  </div>
+                </div>
               ) : (
-                <><Upload size={15} />Unggah</>
+                <div className="py-2 space-y-2">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-100">
+                    <Upload size={22} className="text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">Klik untuk memilih file</p>
+                    <p className="text-xs text-slate-500">atau drag and drop di sini</p>
+                  </div>
+                  <p className="text-xs text-slate-400">PDF, JPEG, PNG, DOCX, XLSX — maks. 50 MB</p>
+                </div>
               )}
-            </button>
-          </div>
-        </form>
+              <input ref={inputRef} type="file" className="hidden" accept={ACCEPTED_TYPES.join(',')} onChange={handleFileChange} />
+            </div>
+
+            {/* Doc type */}
+            <label className="block text-sm font-semibold text-slate-700">
+              Jenis Dokumen
+              <select
+                value={docType}
+                onChange={(e) => setDocType(e.target.value)}
+                className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+              >
+                {DOC_TYPE_OPTIONS.filter((o) => o.value).map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+
+            {/* Description */}
+            <label className="block text-sm font-semibold text-slate-700">
+              Deskripsi <span className="font-normal text-slate-400">(opsional)</span>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+                placeholder="Masukkan keterangan atau catatan tentang dokumen ini..."
+                className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400 resize-none"
+              />
+            </label>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-xl border border-cyan-200 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={isUploading}
+                className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isUploading ? (
+                  <><span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>Mengunggah…</>
+                ) : (
+                  <><Upload size={15} />Unggah Dokumen</>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -352,14 +361,14 @@ function DocumentsTab({ assetId }) {
   return (
     <div className="space-y-5">
       {/* toolbar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
         {/* filters */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <Filter size={14} className="text-slate-400 shrink-0" />
+        <div className="flex flex-wrap gap-3 items-center">
+          <Filter size={16} className="text-slate-400 shrink-0" />
           <select
             value={filterDocType}
             onChange={(e) => setFilterDocType(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
           >
             {DOC_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
@@ -367,32 +376,32 @@ function DocumentsTab({ assetId }) {
             type="date"
             value={filterDateFrom}
             onChange={(e) => setFilterDateFrom(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
             placeholder="Dari"
           />
-          <span className="text-xs text-slate-400">–</span>
+          <span className="text-xs text-slate-400 font-semibold">–</span>
           <input
             type="date"
             value={filterDateTo}
             onChange={(e) => setFilterDateTo(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
             placeholder="Sampai"
           />
           {(filterDocType || filterDateFrom || filterDateTo) && (
             <button
               onClick={() => { setFilterDocType(''); setFilterDateFrom(''); setFilterDateTo(''); }}
-              className="text-xs text-rose-500 hover:underline"
+              className="text-xs font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
             >
-              Reset
+              Reset Filter
             </button>
           )}
         </div>
 
         <button
           onClick={() => setShowUpload(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold shadow-sm hover:brightness-110 shrink-0"
+          className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold shadow-lg hover:shadow-xl hover:brightness-110 shrink-0 transition-all"
         >
-          <Upload size={13} />
+          <Upload size={16} />
           Unggah Dokumen
         </button>
       </div>
@@ -403,36 +412,40 @@ function DocumentsTab({ assetId }) {
           {[1, 2, 3].map((i) => <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />)}
         </div>
       ) : docs.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 space-y-2">
-          <FileText size={36} className="mx-auto opacity-40" />
-          <p className="text-sm font-medium">Belum ada dokumen</p>
-          <p className="text-xs">Unggah dokumen menggunakan tombol di atas</p>
+        <div className="text-center py-24 text-slate-400 space-y-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-100">
+            <FileText size={48} className="text-slate-300" />
+          </div>
+          <p className="text-base font-semibold text-slate-600">Belum ada dokumen</p>
+          <p className="text-sm text-slate-500">Mulai dengan mengupload dokumen menggunakan tombol di atas</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {docs.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl border border-slate-100 bg-white hover:border-cyan-200 hover:bg-cyan-50/30 transition-colors group"
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl border border-slate-100 bg-white hover:border-cyan-300 hover:shadow-md hover:bg-cyan-50/30 transition-all duration-200 group"
             >
-              <DocTypeIcon docType={doc.doc_type} size={22} />
+              <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-cyan-50 transition-colors">
+                <DocTypeIcon docType={doc.doc_type} size={24} />
+              </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">{doc.name}</p>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
-                  <span className="text-xs text-slate-500">{DOC_TYPE_LABELS[doc.doc_type] || doc.doc_type}</span>
-                  <span className="text-xs text-slate-400">{formatFileSize(doc.file_size)}</span>
+                <p className="text-sm font-bold text-slate-800 truncate">{doc.name}</p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                  <span className="inline-block text-xs font-medium text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded-full">{DOC_TYPE_LABELS[doc.doc_type] || doc.doc_type}</span>
+                  <span className="text-xs text-slate-500">{formatFileSize(doc.file_size)}</span>
                   <span className="text-xs text-slate-400">{formatDate(doc.created_at)}</span>
                   {doc.uploader?.name && (
-                    <span className="text-xs text-slate-400">oleh {doc.uploader.name}</span>
+                    <span className="text-xs text-slate-500">oleh <span className="font-medium text-slate-700">{doc.uploader.name}</span></span>
                   )}
                 </div>
                 {doc.description && (
-                  <p className="text-xs text-slate-500 mt-0.5 truncate">{doc.description}</p>
+                  <p className="text-xs text-slate-600 mt-2 truncate italic">{doc.description}</p>
                 )}
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => handleDownload(doc)}
                   disabled={downloadingId === doc.id}
@@ -440,8 +453,8 @@ function DocumentsTab({ assetId }) {
                   className="p-2 rounded-lg hover:bg-cyan-100 text-cyan-600 transition-colors disabled:opacity-50"
                 >
                   {downloadingId === doc.id
-                    ? <span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-                    : <Download size={16} />}
+                    ? <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+                    : <Download size={18} />}
                 </button>
                 <button
                   onClick={() => handleDelete(doc)}
@@ -502,12 +515,12 @@ function TimelineTab({ assetId }) {
   return (
     <div className="space-y-5">
       {/* filters */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <Filter size={14} className="text-slate-400 shrink-0" />
+      <div className="flex flex-wrap gap-3 items-center">
+        <Filter size={16} className="text-slate-400 shrink-0" />
         <select
           value={filterEventType}
           onChange={(e) => setFilterEventType(e.target.value)}
-          className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
         >
           {EVENT_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
@@ -515,21 +528,21 @@ function TimelineTab({ assetId }) {
           type="date"
           value={filterDateFrom}
           onChange={(e) => setFilterDateFrom(e.target.value)}
-          className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
         />
-        <span className="text-xs text-slate-400">–</span>
+        <span className="text-xs text-slate-400 font-semibold">–</span>
         <input
           type="date"
           value={filterDateTo}
           onChange={(e) => setFilterDateTo(e.target.value)}
-          className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
         />
         {(filterEventType || filterDateFrom || filterDateTo) && (
           <button
             onClick={() => { setFilterEventType(''); setFilterDateFrom(''); setFilterDateTo(''); }}
-            className="text-xs text-rose-500 hover:underline"
+            className="text-xs font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
           >
-            Reset
+            Reset Filter
           </button>
         )}
       </div>
@@ -540,9 +553,12 @@ function TimelineTab({ assetId }) {
           {[1, 2, 3, 4].map((i) => <div key={i} className="h-20 rounded-xl bg-slate-100 animate-pulse" />)}
         </div>
       ) : events.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 space-y-2">
-          <History size={36} className="mx-auto opacity-40" />
-          <p className="text-sm font-medium">Belum ada riwayat aktivitas</p>
+        <div className="text-center py-24 text-slate-400 space-y-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-100">
+            <History size={48} className="text-slate-300" />
+          </div>
+          <p className="text-base font-semibold text-slate-600">Belum ada riwayat aktivitas</p>
+          <p className="text-sm text-slate-500">Aktivitas aset akan muncul di sini seiring waktu</p>
         </div>
       ) : (
         <div className="relative">
@@ -681,52 +697,52 @@ export default function AssetDetailPage() {
       {/* back button */}
       <button
         onClick={() => navigate('/dashboard/assets')}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 mb-8 transition-all duration-200 group"
       >
-        <ArrowLeft size={16} />
+        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
         Kembali ke Manajemen Aset
       </button>
 
       {/* asset header card */}
-      <div className="glass-panel rounded-2xl p-5 sm:p-6 mb-6 flex flex-col sm:flex-row gap-4">
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row gap-6 border border-cyan-50 shadow-lg hover:shadow-xl transition-shadow">
         {asset.photo_url ? (
           <img
             src={asset.photo_url}
             alt={asset.name}
-            className="w-full sm:w-32 h-32 object-cover rounded-xl border border-slate-200 shrink-0"
+            className="w-full sm:w-40 h-40 object-cover rounded-2xl border-2 border-slate-200 shadow-md shrink-0 hover:shadow-lg transition-shadow"
           />
         ) : (
-          <div className="w-full sm:w-32 h-32 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 shrink-0">
-            <span className="material-symbols-outlined text-4xl text-slate-300">domain</span>
+          <div className="w-full sm:w-40 h-40 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center border-2 border-slate-200 shadow-md shrink-0">
+            <span className="material-symbols-outlined text-6xl text-slate-300">domain</span>
           </div>
         )}
 
-        <div className="flex-1 space-y-2">
-          <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex-1 space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-cyan-600">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-cyan-600 letter-spacing">
                 {asset.category}
               </p>
-              <h1 className="text-xl font-extrabold text-slate-800 mt-0.5">{asset.name}</h1>
+              <h1 className="text-3xl font-extrabold text-slate-900 mt-1.5">{asset.name}</h1>
             </div>
-            <span className={cn('px-2.5 py-1 rounded-full text-xs font-bold', CONDITION_STYLE[asset.condition] || 'bg-slate-100 text-slate-600')}>
+            <span className={cn('px-3 py-1.5 rounded-full text-xs font-bold shadow-sm', CONDITION_STYLE[asset.condition] || 'bg-slate-100 text-slate-600')}>
               {asset.condition}
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
-            <span><span className="font-semibold text-slate-700">Tahun:</span> {asset.year_built}</span>
+          <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-slate-600 pt-2">
+            <span><span className="font-bold text-slate-800">Tahun:</span> <span className="text-slate-700">{asset.year_built}</span></span>
             {asset.lat && asset.lng && (
-              <span><span className="font-semibold text-slate-700">Koordinat:</span> {Number(asset.lat).toFixed(5)}, {Number(asset.lng).toFixed(5)}</span>
+              <span><span className="font-bold text-slate-800">Koordinat:</span> <span className="text-slate-700">{Number(asset.lat).toFixed(5)}, {Number(asset.lng).toFixed(5)}</span></span>
             )}
           </div>
         </div>
       </div>
 
       {/* tabs */}
-      <div className="glass-panel rounded-2xl overflow-hidden">
+      <div className="glass-panel rounded-3xl overflow-hidden shadow-lg">
         {/* tab header */}
-        <div className="flex border-b border-slate-200 bg-white">
+        <div className="flex border-b border-slate-100 bg-gradient-to-r from-white to-cyan-50/30">
           {[
             { key: 'documents', label: 'Dokumen', icon: FileText },
             { key: 'timeline', label: 'Riwayat Aktivitas', icon: History },
@@ -735,20 +751,20 @@ export default function AssetDetailPage() {
               key={key}
               onClick={() => setActiveTab(key)}
               className={cn(
-                'flex items-center gap-2 px-5 py-4 text-sm font-semibold border-b-2 transition-colors',
+                'flex items-center gap-2.5 px-6 py-4 text-sm font-bold border-b-2 transition-all duration-200',
                 activeTab === key
-                  ? 'border-cyan-500 text-cyan-700 bg-cyan-50/60'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50',
+                  ? 'border-cyan-500 text-cyan-700 bg-gradient-to-b from-cyan-50/80 to-white'
+                  : 'border-transparent text-slate-600 hover:text-slate-800 hover:bg-slate-50/60',
               )}
             >
-              <Icon size={16} />
+              <Icon size={18} />
               {label}
             </button>
           ))}
         </div>
 
         {/* tab content */}
-        <div className="p-5 sm:p-6 bg-white min-h-[400px]">
+        <div className="p-6 sm:p-8 bg-white min-h-[400px]">
           {activeTab === 'documents' && <DocumentsTab assetId={id} />}
           {activeTab === 'timeline' && <TimelineTab assetId={id} />}
         </div>
