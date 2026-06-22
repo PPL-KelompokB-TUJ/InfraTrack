@@ -602,9 +602,6 @@ export default function LandingPage() {
         </div>
       </FadeSection>
 
-      {/* ── YORUSHIKA INTERLUDE 4 ───────────────────────────────────── */}
-      <YorushikaMarquee fadeColor="#1e0f16" theme="dark" />
-
       {/* ── CTA SECTION ──────────────────────────────────────────── */}
       <FadeSection className="py-28 px-6 md:px-12 bg-gradient-to-br from-primary/5 via-white to-secondary/5 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
