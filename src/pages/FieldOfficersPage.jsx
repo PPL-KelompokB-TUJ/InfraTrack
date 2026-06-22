@@ -210,9 +210,13 @@ export default function FieldOfficersPage() {
                   
                   {/* Header: Avatar + Info */}
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/80 to-primary-container/80 flex items-center justify-center text-white font-serif font-bold text-xl shadow-inner">
-                      {initials}
-                    </div>
+                    {officer.profile_photo ? (
+                      <img src={officer.profile_photo} alt={officer.name} className="w-16 h-16 rounded-2xl object-cover shadow-inner border border-primary-container/20" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/80 to-primary-container/80 flex items-center justify-center text-white font-serif font-bold text-xl shadow-inner">
+                        {initials}
+                      </div>
+                    )}
                     <div>
                       <h3 className="text-xl font-bold font-serif text-slate-800 tracking-tight leading-tight">{officer.name}</h3>
                       <p className="text-sm text-slate-500 mt-1">{officer.email}</p>

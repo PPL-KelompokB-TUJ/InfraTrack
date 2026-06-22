@@ -331,6 +331,19 @@ export async function getActiveFieldOfficers() {
 
     if (error) throw new Error(error.message);
 
+    const officerIds = (data || []).map(o => o.id);
+    let photoMap = {};
+    if (officerIds.length > 0) {
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('id, profile_photo')
+        .in('id', officerIds);
+      
+      if (!usersError && usersData) {
+        usersData.forEach(u => { photoMap[u.id] = u.profile_photo; });
+      }
+    }
+
     return (data || []).map((officer) => ({
       id: officer.id,
       name: officer.name,
@@ -338,6 +351,7 @@ export async function getActiveFieldOfficers() {
       phone: officer.phone || '',
       specialization: officer.specialization || '',
       work_area: officer.work_area || '',
+      profile_photo: photoMap[officer.id] || null,
     }));
   } catch (error) {
     const rawMessage = String(error.message || '');
