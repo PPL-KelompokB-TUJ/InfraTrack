@@ -1,6 +1,7 @@
 import Queue from 'bull';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import Redis from 'ioredis';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -22,6 +23,21 @@ const redisOptions = {
   host: process.env.REDIS_HOST || '127.0.0.1',
   port: Number(process.env.REDIS_PORT || 6379),
   password: process.env.REDIS_PASSWORD || undefined,
+};
+
+/**
+ * Get the primary non-internal IPv4 of this machine
+ */
+const getServerIP = () => {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return os.hostname();
 };
 
 /**
@@ -140,8 +156,14 @@ const processExport = async (data, queueMode = 'redis') => {
       fileUrl = `${baseUrl}/exports/${filename}`;
     }
 
+    const serverPort = process.env.PORT || 5000;
+    const serverIP = getServerIP();
+    const queueLabel = queueMode === 'redis' ? 'Redis Queue' : 'In-Memory';
+    const serverInfo = `${serverIP}:${serverPort} (${queueLabel})`;
+
     // 5. Update history status to 'completed' with download link and server info
-    const { error: completeError } = await supabase
+    let completeError;
+    ({ error: completeError } = await supabase
       .from('export_history')
       .update({
         status: 'completed',
@@ -149,7 +171,20 @@ const processExport = async (data, queueMode = 'redis') => {
         server_info: serverInfo,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', jobId);
+      .eq('id', jobId));
+
+    // Graceful fallback jika kolom server_info belum ada di DB
+    if (completeError && (completeError.message?.includes('server_info') || completeError.code === '42703')) {
+      console.warn('Kolom server_info belum ada di DB, menyimpan tanpa server_info...');
+      ({ error: completeError } = await supabase
+        .from('export_history')
+        .update({
+          status: 'completed',
+          file_url: fileUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', jobId));
+    }
 
     if (completeError) {
       throw new Error(`Failed to save completed job details: ${completeError.message}`);

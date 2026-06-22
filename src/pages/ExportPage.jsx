@@ -39,6 +39,7 @@ export default function ExportPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [currentServer, setCurrentServer] = useState(null); // X-Backend-Server dari nginx
 
   // Polling reference
   const pollingRef = useRef(null);
@@ -60,6 +61,10 @@ export default function ExportPage() {
       if (!res.ok) {
         throw new Error('Gagal memuat riwayat ekspor');
       }
+
+      // Tangkap X-Backend-Server dari nginx load balancer
+      const backendServer = res.headers.get('x-backend-server');
+      if (backendServer) setCurrentServer(backendServer);
 
       const data = await res.json();
       setHistory(data.history || []);
@@ -147,6 +152,10 @@ export default function ExportPage() {
           filters,
         }),
       });
+
+      // Tangkap X-Backend-Server dari nginx load balancer
+      const backendServer = response.headers.get('x-backend-server');
+      if (backendServer) setCurrentServer(backendServer);
 
       const data = await response.json();
 
@@ -238,55 +247,11 @@ export default function ExportPage() {
   };
 
   const getServerInfo = (job) => {
-    // Prefer explicit DB field if available
+    // Priority 1: info yang disimpan di DB oleh worker (akurat per-record)
     if (job.server_info) return job.server_info;
-
-    // Derive from file_url
-    if (job.file_url) {
-      try {
-        const url = new URL(job.file_url);
-        const href = job.file_url.toLowerCase();
-        if (href.includes('amazonaws.com')) return 'AWS S3';
-        if (href.includes('digitaloceanspaces.com')) return 'DigitalOcean Spaces';
-        if (href.includes('minio')) return 'MinIO Storage';
-        const { hostname, port } = url;
-        const portStr = port ? `:${port}` : '';
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-          return `localhost${portStr} (Local)`;
-        }
-        return hostname;
-      } catch {
-        // not a valid absolute URL — fall through
-      }
-    }
-
-    // Fallback: derive from API_BASE_URL
-    if (API_BASE_URL) {
-      try {
-        const { hostname, port } = new URL(API_BASE_URL);
-        const portStr = port ? `:${port}` : '';
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-          return `localhost${portStr} (Local)`;
-        }
-        return hostname;
-      } catch {
-        return API_BASE_URL;
-      }
-    }
-
-    // Derive from Supabase URL to show project info
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-    if (supabaseUrl) {
-      try {
-        const projectId = new URL(supabaseUrl).hostname.split('.')[0];
-        return `Supabase: ${projectId}`;
-      } catch {
-        // ignore
-      }
-    }
-
-    // Always show something as last resort
-    return 'Express Backend';
+    // Priority 2: server yang baru saja merespons request history ini (dari header nginx)
+    if (currentServer) return currentServer;
+    return null;
   };
 
   const getStatusBadge = (status) => {
@@ -552,7 +517,14 @@ export default function ExportPage() {
                 </button>
               )}
             </div>
-            <p className="text-xs text-slate-500 mb-6">Tautan unduhan tetap aktif selama server berjalan.</p>
+            <p className="text-xs text-slate-500 mb-3">Tautan unduhan tetap aktif selama server berjalan.</p>
+            {currentServer && (
+              <div className="mb-4 flex items-center gap-1.5 rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2">
+                <Server size={11} className="text-cyan-500 flex-shrink-0" />
+                <span className="text-[10px] font-semibold text-cyan-700">Backend aktif:</span>
+                <span className="text-[10px] font-mono font-bold text-cyan-900">{currentServer}</span>
+              </div>
+            )}
 
             {history.length > 0 && isSelectionMode && (
               <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
