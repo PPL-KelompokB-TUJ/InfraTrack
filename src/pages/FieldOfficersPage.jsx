@@ -158,7 +158,7 @@ export default function FieldOfficersPage() {
 
   return (
     
-    <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8 relative z-10">
+    <main className="mx-auto w-full max-w-full px-4 py-8 sm:px-6 lg:px-8 relative z-10">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-5xl font-bold font-serif text-slate-800 tracking-tight">Manajemen Petugas</h1>

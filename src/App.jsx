@@ -8,6 +8,7 @@ import NotificationContainer from './components/NotificationContainer';
 import { NotificationProvider, InAppNotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import FallingPetals from './components/FallingPetals';
+import CursorPetals from './components/CursorPetals';
 
 // Auth
 import {
@@ -40,6 +41,7 @@ import BudgetMonitoringPage from './pages/BudgetMonitoringPage';
 import NotificationsPage from './pages/NotificationsPage';
 import InventoryPage from './pages/InventoryPage';
 import InventoryHistoryPage from './pages/InventoryHistoryPage';
+
 // ============================================================
 // Auth Context (simple module-level state shared via props)
 // ============================================================
@@ -138,7 +140,7 @@ function DashboardLayout({ currentUser, isAdmin, isOfficer, isBootstrapping, log
         isFieldOfficer={isOfficer}
         onLogout={handleLogout}
       />
-      <main className="flex-1 md:ml-[280px] p-6 md:p-8 transition-all">
+      <main className="flex-1 md:ml-64 transition-all">
         <Outlet />
       </main>
     </div>
@@ -155,58 +157,59 @@ export default function App() {
   return (
     <ThemeProvider>
       <FallingPetals />
+      <CursorPetals />
       <NotificationProvider>
         <InAppNotificationProvider>
           <BrowserRouter>
-          <Routes>
-          {/* Public Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/layanan" element={<PublicServicePage />} />
-          </Route>
+            <Routes>
+              {/* Public Routes */}
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/layanan" element={<PublicServicePage />} />
+              </Route>
 
-          {/* Login (full screen, no layout) */}
-          <Route path="/login" element={<LoginPage />} />
+              {/* Login (full screen, no layout) */}
+              <Route path="/login" element={<LoginPage />} />
 
-          {/* Dashboard Routes (protected) */}
-          <Route
-            path="/dashboard"
-            element={
-              <DashboardLayout
-                currentUser={auth.currentUser}
-                isAdmin={auth.isAdmin}
-                isOfficer={auth.isOfficer}
-                isBootstrapping={auth.isBootstrapping}
-                logout={auth.logout}
-              />
-            }
-          >
-            <Route index element={auth.isOfficer ? <Navigate to="/dashboard/my-tasks" replace /> : <DashboardPage />} />
-            <Route path="reports" element={<ActiveReportsPage />} />
-            <Route path="assets" element={<AssetManagementPage />} />
-            <Route path="assets/:id" element={<AssetDetailPage />} />
-            <Route path="maintenance" element={<MaintenanceTaskPage />} />
-            <Route path="preventive" element={<PreventiveSchedulePage />} />
-            <Route path="budgets" element={<BudgetMonitoringPage />} />
-            <Route path="officers" element={<FieldOfficersPage />} />
-            <Route path="master-data" element={<MasterDataPage />} />
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="inventory/history" element={<InventoryHistoryPage />} />
-            <Route path="ai-analytics" element={<AIAnalyticsPage />} />
-            <Route path="exports" element={<ExportPage />} />
-            <Route path="my-tasks" element={<FieldOfficerTasksPage />} />
-            <Route path="profile" element={<ProfileSettingsPage />} />
-            <Route path="notifications" element={<NotificationsPage />} />
-          </Route>
+              {/* Dashboard Routes (protected) */}
+              <Route
+                path="/dashboard"
+                element={
+                  <DashboardLayout
+                    currentUser={auth.currentUser}
+                    isAdmin={auth.isAdmin}
+                    isOfficer={auth.isOfficer}
+                    isBootstrapping={auth.isBootstrapping}
+                    logout={auth.logout}
+                  />
+                }
+              >
+                <Route index element={auth.isOfficer ? <Navigate to="/dashboard/my-tasks" replace /> : <DashboardPage />} />
+                <Route path="reports" element={<ActiveReportsPage />} />
+                <Route path="assets" element={<AssetManagementPage />} />
+                <Route path="assets/:id" element={<AssetDetailPage />} />
+                <Route path="maintenance" element={<MaintenanceTaskPage />} />
+                <Route path="preventive" element={<PreventiveSchedulePage />} />
+                <Route path="budgets" element={<BudgetMonitoringPage />} />
+                <Route path="officers" element={<FieldOfficersPage />} />
+                <Route path="master-data" element={<MasterDataPage />} />
+                <Route path="inventory" element={<InventoryPage />} />
+                <Route path="inventory/history" element={<InventoryHistoryPage />} />
+                <Route path="ai-analytics" element={<AIAnalyticsPage />} />
+                <Route path="exports" element={<ExportPage />} />
+                <Route path="my-tasks" element={<FieldOfficerTasksPage />} />
+                <Route path="profile" element={<ProfileSettingsPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+              </Route>
 
-          {/* Catch-all → redirect to landing */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+              {/* Catch-all → redirect to landing */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
 
-        <NotificationContainer />
-          </InAppNotificationProvider>
-        </NotificationProvider>
+            <NotificationContainer />
+          </BrowserRouter>
+        </InAppNotificationProvider>
+      </NotificationProvider>
     </ThemeProvider>
   );
 }

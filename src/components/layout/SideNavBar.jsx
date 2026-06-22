@@ -1,131 +1,405 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
+// Icon map for each nav item
+const ICON_COLORS = [
+  '#ce8093', '#b39ad4', '#7fa8d4', '#ce8093',
+  '#a0c4b0', '#d4b39a', '#8093ce', '#d4ce93',
+  '#ce93d4', '#80ced4', '#d4a0b5',
+];
+
 export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLogout }) {
-    const location = useLocation();
-    const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-    const adminItems = [
-        { label: 'Ringkasan', icon: 'dashboard', to: '/dashboard' },
-        { label: 'Laporan Aktif', icon: 'report_problem', to: '/dashboard/reports' },
-        { label: 'Penugasan', icon: 'construction', to: '/dashboard/maintenance' },
-        { label: 'Jadwal Preventif', icon: 'event_note', to: '/dashboard/preventive' },
-        { label: 'Anggaran', icon: 'payments', to: '/dashboard/budgets' },
-        { label: 'Petugas', icon: 'groups', to: '/dashboard/officers' },
-        { label: 'Aset', icon: 'apartment', to: '/dashboard/assets' },
-        { label: 'Inventaris', icon: 'inventory_2', to: '/dashboard/inventory' },
-        { label: 'Master Data', icon: 'database', to: '/dashboard/master-data' },
-        { label: 'Analitik AI', icon: 'smart_toy', to: '/dashboard/ai-analytics' },
-        { label: 'Ekspor Laporan', icon: 'cloud_download', to: '/dashboard/exports' },
-    ];
+  const adminItems = [
+    { label: 'Ringkasan',       icon: 'dashboard',         to: '/dashboard',                  section: 'main' },
+    { label: 'Laporan Aktif',   icon: 'report_problem',    to: '/dashboard/reports',          section: 'main' },
+    { label: 'Penugasan',       icon: 'construction',      to: '/dashboard/maintenance',      section: 'main' },
+    { label: 'Jadwal Preventif',icon: 'event_note',        to: '/dashboard/preventive',       section: 'main' },
+    { label: 'Anggaran',        icon: 'payments',          to: '/dashboard/budgets',          section: 'main' },
+    { label: 'Petugas',         icon: 'groups',            to: '/dashboard/officers',         section: 'main' },
+    { label: 'Aset',            icon: 'apartment',         to: '/dashboard/assets',           section: 'main' },
+    { label: 'Inventaris',      icon: 'inventory_2',       to: '/dashboard/inventory',        section: 'main' },
+    { label: 'Master Data',     icon: 'database',          to: '/dashboard/master-data',      section: 'system' },
+    { label: 'Analitik AI',     icon: 'smart_toy',         to: '/dashboard/ai-analytics',    section: 'system' },
+    { label: 'Ekspor Laporan',  icon: 'cloud_download',    to: '/dashboard/exports',          section: 'system' },
+  ];
 
-    const officerItems = [
-        { label: 'Penugasan Saya', icon: 'assignment_ind', to: '/dashboard/my-tasks' },
-    ];
+  const officerItems = [
+    { label: 'Penugasan Saya', icon: 'assignment_ind', to: '/dashboard/my-tasks', section: 'main' },
+  ];
 
-    const navItems = [
-        ...(isFieldOfficer ? officerItems : []),
-        ...(isAdmin ? adminItems : []),
-    ];
+  const navItems = [
+    ...(isFieldOfficer ? officerItems : []),
+    ...(isAdmin ? adminItems : []),
+  ];
 
-    const handleLogout = async () => {
-        if (onLogout) {
-            await onLogout();
-        }
-        navigate('/');
-    };
+  const mainItems   = navItems.filter(i => i.section === 'main');
+  const systemItems = navItems.filter(i => i.section === 'system');
 
-    return (
-        <nav className="hidden md:flex bg-surface-container-low/80 dark:bg-surface-container-high/80 backdrop-blur-xl h-screen w-64 rounded-r-[32px] border-r border-primary-container/20 shadow-lg shadow-primary/5 fixed left-0 top-0 flex-col pt-container-padding pb-gutter z-40 sidebar-scroll overflow-y-auto transition-all duration-500 ease-in-out">
-            <div className="px-6 mb-8 flex flex-col items-start">
-                <div className="w-12 h-12 rounded-full bg-primary-container/30 flex items-center justify-center mb-4 text-primary">
-                    <span className="material-symbols-outlined text-[24px]">energy_savings_leaf</span>
-                </div>
-                <h1 className="font-headline-md text-headline-md text-primary font-bold italic tracking-tight">InfraTrack</h1>
-                <p className="font-label-md text-label-md text-on-surface-variant mt-1">Infrastructure Management</p>
-            </div>
+  const handleLogout = async () => {
+    if (onLogout) await onLogout();
+    navigate('/');
+  };
 
-            <ul className="flex-1 space-y-2 mt-4 px-2">
-                {navItems.map((item) => {
-                    const isActive = location.pathname === item.to || (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
-                    return (
-                        <li key={item.label}>
-                            <NavLink
-                                to={item.to}
-                                end={item.to === '/dashboard'}
-                                className={cn(
-                                    "flex items-center w-full gap-3 py-3 px-4 transition-all duration-500 ease-in-out font-label-md text-label-md",
-                                    isActive
-                                        ? "bg-primary-container text-on-primary-container rounded-full mx-2"
-                                        : "text-secondary hover:text-primary hover:bg-primary-fixed/30 hover:rounded-full mx-2"
-                                )}
-                            >
-                                <span className={cn("material-symbols-outlined", isActive && "icon-fill")}>{item.icon}</span>
-                                <span>{item.label}</span>
-                            </NavLink>
-                        </li>
-                    );
-                })}
-            </ul>
+  const roleLabel = isAdmin ? 'Administrator' : isFieldOfficer ? 'Petugas Lapangan' : 'Pengguna';
+  const roleColor = isAdmin ? '#4ade80' : isFieldOfficer ? '#f9bbd0' : '#94a3b8';
+  const roleBg    = isAdmin ? 'rgba(74,222,128,0.08)' : isFieldOfficer ? 'rgba(206,128,147,0.08)' : 'rgba(148,163,184,0.08)';
 
-            <div className="px-6 mt-auto space-y-4 pt-4">
-                <NavLink 
-                    to="/layanan"
-                    className="w-full py-3 petal-button font-label-md text-label-md shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 text-primary"
+  const SidebarContent = () => (
+    <nav
+      style={{
+        background: 'linear-gradient(180deg, #1e0f16 0%, #2d1520 60%, #1a0d13 100%)',
+        borderRight: '1px solid rgba(206,128,147,0.12)',
+        width: '256px',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Background ambient glow */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'radial-gradient(ellipse 200px 300px at 50% 0%, rgba(206,128,147,0.12) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '200px',
+        background: 'radial-gradient(ellipse 200px 200px at 50% 100%, rgba(140,58,86,0.1) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Subtle petal watermark */}
+      <div style={{
+        position: 'absolute', right: '-20px', top: '30%',
+        opacity: 0.04, pointerEvents: 'none',
+      }}>
+        <svg width="120" height="120" viewBox="0 0 100 100" fill="#f9bbd0">
+          <path d="M50 0C60 30 100 50 100 50C100 50 60 70 50 100C40 70 0 50 0 50C0 50 40 30 50 0Z" />
+        </svg>
+      </div>
+
+      {/* ── LOGO ── */}
+      <div
+        onClick={() => { navigate('/'); setMobileOpen(false); }}
+        className="cursor-pointer flex-shrink-0"
+        style={{ padding: '28px 24px 20px' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Custom SVG logo */}
+          <div style={{ flexShrink: 0 }}>
+            <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+              <defs>
+                <linearGradient id="sbLogoGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#e8a0b0" />
+                  <stop offset="100%" stopColor="#8c3a56" />
+                </linearGradient>
+                <linearGradient id="sbLogoShine" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#fff" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+              <rect width="40" height="40" rx="11" fill="url(#sbLogoGrad)" />
+              <rect width="40" height="22" rx="11" fill="url(#sbLogoShine)" />
+              <path d="M20 9 L27 14 L27 25 L20 30 L13 25 L13 14 Z" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinejoin="round" />
+              <circle cx="20" cy="19.5" r="2.5" fill="rgba(255,255,255,0.95)" />
+            </svg>
+          </div>
+          <div>
+            <p style={{ fontWeight: 900, fontSize: '17px', color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>
+              InfraTrack
+            </p>
+            <p style={{ fontSize: '8px', color: 'rgba(206,128,147,0.55)', fontWeight: 700, letterSpacing: '0.18em', marginTop: '3px', textTransform: 'uppercase' }}>
+              Sistem Infrastruktur
+            </p>
+          </div>
+        </div>
+
+        {/* Yorushika micro badge */}
+        <div style={{
+          marginTop: '14px',
+          display: 'inline-flex', alignItems: 'center', gap: '5px',
+          padding: '3px 8px', borderRadius: '100px',
+          background: 'rgba(206,128,147,0.08)',
+          border: '1px solid rgba(206,128,147,0.12)',
+        }}>
+          <motion.div
+            animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2.5, repeat: Infinity }}
+            style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#ce8093' }}
+          />
+          <span style={{ fontSize: '9px', color: 'rgba(206,128,147,0.45)', fontWeight: 700, letterSpacing: '0.15em' }}>
+            春泥棒 YORUSHIKA
+          </span>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div style={{ height: '1px', background: 'rgba(206,128,147,0.08)', margin: '0 16px 8px' }} />
+
+      {/* ── NAVIGATION ── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', scrollbarWidth: 'none' }}>
+
+        {/* Main section */}
+        {mainItems.length > 0 && (
+          <div style={{ marginBottom: '4px' }}>
+            <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.25em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '8px 12px 6px' }}>
+              Menu Utama
+            </p>
+            {mainItems.map((item, idx) => {
+              const isActive = location.pathname === item.to || (item.to !== '/dashboard' && location.pathname.startsWith(item.to));
+              const iconColor = ICON_COLORS[idx % ICON_COLORS.length];
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === '/dashboard'}
+                  onMouseEnter={() => setHoveredItem(item.to)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  style={{ display: 'block', marginBottom: '2px', borderRadius: '12px', overflow: 'hidden' }}
                 >
-                    <span className="material-symbols-outlined">add</span>
-                    Laporan Baru
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '10px 12px',
+                    borderRadius: '12px',
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(206,128,147,0.22) 0%, rgba(140,58,86,0.18) 100%)'
+                      : hoveredItem === item.to
+                        ? 'rgba(206,128,147,0.06)'
+                        : 'transparent',
+                    border: isActive ? '1px solid rgba(206,128,147,0.2)' : '1px solid transparent',
+                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                  }}>
+                    {/* Active left bar */}
+                    {isActive && (
+                      <div style={{
+                        position: 'absolute', left: 0, top: '20%', bottom: '20%',
+                        width: '3px', borderRadius: '0 3px 3px 0',
+                        background: 'linear-gradient(180deg, #ce8093, #8c3a56)',
+                      }} />
+                    )}
+                    {/* Icon container */}
+                    <div style={{
+                      width: '30px', height: '30px', borderRadius: '8px', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: isActive ? `rgba(206,128,147,0.2)` : 'rgba(255,255,255,0.04)',
+                    }}>
+                      <span className="material-symbols-outlined" style={{
+                        fontSize: '17px',
+                        color: isActive ? '#f9bbd0' : 'rgba(255,255,255,0.38)',
+                        fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
+                      }}>{item.icon}</span>
+                    </div>
+                    <span style={{
+                      fontSize: '13px',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.45)',
+                      letterSpacing: '0.01em',
+                      transition: 'color 0.2s',
+                    }}>{item.label}</span>
+                  </div>
                 </NavLink>
+              );
+            })}
+          </div>
+        )}
 
-                <div className="border-t border-primary-container/20 pt-4 space-y-1">
-                    <NavLink
-                        to="/dashboard/profile"
-                        className={({ isActive }) => cn(
-                            "flex items-center gap-3 py-3 px-4 transition-all duration-500 ease-in-out font-label-md text-label-md mx-[-8px]",
-                            isActive
-                                ? "bg-primary-container/40 text-primary rounded-full"
-                                : "text-secondary hover:text-primary hover:bg-primary-fixed/30 hover:rounded-full"
-                        )}
-                    >
-                        <span className="material-symbols-outlined">manage_accounts</span>
-                        <span>Profil</span>
-                    </NavLink>
-                    <button 
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 py-3 px-4 transition-all duration-500 ease-in-out font-label-md text-label-md text-secondary hover:text-error hover:bg-error-container/30 hover:rounded-full mx-[-8px]"
-                    >
-                        <span className="material-symbols-outlined">logout</span>
-                        <span>Keluar</span>
-                    </button>
-                </div>
+        {/* System section */}
+        {systemItems.length > 0 && (
+          <div style={{ marginTop: '12px' }}>
+            <p style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.25em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', padding: '8px 12px 6px' }}>
+              Sistem
+            </p>
+            {systemItems.map((item, idx) => {
+              const isActive = location.pathname === item.to || location.pathname.startsWith(item.to);
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onMouseEnter={() => setHoveredItem(item.to)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  style={{ display: 'block', marginBottom: '2px' }}
+                >
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '10px 12px',
+                    borderRadius: '12px',
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(206,128,147,0.22) 0%, rgba(140,58,86,0.18) 100%)'
+                      : hoveredItem === item.to ? 'rgba(206,128,147,0.06)' : 'transparent',
+                    border: isActive ? '1px solid rgba(206,128,147,0.2)' : '1px solid transparent',
+                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                  }}>
+                    {isActive && (
+                      <div style={{
+                        position: 'absolute', left: 0, top: '20%', bottom: '20%',
+                        width: '3px', borderRadius: '0 3px 3px 0',
+                        background: 'linear-gradient(180deg, #ce8093, #8c3a56)',
+                      }} />
+                    )}
+                    <div style={{
+                      width: '30px', height: '30px', borderRadius: '8px', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: isActive ? 'rgba(206,128,147,0.2)' : 'rgba(255,255,255,0.04)',
+                    }}>
+                      <span className="material-symbols-outlined" style={{
+                        fontSize: '17px',
+                        color: isActive ? '#f9bbd0' : 'rgba(255,255,255,0.38)',
+                        fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0",
+                      }}>{item.icon}</span>
+                    </div>
+                    <span style={{
+                      fontSize: '13px',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.45)',
+                      transition: 'color 0.2s',
+                    }}>{item.label}</span>
+                  </div>
+                </NavLink>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-                {currentUser && (
-                    <NavLink
-                        to="/dashboard/profile"
-                        className="mt-4 flex items-center gap-3 cursor-pointer group hover:bg-surface-container/50 p-2 rounded-xl transition-all mx-[-8px]"
-                    >
-                        <img 
-                            alt="User" 
-                            className="w-8 h-8 rounded-full object-cover border border-primary-container"
-                            src={
-                                currentUser.user_metadata?.avatar_url ||
-                                `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email || 'user'}`
-                            }
-                            onError={(e) => {
-                                e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email || 'user'}`;
-                            }}
-                        />
-                        <div className="min-w-0">
-                            <p className="font-label-md text-label-md text-on-surface truncate group-hover:text-primary transition-colors">
-                                {currentUser.user_metadata?.full_name || currentUser.email}
-                            </p>
-                            <p className="font-body-sm text-[10px] text-on-surface-variant leading-none mt-1">
-                                {isAdmin ? 'Administrator' : isFieldOfficer ? 'Petugas Lapangan' : 'User'}
-                            </p>
-                        </div>
-                    </NavLink>
-                )}
+      {/* ── BOTTOM SECTION ── */}
+      <div style={{ padding: '12px 16px 20px', borderTop: '1px solid rgba(206,128,147,0.08)', flexShrink: 0 }}>
+
+        {/* New Report CTA */}
+        <motion.button
+          whileHover={{ y: -1, boxShadow: '0 8px 24px rgba(140,58,86,0.4)' }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => navigate('/layanan')}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            padding: '11px 16px', borderRadius: '12px', marginBottom: '12px',
+            background: 'linear-gradient(135deg, #ce8093, #8c3a56)',
+            border: 'none', cursor: 'pointer', color: 'white',
+            fontWeight: 700, fontSize: '13px',
+            boxShadow: '0 4px 16px rgba(140,58,86,0.28)',
+          }}
+        >
+          <span className="material-symbols-outlined icon-fill" style={{ fontSize: '17px' }}>add</span>
+          Laporan Baru
+        </motion.button>
+
+        {/* Profile + Logout */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <NavLink
+            to="/dashboard/profile"
+            style={{ display: 'block' }}
+          >
+            {({ isActive }) => (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '10px 12px', borderRadius: '12px',
+                background: isActive ? 'rgba(206,128,147,0.1)' : 'transparent',
+                transition: 'background 0.2s',
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(206,128,147,0.06)'}
+                onMouseLeave={e => e.currentTarget.style.background = isActive ? 'rgba(206,128,147,0.1)' : 'transparent'}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '17px', color: 'rgba(255,255,255,0.38)' }}>manage_accounts</span>
+                <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.45)' }}>Profil</span>
+              </div>
+            )}
+          </NavLink>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '10px 12px', borderRadius: '12px', border: 'none',
+              background: 'transparent', cursor: 'pointer', textAlign: 'left',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '17px', color: 'rgba(255,255,255,0.3)' }}>logout</span>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.38)' }}>Keluar</span>
+          </button>
+        </div>
+
+        {/* User card */}
+        {currentUser && (
+          <div style={{
+            marginTop: '12px', padding: '10px 12px', borderRadius: '12px',
+            background: roleBg,
+            border: '1px solid rgba(206,128,147,0.1)',
+            display: 'flex', alignItems: 'center', gap: '10px',
+          }}>
+            <img
+              alt="User avatar"
+              src={currentUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email || 'user'}`}
+              onError={e => { e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.email || 'user'}`; }}
+              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(206,128,147,0.25)', flexShrink: 0 }}
+            />
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {currentUser.user_metadata?.full_name || currentUser.email}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: roleColor, flexShrink: 0 }} />
+                <p style={{ fontSize: '10px', color: roleColor, fontWeight: 600, opacity: 0.8 }}>{roleLabel}</p>
+              </div>
             </div>
-        </nav>
-    );
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <div className="hidden md:block fixed left-0 top-0 h-screen z-40" style={{ width: '256px' }}>
+        <SidebarContent />
+      </div>
+
+      {/* Mobile toggle button */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 flex items-center justify-center w-10 h-10 rounded-xl shadow-lg"
+        style={{ background: 'linear-gradient(135deg,#ce8093,#8c3a56)', border: 'none', cursor: 'pointer' }}
+        onClick={() => setMobileOpen(!mobileOpen)}
+      >
+        <span className="material-symbols-outlined text-white" style={{ fontSize: '20px' }}>
+          {mobileOpen ? 'close' : 'menu'}
+        </span>
+      </button>
+
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="md:hidden fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ x: -256 }} animate={{ x: 0 }} exit={{ x: -256 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="md:hidden fixed left-0 top-0 h-screen z-50"
+              style={{ width: '256px' }}
+            >
+              <SidebarContent />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop spacer */}
+      <div className="hidden md:block flex-shrink-0" style={{ width: '256px' }} />
+    </>
+  );
 }

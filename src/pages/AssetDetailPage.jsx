@@ -692,7 +692,7 @@ export default function AssetDetailPage() {
   if (!asset) return null;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+    <main className="mx-auto w-full max-w-full px-4 py-8 sm:px-6">
 
       {/* back button */}
       <button

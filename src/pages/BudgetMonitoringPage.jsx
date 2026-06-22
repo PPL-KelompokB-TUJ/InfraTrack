@@ -201,219 +201,150 @@ export default function BudgetMonitoringPage() {
   });
 
   return (
-    <main className="min-h-screen bg-primary/5/50 p-6">
-      {/* Title Header */}
-      <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Manajemen Anggaran Pemeliharaan</h1>
-          <p className="text-slate-500 text-sm">Monitor estimasi, realisasi, dan variansi anggaran pemeliharaan infrastruktur.</p>
-        </div>
-        <button 
-          onClick={loadBudgetData} 
-          disabled={isLoading}
-          className="flex items-center gap-2 rounded-xl glass-card border-none px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-primary/5 active:scale-95 disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          Refresh Data
-        </button>
-      </div>
-
-      {/* Stats Section */}
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        {/* Total Estimasi */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm flex items-center gap-4">
-          <div className="rounded-2xl bg-primary/5 p-3 text-primary">
-            <DollarSign className="h-6 w-6" />
+    <div className="min-h-screen pb-12" style={{ background: '#fdf8f8' }}>
+      
+      {/* ── TOP BAR ── */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(253,248,248,0.9)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(206,128,147,0.1)', padding: '12px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="material-symbols-outlined icon-fill" style={{ fontSize: '18px', color: '#ce8093' }}>account_balance_wallet</span>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: '#2d1520' }}>Keuangan</span>
+            <span style={{ color: 'rgba(206,128,147,0.4)', fontSize: '14px' }}>›</span>
+            <span style={{ fontSize: '13px', color: '#6b3a4a', opacity: 0.6 }}>Anggaran Pemeliharaan</span>
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Estimasi</p>
-            <h3 className="text-xl font-extrabold text-slate-800 mt-1">{formatCurrency(stats.totalEstimated)}</h3>
-            <p className="text-xs text-slate-500 mt-0.5">{stats.totalTaskCount} Kegiatan</p>
-          </div>
-        </div>
-
-        {/* Total Realisasi */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm flex items-center gap-4">
-          <div className="rounded-2xl bg-emerald-50 p-3 text-emerald-600">
-            <TrendingUp className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Realisasi</p>
-            <h3 className="text-xl font-extrabold text-slate-800 mt-1">{formatCurrency(stats.totalActual)}</h3>
-            <p className="text-xs text-slate-500 mt-0.5">{stats.completedTaskCount} Selesai</p>
-          </div>
-        </div>
-
-        {/* Selisih / Varian */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm flex items-center gap-4">
-          <div className={`rounded-2xl p-3 ${variance >= 0 ? 'bg-indigo-50 text-indigo-600' : 'bg-rose-50 text-rose-600'}`}>
-            <ArrowRightLeft className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Selisih (Efisiensi)</p>
-            <h3 className={`text-xl font-extrabold mt-1 ${variance >= 0 ? 'text-indigo-600' : 'text-rose-600'}`}>
-              {formatCurrency(variance)}
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {variance >= 0 ? 'Sesuai / Hemat' : 'Melebihi Anggaran'}
-            </p>
-          </div>
-        </div>
-
-        {/* Penyerapan */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm flex items-center gap-4">
-          <div className="rounded-2xl bg-amber-50 p-3 text-amber-600">
-            <Percent className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Penyerapan Anggaran</p>
-            <h3 className="text-xl font-extrabold text-slate-800 mt-1">{absorptionRate.toFixed(1)}%</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Dari total estimasi</p>
-          </div>
+          <button onClick={loadBudgetData} disabled={isLoading} style={{ background: 'rgba(206,128,147,0.08)', border: 'none', borderRadius: '100px', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px', cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.6 : 1 }}>
+            <span className={`material-symbols-outlined ${isLoading ? 'animate-spin' : ''}`} style={{ fontSize: '16px', color: '#ce8093' }}>refresh</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#8c3a56' }}>Refresh</span>
+          </button>
         </div>
       </div>
 
-      {/* Chart Section */}
-      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm mb-6">
-        <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <div style={{ maxWidth: '100%', margin: '0 auto', padding: '28px 24px' }}>
+        
+        {/* ── HEADER ── */}
+        <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <div>
-            <h2 className="text-lg font-bold text-slate-800">Perbandingan Anggaran vs Realisasi</h2>
-            <p className="text-slate-500 text-xs mt-0.5">Representasi grafis penyerapan anggaran pemeliharaan per periode.</p>
-          </div>
-          <div className="flex bg-slate-100 rounded-xl p-1 self-start">
-            <button
-              onClick={() => setPeriod('monthly')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${period === 'monthly' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-            >
-              Bulanan
-            </button>
-            <button
-              onClick={() => setPeriod('yearly')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${period === 'yearly' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
-            >
-              Tahunan
-            </button>
+            <p style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.25em', color: '#ce8093', opacity: 0.6, textTransform: 'uppercase', marginBottom: '6px' }}>Manajemen Finansial</p>
+            <h1 style={{ fontSize: '36px', fontWeight: 900, color: '#1e0f16', letterSpacing: '-0.03em', lineHeight: 1 }}>Monitor Anggaran</h1>
+            <p style={{ fontSize: '14px', color: '#6b3a4a', opacity: 0.6, marginTop: '6px' }}>Monitor estimasi, realisasi, dan variansi anggaran pemeliharaan infrastruktur.</p>
           </div>
         </div>
 
-        <div className="h-[320px] w-full">
-          {isLoading ? (
-            <div className="flex h-full w-full items-center justify-center">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : chartData.length === 0 ? (
-            <div className="flex h-full w-full flex-col items-center justify-center text-slate-400">
-              <Briefcase className="h-10 w-10 mb-2 stroke-1" />
-              <p className="text-sm">Belum ada data anggaran terdaftar pada periode ini</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="period" 
-                  tickLine={false} 
-                  stroke="#94a3b8" 
-                  fontSize={12} 
-                  tickFormatter={formatPeriod}
-                />
-                <YAxis 
-                  tickFormatter={(value) => `Rp ${(value / 1e6).toFixed(0)}jt`}
-                  tickLine={false} 
-                  axisLine={false}
-                  stroke="#94a3b8" 
-                  fontSize={12} 
-                />
-                <Tooltip 
-                  formatter={(value) => [formatCurrency(value), '']}
-                  labelFormatter={(label) => `Periode: ${formatPeriod(label)}`}
-                  contentStyle={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Bar name="Estimasi Biaya" dataKey="estimated" fill="#805062" radius={[6, 6, 0, 0]} />
-                <Bar name="Realisasi Biaya" dataKey="actual" fill="#f2b6cb" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
-
-      {/* Variance Aggregation Table */}
-      <div className="grid gap-6 lg:grid-cols-3 mb-6">
-        {/* Table 1: Period summary */}
-        <div className="lg:col-span-1 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm flex flex-col">
-          <h2 className="text-lg font-bold text-slate-800 mb-2">Analisis Penyerapan</h2>
-          <p className="text-slate-500 text-xs mb-4">Rincian variansi dan penyerapan per periode.</p>
-
-          <div className="flex-1 overflow-auto max-h-[350px] pr-1">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-bold">
-                  <th className="py-2.5">Periode</th>
-                  <th className="py-2.5 text-right">Estimasi</th>
-                  <th className="py-2.5 text-right">Realisasi</th>
-                  <th className="py-2.5 text-right">Penyerapan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {chartData.map((d, index) => {
-                  const absorption = d.estimated > 0 ? (d.actual / d.estimated) * 100 : 0;
-                  return (
-                    <tr key={index} className="border-b border-slate-50 hover:bg-primary/5/50">
-                      <td className="py-3 font-semibold text-slate-700">{formatPeriod(d.period)}</td>
-                      <td className="py-3 text-right text-slate-600">{formatCurrency(d.estimated)}</td>
-                      <td className="py-3 text-right text-slate-600">{formatCurrency(d.actual)}</td>
-                      <td className="py-3 text-right">
-                        <span className={`font-bold ${absorption > 100 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                          {absorption.toFixed(0)}%
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {chartData.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="py-8 text-center text-slate-400">Belum ada data</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Detailed tasks cost monitoring table */}
-        <div className="lg:col-span-2 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-            <div>
-              <h2 className="text-lg font-bold text-slate-800">Detail Anggaran per Kegiatan</h2>
-              <p className="text-slate-500 text-xs mt-0.5">Pemantauan estimasi dan realisasi biaya per kegiatan pemeliharaan.</p>
-            </div>
-            
-            {/* Table filters */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Search bar */}
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Cari tiket/aset..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-primary/5/50 pl-10 pr-4 py-2 text-xs outline-none transition focus:border-primary/80 focus:bg-white"
-                />
+        {/* ── STATS SECTION ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          {[
+            { label: 'Total Estimasi', value: formatCurrency(stats.totalEstimated), sub: `${stats.totalTaskCount} Kegiatan`, icon: 'request_quote', color: '#ce8093', bg: 'rgba(206,128,147,0.06)' },
+            { label: 'Total Realisasi', value: formatCurrency(stats.totalActual), sub: `${stats.completedTaskCount} Selesai`, icon: 'payments', color: '#10b981', bg: 'rgba(16,185,129,0.06)' },
+            { label: 'Selisih (Efisiensi)', value: formatCurrency(variance), sub: variance >= 0 ? 'Sesuai / Hemat' : 'Melebihi Anggaran', icon: 'currency_exchange', color: variance >= 0 ? '#6366f1' : '#f43f5e', bg: variance >= 0 ? 'rgba(99,102,241,0.06)' : 'rgba(244,63,94,0.06)' },
+            { label: 'Penyerapan Anggaran', value: `${absorptionRate.toFixed(1)}%`, sub: 'Dari total estimasi', icon: 'pie_chart', color: '#f59e0b', bg: 'rgba(245,158,11,0.06)' }
+          ].map((s, i) => (
+            <div key={i} style={{ background: 'white', borderRadius: '24px', padding: '24px', border: '1.5px solid rgba(206,128,147,0.12)', boxShadow: '0 4px 20px rgba(206,128,147,0.03)', display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '24px', color: s.color }}>{s.icon}</span>
               </div>
+              <div>
+                <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>{s.label}</p>
+                <h3 style={{ fontSize: '20px', fontWeight: 900, color: s.color === '#ce8093' ? '#1e0f16' : s.color, lineHeight: 1 }}>{s.value}</h3>
+                <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px', fontWeight: 600 }}>{s.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
-              {/* Status filter */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-primary/5/50 px-2.5 py-1.5">
-                <Filter className="h-3.5 w-3.5 text-slate-400" />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-transparent text-xs font-semibold text-slate-600 outline-none"
-                >
+        {/* ── CHARTS AND TABLES ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '24px' }}>
+          
+          {/* Chart Section */}
+          <div style={{ gridColumn: 'span 2', background: 'white', borderRadius: '24px', border: '1.5px solid rgba(206,128,147,0.12)', boxShadow: '0 4px 24px rgba(206,128,147,0.03)', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontSize: '16px', fontWeight: 900, color: '#1e0f16' }}>Perbandingan Anggaran vs Realisasi</h2>
+              </div>
+              <div style={{ display: 'flex', gap: '4px', background: 'rgba(206,128,147,0.06)', borderRadius: '12px', padding: '4px' }}>
+                <button onClick={() => setPeriod('monthly')} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: period === 'monthly' ? 'white' : 'transparent', color: period === 'monthly' ? '#8c3a56' : '#94a3b8', fontSize: '11px', fontWeight: 800, cursor: 'pointer', boxShadow: period === 'monthly' ? '0 2px 8px rgba(206,128,147,0.1)' : 'none' }}>Bulanan</button>
+                <button onClick={() => setPeriod('yearly')} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: period === 'yearly' ? 'white' : 'transparent', color: period === 'yearly' ? '#8c3a56' : '#94a3b8', fontSize: '11px', fontWeight: 800, cursor: 'pointer', boxShadow: period === 'yearly' ? '0 2px 8px rgba(206,128,147,0.1)' : 'none' }}>Tahunan</button>
+              </div>
+            </div>
+
+            <div style={{ height: '320px', width: '100%' }}>
+              {isLoading ? (
+                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span className="material-symbols-outlined animate-spin" style={{ fontSize: '32px', color: '#ce8093', opacity: 0.5 }}>progress_activity</span>
+                </div>
+              ) : chartData.length === 0 ? (
+                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', color: '#ce8093', opacity: 0.4 }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '48px', marginBottom: '8px' }}>analytics</span>
+                  <p style={{ fontSize: '14px', fontWeight: 700 }}>Belum ada data anggaran terdaftar pada periode ini</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="period" tickLine={false} stroke="#94a3b8" fontSize={11} fontWeight={600} tickFormatter={formatPeriod} />
+                    <YAxis tickFormatter={(value) => `Rp ${(value / 1e6).toFixed(0)}jt`} tickLine={false} axisLine={false} stroke="#94a3b8" fontSize={11} fontWeight={600} />
+                    <Tooltip formatter={(value) => [formatCurrency(value), '']} labelFormatter={(label) => `Periode: ${formatPeriod(label)}`} contentStyle={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid rgba(206,128,147,0.2)', boxShadow: '0 4px 12px rgba(206,128,147,0.1)', fontWeight: 700, fontSize: '12px' }} />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: 600, paddingTop: '10px' }} />
+                    <Bar name="Estimasi Biaya" dataKey="estimated" fill="#8c3a56" radius={[6, 6, 0, 0]} />
+                    <Bar name="Realisasi Biaya" dataKey="actual" fill="#f2b6cb" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          {/* Analysis Table */}
+          <div style={{ background: 'white', borderRadius: '24px', border: '1.5px solid rgba(206,128,147,0.12)', boxShadow: '0 4px 24px rgba(206,128,147,0.03)', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+            <h2 style={{ fontSize: '16px', fontWeight: 900, color: '#1e0f16', marginBottom: '4px' }}>Analisis Penyerapan</h2>
+            <p style={{ fontSize: '11px', color: '#6b3a4a', opacity: 0.6, marginBottom: '16px' }}>Rincian variansi dan penyerapan per periode.</p>
+
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
+                <thead style={{ position: 'sticky', top: 0, background: 'white', zIndex: 1 }}>
+                  <tr>
+                    <th style={{ padding: '12px 0', textAlign: 'left', fontWeight: 800, color: '#94a3b8', borderBottom: '1.5px solid rgba(206,128,147,0.1)' }}>Periode</th>
+                    <th style={{ padding: '12px 0', textAlign: 'right', fontWeight: 800, color: '#94a3b8', borderBottom: '1.5px solid rgba(206,128,147,0.1)' }}>Estimasi</th>
+                    <th style={{ padding: '12px 0', textAlign: 'right', fontWeight: 800, color: '#94a3b8', borderBottom: '1.5px solid rgba(206,128,147,0.1)' }}>Realisasi</th>
+                    <th style={{ padding: '12px 0', textAlign: 'right', fontWeight: 800, color: '#94a3b8', borderBottom: '1.5px solid rgba(206,128,147,0.1)' }}>%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chartData.map((d, index) => {
+                    const absorption = d.estimated > 0 ? (d.actual / d.estimated) * 100 : 0;
+                    return (
+                      <tr key={index} style={{ borderBottom: '1px solid rgba(206,128,147,0.05)' }}>
+                        <td style={{ padding: '12px 0', fontWeight: 800, color: '#1e0f16' }}>{formatPeriod(d.period)}</td>
+                        <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 600, color: '#6b3a4a' }}>{formatCurrency(d.estimated)}</td>
+                        <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 600, color: '#6b3a4a' }}>{formatCurrency(d.actual)}</td>
+                        <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 800, color: absorption > 100 ? '#f43f5e' : '#10b981' }}>{absorption.toFixed(0)}%</td>
+                      </tr>
+                    );
+                  })}
+                  {chartData.length === 0 && (
+                    <tr><td colSpan={4} style={{ padding: '32px 0', textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>Belum ada data</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* ── DETAILED TASKS TABLE ── */}
+        <div style={{ background: 'white', borderRadius: '24px', border: '1.5px solid rgba(206,128,147,0.12)', boxShadow: '0 4px 24px rgba(206,128,147,0.03)', overflow: 'hidden' }}>
+          <div style={{ padding: '24px', borderBottom: '1.5px solid rgba(206,128,147,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h2 style={{ fontSize: '16px', fontWeight: 900, color: '#1e0f16' }}>Detail Anggaran per Kegiatan</h2>
+              <p style={{ fontSize: '12px', color: '#6b3a4a', opacity: 0.6 }}>Pemantauan estimasi dan realisasi biaya per kegiatan pemeliharaan.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ position: 'relative' }}>
+                <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', color: '#ce8093' }}>search</span>
+                <input type="text" placeholder="Cari tiket/aset..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ padding: '8px 16px 8px 36px', borderRadius: '12px', border: '1.5px solid rgba(206,128,147,0.15)', background: 'rgba(206,128,147,0.04)', outline: 'none', fontSize: '12px', fontWeight: 600, width: '200px' }} />
+              </div>
+              <div style={{ position: 'relative' }}>
+                <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', color: '#ce8093' }}>filter_list</span>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                  style={{ padding: '8px 16px 8px 36px', borderRadius: '12px', border: '1.5px solid rgba(206,128,147,0.15)', background: 'rgba(206,128,147,0.04)', outline: 'none', fontSize: '12px', fontWeight: 600, appearance: 'none', paddingRight: '32px' }}>
                   <option value="all">Semua Status</option>
                   <option value="assigned">Ditugaskan</option>
                   <option value="in_progress">Dikerjakan</option>
@@ -424,17 +355,16 @@ export default function BudgetMonitoringPage() {
             </div>
           </div>
 
-          {/* Details Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
-                  <th className="pb-3 pl-2">Kode Tiket</th>
-                  <th className="pb-3">Infrastruktur / Aset</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3 text-right">Estimasi (Rp)</th>
-                  <th className="pb-3 text-right">Realisasi (Rp)</th>
-                  <th className="pb-3 text-right">Selisih</th>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <thead style={{ background: 'rgba(206,128,147,0.03)' }}>
+                <tr>
+                  <th style={{ padding: '16px 24px', textAlign: 'left', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}>Kode Tiket</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'left', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}>Infrastruktur / Aset</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'left', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}>Status</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}>Estimasi (Rp)</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}>Realisasi (Rp)</th>
+                  <th style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}>Selisih</th>
                 </tr>
               </thead>
               <tbody>
@@ -442,60 +372,40 @@ export default function BudgetMonitoringPage() {
                   const est = Number(b.estimated_cost || 0);
                   const act = b.actual_cost !== null && b.actual_cost !== undefined ? Number(b.actual_cost) : null;
                   const diff = act !== null ? est - act : null;
-
                   return (
-                    <tr key={b.id} className="border-b border-slate-50 hover:bg-primary/5/30 transition-colors">
-                      <td className="py-3 pl-2 font-mono font-bold text-primary">
-                        {b.task?.report?.ticket_code || 'N/A'}
+                    <tr key={b.id} style={{ borderBottom: '1px solid rgba(206,128,147,0.06)' }}>
+                      <td style={{ padding: '16px 24px', fontWeight: 800, fontFamily: 'monospace', fontSize: '13px', color: '#1e0f16' }}>{b.task?.report?.ticket_code || 'N/A'}</td>
+                      <td style={{ padding: '16px 24px' }}>
+                        <div style={{ fontWeight: 800, color: '#6b3a4a', fontSize: '13px' }}>{b.task?.asset?.name || 'N/A'}</div>
+                        <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>{b.task?.instructions}</div>
                       </td>
-                      <td className="py-3">
-                        <div className="font-semibold text-slate-800">{b.task?.asset?.name || 'N/A'}</div>
-                        <div className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{b.task?.instructions}</div>
-                      </td>
-                      <td className="py-3">
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          b.task?.status === 'completed' ? 'bg-emerald-50 text-emerald-700' :
-                          b.task?.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
-                          b.task?.status === 'cancelled' ? 'bg-rose-50 text-rose-700' :
-                          'bg-primary/5 text-primary'
-                        }`}>
-                          {b.task?.status === 'completed' ? 'Selesai' :
-                           b.task?.status === 'in_progress' ? 'Dikerjakan' :
-                           b.task?.status === 'cancelled' ? 'Batal' :
-                           'Ditugaskan'}
+                      <td style={{ padding: '16px 24px' }}>
+                        <span style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '100px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase',
+                          background: b.task?.status === 'completed' ? 'rgba(16,185,129,0.1)' : b.task?.status === 'in_progress' ? 'rgba(245,158,11,0.1)' : b.task?.status === 'cancelled' ? 'rgba(244,63,94,0.1)' : 'rgba(206,128,147,0.1)',
+                          color: b.task?.status === 'completed' ? '#10b981' : b.task?.status === 'in_progress' ? '#f59e0b' : b.task?.status === 'cancelled' ? '#f43f5e' : '#ce8093' }}>
+                          {b.task?.status === 'completed' ? 'Selesai' : b.task?.status === 'in_progress' ? 'Dikerjakan' : b.task?.status === 'cancelled' ? 'Batal' : 'Ditugaskan'}
                         </span>
                       </td>
-                      <td className="py-3 text-right font-medium text-slate-600">
-                        {formatCurrency(est)}
-                      </td>
-                      <td className="py-3 text-right font-semibold text-slate-800">
-                        {act !== null ? formatCurrency(act) : <span className="text-slate-400 italic">Belum Selesai</span>}
-                      </td>
-                      <td className="py-3 text-right">
-                        {diff !== null ? (
-                          <span className={`font-bold ${diff >= 0 ? 'text-indigo-600' : 'text-rose-600'}`}>
-                            {diff >= 0 ? `+${formatCurrency(diff)}` : formatCurrency(diff)}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">-</span>
-                        )}
+                      <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600, color: '#6b3a4a' }}>{formatCurrency(est)}</td>
+                      <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color: act !== null ? '#1e0f16' : '#94a3b8' }}>{act !== null ? formatCurrency(act) : <span style={{ fontStyle: 'italic' }}>Belum Selesai</span>}</td>
+                      <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 800, color: diff !== null ? (diff >= 0 ? '#6366f1' : '#f43f5e') : '#94a3b8' }}>
+                        {diff !== null ? (diff >= 0 ? `+${formatCurrency(diff)}` : formatCurrency(diff)) : '-'}
                       </td>
                     </tr>
                   );
                 })}
                 {filteredBudgets.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-400">
-                      <Info className="h-8 w-8 mx-auto mb-2 text-slate-300 stroke-1" />
-                      Tidak ada data anggaran pemeliharaan yang cocok dengan pencarian / filter
-                    </td>
-                  </tr>
+                  <tr><td colSpan={6} style={{ padding: '48px', textAlign: 'center', color: '#ce8093', opacity: 0.5 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '32px', marginBottom: '8px' }}>search_off</span>
+                    <p style={{ fontWeight: 700 }}>Tidak ada data anggaran pemeliharaan yang cocok</p>
+                  </td></tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
+
       </div>
-    </main>
+    </div>
   );
 }

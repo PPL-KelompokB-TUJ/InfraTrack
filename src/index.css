@@ -583,3 +583,18 @@ html, body, * {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* ── UIUX Spring Thief Petal Shapes ── */
+.petal-shape {
+  border-radius: 32px 4px 32px 4px !important;
+}
+
+.petal-radius {
+  border-radius: 16px 2px 16px 2px !important;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}

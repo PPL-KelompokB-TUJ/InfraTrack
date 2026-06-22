@@ -118,195 +118,161 @@ export default function ActiveReportsPage() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="text-center py-12">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
-          <p className="mt-4 text-sm text-slate-600">Memuat laporan aktif...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#fdf8f8' }}>
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl" style={{ background: 'linear-gradient(135deg,#ce8093,#8c3a56)' }}>
+            <span className="material-symbols-outlined text-white animate-spin" style={{ fontSize: '28px' }}>progress_activity</span>
+          </div>
+          <p className="font-semibold" style={{ color: '#6b3a4a' }}>Memuat laporan aktif...</p>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      {/* Header with Back Button */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {true && (
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold transition-colors"
-            >
-              <ChevronLeft size={20} />
-              Kembali
-            </button>
-          )}
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900">Laporan Aktif</h1>
-            <p className="mt-1 text-slate-600">Daftar semua laporan kerusakan infrastruktur</p>
+    <div className="min-h-screen pb-12" style={{ background: '#fdf8f8' }}>
+      
+      {/* ── TOP BAR ── */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(253,248,248,0.9)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(206,128,147,0.1)', padding: '12px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="material-symbols-outlined icon-fill" style={{ fontSize: '18px', color: '#ce8093' }}>inbox</span>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: '#2d1520' }}>Laporan</span>
+            <span style={{ color: 'rgba(206,128,147,0.4)', fontSize: '14px' }}>›</span>
+            <span style={{ fontSize: '13px', color: '#6b3a4a', opacity: 0.6 }}>Aktif</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ position: 'relative' }}>
+              <span className="material-symbols-outlined" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', color: 'rgba(107,58,74,0.4)' }}>search</span>
+              <input type="text" placeholder="Cari laporan..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ paddingLeft: '36px', paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px', borderRadius: '12px', fontSize: '13px', outline: 'none', width: '220px', background: 'rgba(206,128,147,0.06)', border: '1.5px solid rgba(206,128,147,0.15)', color: '#2d1520' }}
+                onFocus={e => { e.target.style.borderColor = '#ce8093'; e.target.style.background = 'white'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(206,128,147,0.15)'; e.target.style.background = 'rgba(206,128,147,0.06)'; }}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-5 mb-8">
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500 font-bold">Total Laporan</p>
-          <p className="text-3xl font-bold text-slate-900 mt-2">{reports.length}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500 font-bold">Pending</p>
-          <p className="text-3xl font-bold text-slate-400 mt-2">
-            {reports.filter((r) => r.status === 'pending').length}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500 font-bold">Terverifikasi</p>
-          <p className="text-3xl font-bold text-blue-600 mt-2">
-            {reports.filter((r) => r.status === 'terverifikasi' || r.status === 'sedang_dikerjakan').length}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500 font-bold">Ditolak</p>
-          <p className="text-3xl font-bold text-red-600 mt-2">
-            {reports.filter((r) => r.status === 'ditolak').length}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500 font-bold">Selesai</p>
-          <p className="text-3xl font-bold text-emerald-600 mt-2">
-            {reports.filter((r) => r.status === 'selesai').length}
-          </p>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Search */}
+      <div style={{ maxWidth: '100%', margin: '0 auto', padding: '28px 24px' }}>
+        
+        {/* ── HEADER ── */}
+        <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'flex-end', justifyItems: 'space-between', justifyContent: 'space-between' }}>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              <Search className="inline mr-2" size={16} />
-              Cari Laporan
-            </label>
-            <input
-              type="text"
-              placeholder="Cari kode tiket, jenis, atau lokasi..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              <Filter className="inline mr-2" size={16} />
-              Filter Status
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="all">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="terverifikasi">Terverifikasi</option>
-              <option value="ditolak">Ditolak</option>
-              <option value="selesai">Selesai</option>
-            </select>
+            <div className="flex items-center gap-4 mb-2">
+              <button onClick={() => navigate('/dashboard')} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1.5px solid rgba(206,128,147,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'white' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(206,128,147,0.1)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'white'}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#ce8093' }}>arrow_back</span>
+              </button>
+              <p style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.25em', color: '#ce8093', opacity: 0.6, textTransform: 'uppercase' }}>Manajemen Laporan</p>
+            </div>
+            <h1 style={{ fontSize: '36px', fontWeight: 900, color: '#1e0f16', letterSpacing: '-0.03em', lineHeight: 1 }}>Laporan Aktif</h1>
+            <p style={{ fontSize: '14px', color: '#6b3a4a', opacity: 0.6, marginTop: '6px' }}>Daftar semua laporan kerusakan infrastruktur dari warga.</p>
           </div>
         </div>
-      </div>
 
-      {/* Reports Table */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        {filteredReports.length === 0 ? (
-          <div className="p-12 text-center">
-            <AlertCircle size={48} className="mx-auto mb-3 text-slate-400" />
-            <p className="text-slate-600">Tidak ada laporan yang sesuai dengan filter</p>
+        {/* ── STAT CARDS ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          {[
+            { label: 'Total Laporan', value: reports.length, color: '#8c3a56' },
+            { label: 'Pending', value: reports.filter((r) => r.status === 'pending').length, color: '#f87171' },
+            { label: 'Terverifikasi', value: reports.filter((r) => r.status === 'terverifikasi' || r.status === 'sedang_dikerjakan').length, color: '#7fa8d4' },
+            { label: 'Ditolak', value: reports.filter((r) => r.status === 'ditolak').length, color: '#94a3b8' },
+            { label: 'Selesai', value: reports.filter((r) => r.status === 'selesai').length, color: '#4ade80' }
+          ].map((card, i) => (
+            <div key={i} style={{ background: 'white', border: '1.5px solid rgba(206,128,147,0.12)', borderRadius: '16px', padding: '16px 20px', boxShadow: '0 4px 20px rgba(206,128,147,0.04)' }}>
+              <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.1em', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>{card.label}</p>
+              <p style={{ fontSize: '26px', fontWeight: 900, color: card.color, lineHeight: 1 }}>{card.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── TABLE CONTAINER ── */}
+        <div style={{ background: 'white', borderRadius: '20px', border: '1.5px solid rgba(206,128,147,0.12)', boxShadow: '0 4px 24px rgba(206,128,147,0.06)', overflow: 'hidden' }}>
+          {/* Toolbar */}
+          <div style={{ padding: '16px 24px', borderBottom: '1.5px solid rgba(206,128,147,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span className="material-symbols-outlined" style={{ color: '#ce8093' }}>filter_list</span>
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                style={{ padding: '6px 12px', borderRadius: '8px', border: '1.5px solid rgba(206,128,147,0.2)', fontSize: '12px', fontWeight: 600, color: '#6b3a4a', outline: 'none', background: 'rgba(206,128,147,0.04)' }}>
+                <option value="all">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="terverifikasi">Terverifikasi</option>
+                <option value="ditolak">Ditolak</option>
+                <option value="selesai">Selesai</option>
+              </select>
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="text-left py-4 px-6 font-bold text-slate-700">Kode Tiket</th>
-                  <th className="text-left py-4 px-6 font-bold text-slate-700">Jenis Kerusakan</th>
-                  <th className="text-left py-4 px-6 font-bold text-slate-700">Lokasi</th>
-                  <th className="text-left py-4 px-6 font-bold text-slate-700">Urgensi</th>
-                  <th className="text-left py-4 px-6 font-bold text-slate-700">Prioritas</th>
-                  <th className="text-left py-4 px-6 font-bold text-slate-700">Status</th>
-                  <th className="text-left py-4 px-6 font-bold text-slate-700">Tanggal</th>
-                  <th className="text-center py-4 px-6 font-bold text-slate-700">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredReports.map((report) => (
-                  <tr key={report.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td className="py-4 px-6">
-                      <span className="font-mono font-bold text-primary">{report.ticket_code}</span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-slate-700">{report.damage_type_name || '-'}</span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="text-slate-600 text-xs">{report.location_description}</span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className={`inline-block px-3 py-1 rounded text-xs font-bold ${getUrgencyColor(report.urgency_level)}`}>
-                        {getUrgencyLabel(report.urgency_level)}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      {report.priority_score ? (
-                        <span className={`inline-block px-3 py-1 rounded text-xs font-bold border ${
-                          report.priority_score >= 80 ? 'bg-red-100 text-red-700 border-red-200' :
-                          report.priority_score >= 60 ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                          'bg-blue-100 text-blue-700 border-blue-200'
-                        }`}>
-                          Skor {report.priority_score}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 text-xs">-</span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="flex flex-col gap-1 items-start">
-                        <span className={`inline-block px-3 py-1 rounded text-xs font-bold border ${
-                          report.status === 'sedang_dikerjakan'
-                            ? 'bg-blue-100 text-blue-800 border-blue-300'
-                            : getStatusColor(report.status)
-                        }`}>
-                          {report.status === 'sedang_dikerjakan' ? 'Terverifikasi' : getStatusLabel(report.status)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6 text-slate-600 text-xs">
-                      {new Date(report.created_at).toLocaleDateString('id-ID')}
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      <button
-                        onClick={() => handleViewDetail(report)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-container/40 text-primary hover:bg-primary-container/60 font-semibold text-sm transition-colors"
-                      >
-                        <Eye size={16} />
-                        Detail
-                      </button>
-                    </td>
+
+          {/* Table */}
+          {filteredReports.length === 0 ? (
+            <div style={{ padding: '64px', textAlign: 'center' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'rgba(206,128,147,0.3)', marginBottom: '16px' }}>search_off</span>
+              <p style={{ color: '#6b3a4a', fontSize: '14px', fontWeight: 600 }}>Tidak ada laporan yang sesuai dengan filter.</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead style={{ background: 'rgba(206,128,147,0.03)' }}>
+                  <tr>
+                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kode Tiket</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Jenis Kerusakan</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lokasi</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '11px', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tanggal</th>
+                    <th style={{ padding: '16px 24px', textAlign: 'center', fontSize: '11px', fontWeight: 800, color: '#ce8093', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {filteredReports.map((report) => (
+                    <tr key={report.id} style={{ borderTop: '1px solid rgba(206,128,147,0.06)', transition: 'background 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(206,128,147,0.02)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '16px 24px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, fontFamily: 'monospace', color: '#1e0f16' }}>{report.ticket_code}</span>
+                      </td>
+                      <td style={{ padding: '16px 24px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b3a4a' }}>{report.damage_type_name || '-'}</span>
+                      </td>
+                      <td style={{ padding: '16px 24px', maxWidth: '250px' }}>
+                        <span style={{ fontSize: '12px', color: '#6b3a4a', opacity: 0.8, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{report.location_description}</span>
+                      </td>
+                      <td style={{ padding: '16px 24px' }}>
+                        <span style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 700, 
+                          background: report.status === 'pending' ? 'rgba(248,113,113,0.1)' : report.status === 'selesai' ? 'rgba(74,222,128,0.1)' : 'rgba(127,168,212,0.1)',
+                          color: report.status === 'pending' ? '#f87171' : report.status === 'selesai' ? '#16a34a' : '#7fa8d4'
+                         }}>
+                          {getStatusLabel(report.status)}
+                        </span>
+                      </td>
+                      <td style={{ padding: '16px 24px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#94a3b8' }}>{new Date(report.created_at).toLocaleDateString('id-ID')}</span>
+                      </td>
+                      <td style={{ padding: '16px 24px', textAlign: 'center' }}>
+                        <button onClick={() => handleViewDetail(report)}
+                          style={{ padding: '6px 12px', borderRadius: '8px', background: 'rgba(206,128,147,0.1)', color: '#ce8093', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px', transition: 'background 0.2s' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(206,128,147,0.2)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(206,128,147,0.1)'}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>visibility</span>
+                          Detail
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
       </div>
 
       {/* Detail Modal */}
       {isDetailModalOpen && selectedReport && (
         <ReportDetailModal report={selectedReport} onClose={handleCloseModal} />
       )}
-    </main>
+    </div>
   );
 }
 

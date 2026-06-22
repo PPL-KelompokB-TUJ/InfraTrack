@@ -227,7 +227,7 @@ export default function PreventiveSchedulePage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-full px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
