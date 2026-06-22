@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 
 const PLAYLIST = [
-  { src: '/track1.mp3', title: '春泥棒 (Haru Dorobou)', artist: 'Yorushika' },
-  { src: '/track2.mp3', title: '雨とカプチーノ (Ame to Cappuccino)', artist: 'Yorushika' },
+  { src: '/track1.mp3', title: 'アルジャーノン (Algernon)', artist: 'Yorushika' },
+  { src: '/track2.mp3', title: '春泥棒 (Haru Dorobou)', artist: 'Yorushika' },
 ];
 
 export default function YorushikaMusicPlayer() {
