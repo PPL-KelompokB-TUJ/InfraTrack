@@ -237,6 +237,37 @@ export default function ExportPage() {
     }
   };
 
+  const getServerInfo = (job) => {
+    // Prefer explicit DB field if available (new records with server_info column)
+    if (job.server_info) return job.server_info;
+
+    // Derive from file_url for all existing records
+    if (job.file_url) {
+      try {
+        const url = new URL(job.file_url);
+        const href = job.file_url.toLowerCase();
+        if (href.includes('amazonaws.com')) return 'AWS S3';
+        if (href.includes('digitaloceanspaces.com')) return 'DigitalOcean Spaces';
+        if (href.includes('minio') || (url.pathname.includes('/exports/') && href.includes('s3'))) return 'S3 / MinIO';
+        const { hostname } = url;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') return `Local Server (${hostname})`;
+        return hostname;
+      } catch {
+        // not a parseable URL
+      }
+    }
+
+    // Fallback: show API server hostname
+    if (API_BASE_URL) {
+      try {
+        return new URL(API_BASE_URL).hostname;
+      } catch {
+        return API_BASE_URL || null;
+      }
+    }
+    return null;
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending':
@@ -568,12 +599,15 @@ export default function ExportPage() {
                         <p className="mt-1 text-[10px] text-slate-400">
                           {new Date(job.created_at).toLocaleString('id-ID')}
                         </p>
-                        {job.server_info && (
-                          <p className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">
-                            <Server size={9} className="flex-shrink-0 text-cyan-500" />
-                            {job.server_info}
-                          </p>
-                        )}
+                        {(() => {
+                          const serverLabel = getServerInfo(job);
+                          return serverLabel ? (
+                            <p className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">
+                              <Server size={9} className="flex-shrink-0 text-cyan-500" />
+                              {serverLabel}
+                            </p>
+                          ) : null;
+                        })()}
                       </div>
                     </div>
 
