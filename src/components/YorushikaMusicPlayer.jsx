@@ -47,7 +47,7 @@ export default function YorushikaMusicPlayer() {
   };
 
   const currentTrack = PLAYLIST[currentTrackIndex];
-  const showExpanded = isPlaying || isHovered;
+  const showExpanded = isHovered;
 
   return (
     <div 
