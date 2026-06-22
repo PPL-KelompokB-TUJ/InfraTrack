@@ -62,9 +62,10 @@ export default function ExportPage() {
         throw new Error('Gagal memuat riwayat ekspor');
       }
 
-      // Tangkap server backend dari JSON response (lebih reliable dari header)
+      // Tangkap server backend: coba header nginx dulu, fallback ke JSON body
       const data = await res.json();
-      if (data.current_server) setCurrentServer(data.current_server);
+      const backendServer = res.headers.get('x-backend-server') || data.current_server;
+      if (backendServer) setCurrentServer(backendServer);
       setHistory(data.history || []);
     } catch (error) {
       console.error('Error loading history:', error);
@@ -151,9 +152,10 @@ export default function ExportPage() {
         }),
       });
 
-      // Tangkap server backend dari JSON response (lebih reliable dari header)
+      // Tangkap server backend: coba header nginx dulu, fallback ke JSON body
       const data = await response.json();
-      if (data.current_server) setCurrentServer(data.current_server);
+      const backendServer = response.headers.get('x-backend-server') || data.current_server;
+      if (backendServer) setCurrentServer(backendServer);
 
       if (!response.ok) {
         throw new Error(data.error || 'Terjadi kesalahan saat memproses ekspor');
