@@ -378,35 +378,35 @@ export default function DashboardPage() {
             </div>
             
             {/* Reports Status Progress */}
-            <div className="flex flex-col justify-center space-y-6">
-               <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-slate-700">Laporan Pending</span>
-                    <span className="font-bold text-slate-900">{dashboardData.damageReports.pending || 0}</span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                    <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${Math.min(((dashboardData.damageReports.pending || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
-                  </div>
-               </div>
-               <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-slate-700">Sedang Diverifikasi</span>
-                    <span className="font-bold text-slate-900">{dashboardData.damageReports.terverifikasi || 0}</span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                    <div className="bg-blue-400 h-2 rounded-full" style={{ width: `${Math.min(((dashboardData.damageReports.terverifikasi || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
-                  </div>
-               </div>
-               <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-slate-700">Selesai</span>
-                    <span className="font-bold text-slate-900">{dashboardData.damageReports.selesai || 0}</span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                    <div className="bg-tertiary h-2 rounded-full" style={{ width: `${Math.min(((dashboardData.damageReports.selesai || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
-                  </div>
-               </div>
-            </div>
+             <div className="flex flex-col justify-center space-y-6">
+                <div>
+                   <div className="flex justify-between text-sm mb-2">
+                     <span className="font-medium text-slate-700">Laporan Pending</span>
+                     <span className="font-bold text-slate-900">{dashboardData.damageReports.pending || 0}</span>
+                   </div>
+                   <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                     <div className="h-2 rounded-full" style={{ backgroundColor: '#8c3a56', width: `${Math.min(((dashboardData.damageReports.pending || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
+                   </div>
+                </div>
+                <div>
+                   <div className="flex justify-between text-sm mb-2">
+                     <span className="font-medium text-slate-700">Sedang Diverifikasi</span>
+                     <span className="font-bold text-slate-900">{dashboardData.damageReports.terverifikasi || 0}</span>
+                   </div>
+                   <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                     <div className="h-2 rounded-full" style={{ backgroundColor: '#ce8093', width: `${Math.min(((dashboardData.damageReports.terverifikasi || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
+                   </div>
+                </div>
+                <div>
+                   <div className="flex justify-between text-sm mb-2">
+                     <span className="font-medium text-slate-700">Selesai</span>
+                     <span className="font-bold text-slate-900">{dashboardData.damageReports.selesai || 0}</span>
+                   </div>
+                   <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                     <div className="h-2 rounded-full" style={{ backgroundColor: '#f9bbd0', width: `${Math.min(((dashboardData.damageReports.selesai || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
+                   </div>
+                </div>
+             </div>  
           </div>
         </div>
 
