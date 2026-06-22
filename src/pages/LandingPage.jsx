@@ -232,7 +232,16 @@ export default function LandingPage() {
                   <div key={i} className={`w-2 h-2 rounded-full ${c} opacity-80`} />
                 ))}
               </div>
-              <span className="text-xs font-bold text-primary tracking-[0.2em] uppercase">Haru — 春 — Spring</span>
+              <motion.span 
+                animate={{ 
+                  color: ['#ce8093', '#8c3a56', '#ce8093'],
+                  textShadow: ['0px 0px 0px rgba(206,128,147,0)', '0px 0px 8px rgba(206,128,147,0.5)', '0px 0px 0px rgba(206,128,147,0)']
+                }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="text-xs font-bold text-primary tracking-[0.2em] uppercase"
+              >
+                Haru — 春 — Spring
+              </motion.span>
             </motion.div>
 
             <motion.h1

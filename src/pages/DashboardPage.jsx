@@ -322,9 +322,9 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
             <h2 className="text-2xl font-serif font-bold text-slate-800">Distribusi Aset</h2>
             <div className="flex items-center gap-4 mt-4 md:mt-0">
-              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-tertiary"></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Baik</span></div>
-              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-secondary"></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Rusak Ringan</span></div>
-              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-error"></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Rusak Berat</span></div>
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#f9bbd0' }}></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Baik</span></div>
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#ce8093' }}></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Rusak Ringan</span></div>
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#8c3a56' }}></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Rusak Berat</span></div>
             </div>
           </div>
           
@@ -335,9 +335,9 @@ export default function DashboardPage() {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4c56af' },
-                      { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#526069' },
-                      { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#ba1a1a' }
+                      { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#f9bbd0' },
+                      { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#ce8093' },
+                      { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#8c3a56' }
                     ]}
                     cx="50%"
                     cy="50%"
@@ -362,9 +362,9 @@ export default function DashboardPage() {
                   >
                     {
                       [
-                        { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4c56af' },
-                        { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#526069' },
-                        { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#ba1a1a' }
+                        { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#f9bbd0' },
+                        { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#ce8093' },
+                        { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#8c3a56' }
                       ].map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))
