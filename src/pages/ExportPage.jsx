@@ -238,34 +238,55 @@ export default function ExportPage() {
   };
 
   const getServerInfo = (job) => {
-    // Prefer explicit DB field if available (new records with server_info column)
+    // Prefer explicit DB field if available
     if (job.server_info) return job.server_info;
 
-    // Derive from file_url for all existing records
+    // Derive from file_url
     if (job.file_url) {
       try {
         const url = new URL(job.file_url);
         const href = job.file_url.toLowerCase();
         if (href.includes('amazonaws.com')) return 'AWS S3';
         if (href.includes('digitaloceanspaces.com')) return 'DigitalOcean Spaces';
-        if (href.includes('minio') || (url.pathname.includes('/exports/') && href.includes('s3'))) return 'S3 / MinIO';
-        const { hostname } = url;
-        if (hostname === 'localhost' || hostname === '127.0.0.1') return `Local Server (${hostname})`;
+        if (href.includes('minio')) return 'MinIO Storage';
+        const { hostname, port } = url;
+        const portStr = port ? `:${port}` : '';
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return `localhost${portStr} (Local)`;
+        }
         return hostname;
       } catch {
-        // not a parseable URL
+        // not a valid absolute URL — fall through
       }
     }
 
-    // Fallback: show API server hostname
+    // Fallback: derive from API_BASE_URL
     if (API_BASE_URL) {
       try {
-        return new URL(API_BASE_URL).hostname;
+        const { hostname, port } = new URL(API_BASE_URL);
+        const portStr = port ? `:${port}` : '';
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return `localhost${portStr} (Local)`;
+        }
+        return hostname;
       } catch {
-        return API_BASE_URL || null;
+        return API_BASE_URL;
       }
     }
-    return null;
+
+    // Derive from Supabase URL to show project info
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    if (supabaseUrl) {
+      try {
+        const projectId = new URL(supabaseUrl).hostname.split('.')[0];
+        return `Supabase: ${projectId}`;
+      } catch {
+        // ignore
+      }
+    }
+
+    // Always show something as last resort
+    return 'Express Backend';
   };
 
   const getStatusBadge = (status) => {
