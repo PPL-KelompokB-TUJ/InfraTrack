@@ -245,12 +245,12 @@ export default function ExportPage() {
   };
 
   const getServerInfo = (job) => {
-    // Priority 1: info yang disimpan di DB oleh worker (akurat per-record)
-    if (job.server_info) return job.server_info;
-    // Priority 2: server yang baru saja merespons request history ini (dari header nginx)
-    if (currentServer) return currentServer;
-    return null;
+    // Hanya tampilkan server_info yang disimpan di DB oleh worker yang benar-benar memproses job ini.
+    // Jangan fallback ke currentServer karena itu server yang merespons REQUEST SEKARANG,
+    // bukan server yang memproses job tersebut.
+    return job.server_info || null;
   };
+
 
   const getStatusBadge = (status) => {
     switch (status) {
