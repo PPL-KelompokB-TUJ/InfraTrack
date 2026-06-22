@@ -151,8 +151,8 @@ const processExport = async (data, queueMode = 'redis') => {
       const localFilePath = path.join(publicExportsDir, filename);
       fs.writeFileSync(localFilePath, buffer);
 
-      const serverPort = process.env.PORT || 5000;
-      const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_BACKEND_URL || `http://localhost:${serverPort}`;
+      const localServerPort = process.env.PORT || 5000;
+      const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_BACKEND_URL || `http://localhost:${localServerPort}`;
       fileUrl = `${baseUrl}/exports/${filename}`;
     }
 
