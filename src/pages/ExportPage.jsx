@@ -12,7 +12,8 @@ import {
   AlertCircle,
   Clock,
   Trash2,
-  Package
+  Package,
+  Server
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useNotification } from '../context/NotificationContext';
@@ -567,6 +568,12 @@ export default function ExportPage() {
                         <p className="mt-1 text-[10px] text-slate-400">
                           {new Date(job.created_at).toLocaleString('id-ID')}
                         </p>
+                        {job.server_info && (
+                          <p className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">
+                            <Server size={9} className="flex-shrink-0 text-cyan-500" />
+                            {job.server_info}
+                          </p>
+                        )}
                       </div>
                     </div>
 

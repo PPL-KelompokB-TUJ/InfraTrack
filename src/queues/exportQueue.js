@@ -27,7 +27,7 @@ const redisOptions = {
 /**
  * High-performance report generation worker
  */
-const processExport = async (data) => {
+const processExport = async (data, queueMode = 'redis') => {
   const { jobId, reportType, format, filters, accessToken } = data;
   console.log(`Processing export job: ${jobId} (${reportType} - ${format})`);
 
@@ -91,6 +91,9 @@ const processExport = async (data) => {
     // 4. File Storage Upload (S3/MinIO vs Local Fallback)
     let fileUrl = '';
     const hasS3Config = process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY;
+    const storageType = hasS3Config ? 'S3 / MinIO' : 'Local Storage';
+    const queueLabel = queueMode === 'redis' ? 'Redis Bull Queue' : 'In-Memory Fallback';
+    const serverInfo = `${queueLabel} • ${storageType}`;
 
     if (hasS3Config) {
       console.log(`Uploading ${filename} to S3 bucket...`);
@@ -137,12 +140,13 @@ const processExport = async (data) => {
       fileUrl = `${baseUrl}/exports/${filename}`;
     }
 
-    // 5. Update history status to 'completed' with download link
+    // 5. Update history status to 'completed' with download link and server info
     const { error: completeError } = await supabase
       .from('export_history')
       .update({
         status: 'completed',
         file_url: fileUrl,
+        server_info: serverInfo,
         updated_at: new Date().toISOString(),
       })
       .eq('id', jobId);
@@ -201,7 +205,7 @@ class ResilientExportQueue {
       console.log('✅ Redis is running. Initializing Bull background queue.');
       this.bullQueue = new Queue('export-reports', { redis: redisOptions });
       this.bullQueue.process(async (job) => {
-        await processExport(job.data);
+        await processExport(job.data, 'redis');
       });
 
       this.bullQueue.on('failed', (job, err) => {
@@ -230,7 +234,7 @@ class ResilientExportQueue {
       // Simulating background worker using setTimeout
       setTimeout(async () => {
         try {
-          await processExport(data);
+          await processExport(data, 'fallback');
         } catch (err) {
           console.error(`[Fallback Queue] In-memory job ${data.jobId} failed:`, err.message);
         }
