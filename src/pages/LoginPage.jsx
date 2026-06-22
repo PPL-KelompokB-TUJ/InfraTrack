@@ -15,19 +15,7 @@ const YORUSHIKA_LYRICS = [
   { jp: 'この瞬間が永遠になれば', en: 'If only this moment could last forever' },
 ];
 
-function FloatingPetal({ style }) {
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      className="absolute pointer-events-none"
-      style={style}
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M50 0C60 30 100 50 100 50C100 50 60 70 50 100C40 70 0 50 0 50C0 50 40 30 50 0Z" />
-    </svg>
-  );
-}
+
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -98,23 +86,40 @@ export default function LoginPage() {
 
         {/* Petals decoration */}
         {petals.map((p) => (
-          <FloatingPetal
+          <motion.div
             key={p.id}
+            animate={{ 
+              y: [0, -30, 0], 
+              rotate: [p.rotate, p.rotate + 45, p.rotate - 45, p.rotate],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{ duration: 6 + (p.id % 4), repeat: Infinity, ease: "easeInOut" }}
+            className="absolute pointer-events-none text-[#ce8093]"
             style={{
               left: p.left,
               top: p.top,
-              width: p.size + 'px',
-              height: p.size + 'px',
-              color: '#ce8093',
+              width: p.size,
+              height: p.size,
               opacity: p.opacity * 2,
-              transform: `rotate(${p.rotate}deg)`,
             }}
-          />
+          >
+            <svg viewBox="0 0 100 100" fill="currentColor">
+              <path d="M50 0C60 30 100 50 100 50C100 50 60 70 50 100C40 70 0 50 0 50C0 50 40 30 50 0Z" />
+            </svg>
+          </motion.div>
         ))}
 
         {/* Glow blobs */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#e8a0b0]/5 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#8c3a56]/10 rounded-full blur-[100px]" />
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3], rotate: [0, 90, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -top-20 -left-20 w-[500px] h-[500px] bg-[#e8a0b0]/10 rounded-full blur-[100px] pointer-events-none" 
+        />
+        <motion.div 
+          animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.5, 0.2], rotate: [0, -90, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+          className="absolute -bottom-20 -right-20 w-[600px] h-[600px] bg-[#8c3a56]/15 rounded-full blur-[120px] pointer-events-none" 
+        />
 
         {/* Content */}
         <div className="relative z-10 max-w-md px-12 text-center flex flex-col items-center space-y-12">
@@ -125,9 +130,13 @@ export default function LoginPage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="flex flex-col items-center gap-6"
           >
-            <div className="w-28 h-28 flex items-center justify-center group hover:scale-105 transition-transform duration-500">
+            <motion.div 
+              animate={{ y: [0, -15, 0], dropShadow: ["0px 0px 0px rgba(232,160,176,0)", "0px 10px 20px rgba(232,160,176,0.3)", "0px 0px 0px rgba(232,160,176,0)"] }} 
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="w-32 h-32 flex items-center justify-center group hover:scale-105 transition-transform duration-500"
+            >
               <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-contain" />
-            </div>
+            </motion.div>
             <div>
               <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tighter">InfraTrack</p>
               <p className="text-[10px] text-[#e8a0b0]/60 font-bold tracking-[0.4em] mt-2">INFRASTRUCTURE MANAGEMENT</p>
@@ -139,16 +148,24 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.7 }}
-            className="space-y-3"
+            className="space-y-3 relative"
           >
-            <div className="w-8 h-px bg-primary/40 mx-auto" />
+            <motion.div 
+              animate={{ opacity: [0.3, 0.8, 0.3], width: ['2rem', '5rem', '2rem'] }} 
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="h-px bg-primary/60 mx-auto" 
+            />
             <p className="text-2xl text-white/90 font-serif leading-relaxed italic">
               {YORUSHIKA_LYRICS[lyricIndex].jp}
             </p>
             <p className="text-sm text-white/40 font-medium">
               {YORUSHIKA_LYRICS[lyricIndex].en}
             </p>
-            <div className="w-8 h-px bg-primary/40 mx-auto" />
+            <motion.div 
+              animate={{ opacity: [0.3, 0.8, 0.3], width: ['2rem', '5rem', '2rem'] }} 
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+              className="h-px bg-primary/60 mx-auto" 
+            />
             <p className="text-[10px] text-primary/50 font-bold tracking-[0.3em]">— YORUSHIKA</p>
           </motion.div>
 
@@ -180,43 +197,56 @@ export default function LoginPage() {
 
         {/* Subtle petal background on form side */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/3 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-secondary/3 rounded-full blur-3xl" />
+          <motion.div 
+            animate={{ y: [0, 40, 0], x: [0, -30, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -top-20 -right-20 w-80 h-80 bg-[#f9bbd0]/30 rounded-full blur-3xl" 
+          />
+          <motion.div 
+            animate={{ y: [0, -50, 0], x: [0, 40, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            className="absolute -bottom-20 -left-20 w-72 h-72 bg-[#ce8093]/20 rounded-full blur-3xl" 
+          />
         </div>
 
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="w-full max-w-md space-y-10 relative z-10"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.08 } }
+          }}
+          className="w-full max-w-md space-y-8 relative z-10"
         >
           {/* Back to landing */}
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors group"
-          >
-            <span className="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
-            Kembali ke Beranda
-          </button>
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors group mb-4"
+            >
+              <span className="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+              Kembali ke Beranda
+            </button>
+          </motion.div>
 
           {/* Header */}
-          <div className="space-y-3">
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="space-y-3">
             <div className="flex items-center gap-2 md:hidden mb-4">
               <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center overflow-hidden">
                 <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-contain" style={{ filter: 'invert(1)' }} />
               </div>
               <span className="text-xl font-black text-on-surface tracking-tight">InfraTrack</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black text-on-surface leading-tight">
+            <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-[#ce8093] leading-tight">
               Masuk ke Portal
             </h1>
             <p className="text-on-surface-variant leading-relaxed">
               Silakan masukkan kredensial resmi Anda untuk mengakses panel kendali infrastruktur.
             </p>
-          </div>
+          </motion.div>
 
           {/* Role Selector */}
-          <div className="grid grid-cols-2 gap-4">
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }} className="grid grid-cols-2 gap-4">
             {roleOptions.map((role) => (
               <motion.button
                 key={role.key}
@@ -247,24 +277,26 @@ export default function LoginPage() {
           </div>
 
           {/* Error Message */}
-          <AnimatePresence>
-            {authError && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="rounded-2xl border border-error/20 bg-error-container/20 px-4 py-3.5 text-sm text-error font-medium flex items-start gap-3"
-              >
-                <span className="material-symbols-outlined text-[18px] flex-shrink-0 mt-0.5">warning</span>
-                {authError}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
+            <AnimatePresence>
+              {authError && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -10 }}
+                  className="rounded-2xl border border-error/20 bg-error-container/20 px-4 py-3.5 text-sm text-error font-medium flex items-start gap-3 overflow-hidden"
+                >
+                  <span className="material-symbols-outlined text-[18px] flex-shrink-0 mt-0.5">warning</span>
+                  {authError}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
           {/* Form */}
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email */}
-            <div className="space-y-1.5">
+            <motion.div variants={{ hidden: { opacity: 0, x: -15 }, visible: { opacity: 1, x: 0 } }} className="space-y-1.5">
               <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
                 <span className="material-symbols-outlined text-[15px]">mail</span>
                 Alamat Email
@@ -279,10 +311,10 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Password */}
-            <div className="space-y-1.5">
+            <motion.div variants={{ hidden: { opacity: 0, x: 15 }, visible: { opacity: 1, x: 0 } }} className="space-y-1.5">
               <label className="text-xs font-black uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
                 <span className="material-symbols-outlined text-[15px]">lock</span>
                 Kata Sandi
@@ -304,33 +336,36 @@ export default function LoginPage() {
                   <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Submit */}
-            <motion.button
-              type="submit"
-              disabled={isSubmitting}
-              whileTap={{ scale: 0.98 }}
-              className="relative w-full bg-primary text-on-primary font-black text-base py-5 rounded-2xl shadow-xl shadow-primary/20 hover:brightness-90 hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden group"
-            >
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {isSubmitting ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    MEMPROSES...
-                  </>
-                ) : (
-                  <>
-                    MASUK SISTEM
-                    <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">login</span>
-                  </>
-                )}
-              </span>
-            </motion.button>
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+              <motion.button
+                type="submit"
+                disabled={isSubmitting}
+                whileTap={{ scale: 0.98 }}
+                className="relative w-full bg-gradient-to-r from-[#ce8093] to-[#8c3a56] text-white font-black text-base py-5 rounded-2xl shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-1 transition-all disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden group mt-4"
+              >
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      MEMPROSES...
+                    </>
+                  ) : (
+                    <>
+                      MASUK SISTEM
+                      <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">login</span>
+                    </>
+                  )}
+                </span>
+              </motion.button>
+            </motion.div>
           </form>
 
           {/* Public service link */}
-          <div className="text-center pt-4 border-t border-outline-variant/15">
+          <motion.div variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }} className="text-center pt-6 border-t border-outline-variant/15">
             <p className="text-sm text-on-surface-variant">
               Ingin melaporkan kerusakan?{' '}
               <button
@@ -340,7 +375,7 @@ export default function LoginPage() {
                 Klik di sini
               </button>
             </p>
-          </div>
+          </motion.div>
         </motion.div>
       </section>
     </main>
