@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ResponsiveContainer, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, PieChart, Pie, Cell } from 'recharts';
 import { 
   Building2, FileText, CheckCircle2, DollarSign,
   AlertCircle, Clock, Eye, X, Filter, Sparkles, MapIcon, Search, Bell, Settings,
@@ -142,7 +143,7 @@ export default function DashboardPage() {
       <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800">
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-cyan-200 border-t-cyan-600"></div>
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
             <p className="mt-4 text-slate-600 dark:text-slate-400">Memuat dashboard...</p>
           </div>
         </div>
@@ -164,7 +165,7 @@ export default function DashboardPage() {
                   placeholder="Cari aset, laporan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full max-w-sm pl-10 pr-4 py-2 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100"
+                  className="w-full max-w-sm pl-10 pr-4 py-2 border border-slate-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -178,262 +179,219 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+      
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+        {/* Header - Styled like mockup */}
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">Dashboard</h1>
-          <p className="mt-1 text-slate-600 dark:text-slate-400">Infratrack / Dashboard</p>
+          <h1 className="text-5xl font-bold font-serif text-slate-800 tracking-tight">Dashboard</h1>
+          <p className="mt-2 text-slate-600 text-lg">Ringkasan vitalitas sistem dan metrik infrastruktur saat ini.</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          {/* Total Assets - Clickable */}
-          <button
-            onClick={() => navigate('/dashboard/assets')}
-            className="glass-panel rounded-2xl p-6 border border-cyan-100 dark:border-cyan-900/30 bg-white dark:bg-gray-800 hover:bg-cyan-50 dark:hover:bg-cyan-900/10 hover:border-cyan-200 transition-colors cursor-pointer text-left"
-          >
-            <div className="flex items-start justify-between">
+        {/* Top Section: 2 Columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          
+          {/* Left Column: Vitality Stream (Damage Trend) - takes 2 columns */}
+          <div className="lg:col-span-2 glass-card petal-shape bg-white/60 border border-primary-container/20 p-8 shadow-sm relative overflow-hidden">
+            <h2 className="text-2xl font-serif font-bold text-slate-800 mb-6">Tren Kerusakan</h2>
+            
+            <div className="flex gap-12 mb-8 relative z-10">
               <div>
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">TOTAL ASET</p>
-                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{stats.totalAssets.toLocaleString('id-ID')}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">+{stats.assetsChange} bulan ini</p>
-              </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-100 to-cyan-50 text-cyan-600">
-                <Building2 size={24} />
-              </div>
-            </div>
-          </button>
-
-          {/* Damage Reports - Clickable */}
-          <button
-            onClick={() => navigate('/dashboard/reports')}
-            className="glass-panel rounded-2xl p-6 border border-red-100 dark:border-red-900/30 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/10 hover:border-red-200 transition-colors cursor-pointer text-left"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">LAPORAN AKTIF</p>
-                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{stats.totalReports}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{stats.reportsChange} terlaksanakan</p>
-              </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-red-100 to-red-50 text-red-600">
-                <AlertCircle size={24} />
-              </div>
-            </div>
-          </button>
-
-          {/* Maintenance Done - Clickable */}
-          <button
-            onClick={() => navigate('/dashboard/maintenance')}
-            className="glass-panel rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-gray-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:border-emerald-200 transition-colors cursor-pointer text-left"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">MAINTENANCE DONE</p>
-                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">{stats.completedTasks}</p>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-2">+{stats.tasksChange}% vs target</p>
-              </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50 text-emerald-600">
-                <CheckCircle2 size={24} />
-              </div>
-            </div>
-          </button>
-
-          {/* Budget - Clickable */}
-          <button
-            onClick={() => navigate('/dashboard/budgets')}
-            className="glass-panel rounded-2xl p-6 border border-amber-100 dark:border-amber-900/30 bg-white dark:bg-gray-800 hover:bg-amber-50 dark:hover:bg-amber-900/10 hover:border-amber-200 transition-colors cursor-pointer text-left"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">ANGGARAN TERPAKSI</p>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">Rp {(stats.budgetAllocated / 1000000).toFixed(1)}M</p>
-                <div className="w-full bg-slate-200 dark:bg-gray-700 rounded-full h-2 mt-3">
-                  <div className="bg-amber-500 h-2 rounded-full" style={{width: `${stats.budgetProgress}%`}}></div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">TOTAL ASET</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-primary">{(stats.totalAssets / 1000).toFixed(1)}K</p>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{stats.budgetProgress}% rencana tahunan</p>
               </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-amber-50 text-amber-600">
-                <DollarSign size={24} />
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">ANGGARAN</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold text-slate-800">{stats.budgetProgress}%</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">STATUS</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+                  <p className="text-sm font-medium text-slate-700">Optimal</p>
+                </div>
               </div>
             </div>
-          </button>
-        </div>
 
-        {/* Analytics Section - Asset Condition & Report Status */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Asset Condition Chart */}
-          <AssetConditionChart data={dashboardData.assetCondition} />
-          {/* Report Status Summary */}
-          <ReportStatusSummary data={dashboardData.damageReports} />
-        </div>
-
-        {/* Maintenance KPIs */}
-        <MaintenanceKPICards kpis={dashboardData.maintenanceKPIs} />
-
-        {/* Damage Trend Chart */}
-        <div className="mb-8">
-          <TrendChart 
-            data={dashboardData.damageTrend} 
-            period={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-          />
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Map Section */}
-          <MapVisualization />
-
-          {/* AI Recommendations */}
-          <div className="glass-panel rounded-2xl p-6 bg-gradient-to-br from-purple-50 to-white border border-purple-100">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={20} className="text-purple-600" />
-              <h2 className="text-lg font-bold text-slate-900">AI Recommendation</h2>
+            <div className="h-64 w-full relative z-10">
+              {/* Existing Area Chart */}
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.damageTrend || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorDamage" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f8bbd0" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#f8bbd0" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(200,200,200,0.2)" />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: '#94a3b8' }}
+                    dy={10}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="#f8bbd0" 
+                    strokeWidth={3}
+                    fillOpacity={1} 
+                    fill="url(#colorDamage)" 
+                    activeDot={{ r: 6, fill: '#fff', stroke: '#f8bbd0', strokeWidth: 2 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
             
-            <p className="text-xs text-slate-600 mb-4">
-              Berdasarkan skor urgensi & efisiensi, 3 laporan terbaik dijadwalkan minggu depan
-            </p>
-
-            <div className="space-y-3">
-              {aiRecommendations.map((rec, index) => (
-                <div key={rec.id} className="bg-white rounded-lg p-3 border border-purple-100 hover:border-purple-300 transition-all cursor-pointer">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-1 rounded">
-                      #{index + 1}
-                    </span>
-                    <span className="text-lg font-bold text-slate-900">{rec.score}</span>
-                  </div>
-                  <p className="text-xs font-semibold text-slate-700">{rec.location}</p>
-                  <div className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${
-                    rec.priority === 'urgent' ? 'bg-red-100 text-red-700' :
-                    rec.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                    'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {rec.priority === 'urgent' ? 'Urgent' : 
-                     rec.priority === 'high' ? 'High' : 'Medium'}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Background Petal Decoration */}
+            <div className="absolute -right-8 -top-8 w-40 h-40 bg-primary/5 rounded-[40%_60%_70%_30%] transform rotate-12 blur-xl pointer-events-none"></div>
           </div>
-        </div>
 
-        {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Reports */}
-          <div className="lg:col-span-2 glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Laporan Terbaru</h2>
-              <button
-                type="button"
-                onClick={() => navigate('/dashboard/reports')}
-                className="text-sm text-cyan-600 hover:text-cyan-700 font-semibold"
-              >
-                Lihat Semua →
+          {/* Right Column: Recent Whispers (Recent Reports) */}
+          <div className="lg:col-span-1 glass-card petal-shape bg-white/60 border border-primary-container/20 p-6 flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-serif font-bold text-slate-800">Laporan Terbaru</h2>
+              <button className="text-slate-400 hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">sort</span>
               </button>
             </div>
 
-            {recentReports.length === 0 ? (
-              <p className="text-slate-600 dark:text-slate-400 text-center py-8">Belum ada laporan kerusakan terbaru</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b-2 border-slate-200 dark:border-gray-700">
-                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">ID</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">KATEGORI</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">LOKASI</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">SKOR AI</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">STATUS</th>
-                      <th className="text-left py-3 px-3 font-bold text-slate-700 dark:text-slate-300">AKSI</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentReports.slice(0, 5).map((report) => (
-                      <tr key={report.id} className="border-b border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td className="py-3 px-3">
-                          <span className="font-mono font-bold text-cyan-700 dark:text-cyan-400 text-xs">{report.ticket_code}</span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <span className="text-slate-700 dark:text-slate-300 font-medium text-xs">{report.damage_type_name}</span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <span className="text-slate-600 dark:text-slate-400 text-xs truncate max-w-xs">{report.location_description}</span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <span className="text-slate-900 dark:text-slate-100 font-bold text-sm">{Math.floor(Math.random() * 40) + 60}</span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <StatusBadge status={report.status} />
-                        </td>
-                        <td className="py-3 px-3">
-                          <button
-                            onClick={() => handleViewDetail(report)}
-                            className="text-cyan-600 hover:text-cyan-700 font-semibold text-xs"
-                          >
-                            Detail
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Monthly Statistics */}
-          <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4">Statistik Penanganan Bulanan</h2>
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+              {recentReports.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">Belum ada laporan.</div>
+              ) : (
+                recentReports.slice(0, 4).map(report => (
+                  <div key={report.id} onClick={() => { setSelectedReport(report); setIsDetailModalOpen(true); }} className="group relative p-4 rounded-2xl bg-surface-container-lowest border border-primary-container/10 hover:border-primary-container/30 hover:shadow-md transition-all cursor-pointer overflow-hidden">
+                    <div className="flex gap-4">
+                      <div className="mt-1">
+                        {report.status === 'pending' ? (
+                          <span className="material-symbols-outlined text-error">error</span>
+                        ) : report.status === 'selesai' ? (
+                          <span className="material-symbols-outlined text-tertiary">check_circle</span>
+                        ) : (
+                          <span className="material-symbols-outlined text-secondary">info</span>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors line-clamp-1">
+                          {report.ticket_code} - {report.damage_type_name}
+                        </h4>
+                        <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                          {report.location_description}
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-2 font-medium uppercase tracking-wider">
+                          {new Date(report.created_at).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
             
-            <div className="space-y-4">
-              {/* Chart */}
-              <div className="h-40 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-700 dark:to-gray-800 rounded-xl flex items-end justify-around p-4 border border-slate-200 dark:border-gray-700">
-                <div className="flex flex-col items-center gap-1">
-                  <div className="bg-cyan-500 rounded" style={{height: '80px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Jan</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <div className="bg-cyan-500 rounded" style={{height: '60px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Feb</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <div className="bg-cyan-500 rounded" style={{height: '100px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Mar</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <div className="bg-cyan-400 rounded opacity-50" style={{height: '45px', width: '28px'}}></div>
-                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">Apr</span>
-                </div>
-              </div>
+            <button onClick={() => navigate('/dashboard/reports')} className="mt-4 w-full py-3 text-xs font-bold text-slate-600 hover:text-primary uppercase tracking-widest border-t border-primary-container/10 transition-colors">
+              Lihat Semua Laporan →
+            </button>
+          </div>
+        </div>
 
-              {/* Stats */}
-              <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-gray-700">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Total Laporan</span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100">{stats.totalReports}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Tertangani</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">{stats.completedTasks}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-slate-700 dark:text-slate-300">Pending</span>
-                  <span className="font-bold text-orange-600 dark:text-orange-400">{stats.totalReports - stats.completedTasks}</span>
-                </div>
-              </div>
+        {/* Bottom Section: Orchard Distribution (Asset Condition & Status) */}
+        <div className="glass-card petal-shape bg-white/60 border border-primary-container/20 p-8 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+            <h2 className="text-2xl font-serif font-bold text-slate-800">Distribusi Aset</h2>
+            <div className="flex items-center gap-4 mt-4 md:mt-0">
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-tertiary"></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Baik</span></div>
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-secondary"></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Rusak Ringan</span></div>
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-error"></div><span className="text-xs text-slate-600 font-medium uppercase tracking-wider">Rusak Berat</span></div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* Condition Pie Chart */}
+            <div className="h-64 flex justify-center items-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4ade80' },
+                      { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#fcd34d' },
+                      { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#f87171' }
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {
+                      [
+                        { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4ade80' },
+                        { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#fcd34d' },
+                        { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#f87171' }
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))
+                    }
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            
+            {/* Reports Status Progress */}
+            <div className="flex flex-col justify-center space-y-6">
+               <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-medium text-slate-700">Laporan Pending</span>
+                    <span className="font-bold text-slate-900">{dashboardData.damageReports.pending || 0}</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${Math.min(((dashboardData.damageReports.pending || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
+                  </div>
+               </div>
+               <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-medium text-slate-700">Sedang Diverifikasi</span>
+                    <span className="font-bold text-slate-900">{dashboardData.damageReports.terverifikasi || 0}</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div className="bg-blue-400 h-2 rounded-full" style={{ width: `${Math.min(((dashboardData.damageReports.terverifikasi || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
+                  </div>
+               </div>
+               <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-medium text-slate-700">Selesai</span>
+                    <span className="font-bold text-slate-900">{dashboardData.damageReports.selesai || 0}</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div className="bg-tertiary h-2 rounded-full" style={{ width: `${Math.min(((dashboardData.damageReports.selesai || 0) / Math.max(stats.totalReports, 1)) * 100, 100)}%` }}></div>
+                  </div>
+               </div>
             </div>
           </div>
         </div>
-      </div>
 
+        {/* Detail Modal */}
+              </div>
       {/* Detail Modal */}
       {isDetailModalOpen && selectedReport && (
-        <ReportDetailModal 
-          report={selectedReport} 
-          onClose={handleCloseModal}
-        />
+        <ReportDetailModal report={selectedReport} onClose={() => { setIsDetailModalOpen(false); setSelectedReport(null); }} />
       )}
     </main>
   );
@@ -451,7 +409,7 @@ function AssetConditionChart({ data }) {
   return (
     <div className="glass-panel rounded-2xl p-6 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700">
       <div className="flex items-center gap-2 mb-4">
-        <BarChart3 size={20} className="text-cyan-600" />
+        <BarChart3 size={20} className="text-primary" />
         <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Kondisi Aset</h2>
       </div>
 
@@ -539,7 +497,7 @@ function ReportStatusSummary({ data }) {
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-700/50 rounded-lg">
+        <div className="flex items-center justify-between p-3 bg-primary/5 dark:bg-gray-700/50 rounded-lg">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-slate-400"></div>
             <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">Pending</span>
@@ -676,10 +634,10 @@ function TrendChart({ data, period, onPeriodChange }) {
   };
 
   return (
-    <div className="glass-panel rounded-2xl p-6 bg-white border border-slate-200">
+    <div className="glass-panel rounded-2xl p-6 glass-card border-none">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp size={20} className="text-teal-600" />
+          <TrendingUp size={20} className="text-primary" />
           <h2 className="text-lg font-bold text-slate-900">Tren Pelaporan Kerusakan</h2>
         </div>
         <div className="flex gap-2">
@@ -687,7 +645,7 @@ function TrendChart({ data, period, onPeriodChange }) {
             onClick={() => onPeriodChange('weekly')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
               period === 'weekly'
-                ? 'bg-teal-500 text-white shadow-sm'
+                ? 'bg-primary text-white shadow-sm'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -697,7 +655,7 @@ function TrendChart({ data, period, onPeriodChange }) {
             onClick={() => onPeriodChange('monthly')}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
               period === 'monthly'
-                ? 'bg-teal-500 text-white shadow-sm'
+                ? 'bg-primary text-white shadow-sm'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -712,7 +670,7 @@ function TrendChart({ data, period, onPeriodChange }) {
           <p>Tidak ada data tren</p>
         </div>
       ) : (
-        <div className="relative h-56 w-full rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden px-4">
+        <div className="relative h-56 w-full rounded-xl border border-slate-200 bg-primary/5/50 overflow-hidden px-4">
           {/* Dotted Grid Background */}
           <div 
             className="absolute inset-0 z-0 opacity-50" 
@@ -733,7 +691,7 @@ function TrendChart({ data, period, onPeriodChange }) {
               <path 
                 d={generatePath()} 
                 fill="none" 
-                stroke="#0d9488" 
+                stroke="#805062" 
                 strokeWidth="2" 
                 vectorEffect="non-scaling-stroke" 
                 strokeLinecap="round" 
@@ -749,7 +707,7 @@ function TrendChart({ data, period, onPeriodChange }) {
                     cy={y} 
                     r="4" 
                     fill="#fff" 
-                    stroke="#0d9488" 
+                    stroke="#805062" 
                     strokeWidth="2" 
                     vectorEffect="non-scaling-stroke" 
                   />
@@ -768,7 +726,7 @@ function TrendChart({ data, period, onPeriodChange }) {
                   
                   {/* Bar */}
                   <div
-                    className="w-full max-w-[4.5rem] bg-teal-500/60 group-hover:bg-teal-500 transition-all rounded-t-sm"
+                    className="w-full max-w-[4.5rem] bg-primary/60 group-hover:bg-primary transition-all rounded-t-sm"
                     style={{
                       height: `${(item.total / maxValue) * 100}%`,
                       minHeight: item.total > 0 ? '4px' : '2px',
@@ -796,7 +754,7 @@ function TrendChart({ data, period, onPeriodChange }) {
         </div>
         <div>
           <p className="text-xs text-slate-600 mb-1">Selesai</p>
-          <p className="text-2xl font-black text-teal-600">
+          <p className="text-2xl font-black text-primary">
             {data.reduce((sum, item) => sum + item.completed, 0)}
           </p>
         </div>
@@ -862,12 +820,12 @@ function StatusBadge({ status }) {
 function ReportDetailModal({ report, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-6 flex items-center justify-between">
+        <div className="sticky top-0 bg-primary px-6 py-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Detail Laporan</h2>
-            <p className="text-cyan-100 text-sm mt-1">{report.ticket_code}</p>
+            <p className="text-primary-container text-sm mt-1">{report.ticket_code}</p>
           </div>
           <button
             onClick={onClose}
@@ -878,7 +836,7 @@ function ReportDetailModal({ report, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Status */}
           <div>
             <p className="text-sm font-semibold text-slate-600 mb-2">Status</p>
@@ -886,7 +844,7 @@ function ReportDetailModal({ report, onClose }) {
           </div>
 
           {/* Informasi Pelapor */}
-          <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+          <div className="bg-primary/5 rounded-xl p-4 border border-slate-200">
             <h3 className="font-semibold text-slate-800 mb-3">Informasi Pelapor</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -897,7 +855,7 @@ function ReportDetailModal({ report, onClose }) {
           </div>
 
           {/* Kerusakan */}
-          <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+          <div className="bg-primary/5 rounded-xl p-4 border border-slate-200">
             <h3 className="font-semibold text-slate-800 mb-3">Informasi Kerusakan</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
@@ -929,7 +887,7 @@ function ReportDetailModal({ report, onClose }) {
 
           {/* Aset */}
           {report.asset_name && report.asset_name !== '-' && (
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+            <div className="bg-primary/5 rounded-xl p-4 border border-slate-200">
               <h3 className="font-semibold text-slate-800 mb-3">Aset Terkait</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">

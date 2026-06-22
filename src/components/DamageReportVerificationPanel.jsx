@@ -148,7 +148,7 @@ export default function DamageReportVerificationPanel() {
       case 'sedang': return 'bg-yellow-50 border-yellow-200 text-yellow-700';
       case 'tinggi': return 'bg-orange-50 border-orange-200 text-orange-700';
       case 'sangat_tinggi': return 'bg-red-50 border-red-200 text-red-700';
-      default: return 'bg-slate-50 border-slate-200 text-slate-700';
+      default: return 'bg-primary/5 border-slate-200 text-slate-700';
     }
   };
 
@@ -163,7 +163,7 @@ export default function DamageReportVerificationPanel() {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200">
+    <div className="glass-card rounded- border-none">
       {/* Header */}
       <div className="px-6 py-4 border-b border-slate-200">
         <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export default function DamageReportVerificationPanel() {
       {/* Content */}
       {isLoading ? (
         <div className="px-6 py-8 text-center">
-          <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-cyan-200 border-t-cyan-600"></div>
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
           <p className="mt-2 text-sm text-slate-600">Memuat laporan...</p>
         </div>
       ) : pendingReports.length === 0 ? (
@@ -208,8 +208,8 @@ export default function DamageReportVerificationPanel() {
                 }}
                 className={`px-6 py-4 cursor-pointer transition-colors ${
                   selectedReport?.id === report.id
-                    ? 'bg-cyan-50 border-l-4 border-cyan-500'
-                    : 'hover:bg-slate-50'
+                    ? 'bg-primary/5 border-l-4 border-primary'
+                    : 'hover:bg-primary/5'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -243,17 +243,17 @@ export default function DamageReportVerificationPanel() {
 
           {/* Detail & Verification Form */}
           {selectedReport && (
-            <div className="p-6 bg-slate-50">
+            <div className="p-6 bg-primary/5">
               <h3 className="font-semibold text-slate-900 mb-4">Detail & Verifikasi</h3>
 
               {/* Report Details */}
-              <div className="mb-6 p-4 bg-white rounded-lg border border-slate-200">
+              <div className="mb-6 p-4 glass-card rounded- border-none">
                 {selectedReport.priority_score && (
-                  <div className="mb-4 p-3 rounded-lg border border-cyan-200 bg-cyan-50 flex items-start gap-3">
-                    <Info className="text-cyan-600 flex-shrink-0 mt-0.5" size={18} />
+                  <div className="mb-4 p-3 rounded-lg border border-primary/20 bg-primary/5 flex items-start gap-3">
+                    <Info className="text-primary flex-shrink-0 mt-0.5" size={18} />
                     <div>
-                      <p className="text-sm font-semibold text-cyan-900">Rekomendasi Prioritas Otomatis (Skor: {selectedReport.priority_score}/100)</p>
-                      <p className="text-xs text-cyan-700 mt-1">
+                      <p className="text-sm font-semibold text-primary">Rekomendasi Prioritas Otomatis (Skor: {selectedReport.priority_score}/100)</p>
+                      <p className="text-xs text-primary mt-1">
                         Sistem merekomendasikan prioritas penanganan: <span className="font-bold">{selectedReport.priority_recommendation}</span>. Skor ini dihitung dari tingkat urgensi, frekuensi pelaporan di radius 1km yang sama, ketersediaan petugas, dan anggaran.
                       </p>
                     </div>
@@ -306,7 +306,7 @@ export default function DamageReportVerificationPanel() {
                   <select
                     value={priorityLevel}
                     onChange={(e) => setPriorityLevel(e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 ${getPriorityColor(
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${getPriorityColor(
                       priorityLevel
                     )}`}
                   >
@@ -327,7 +327,7 @@ export default function DamageReportVerificationPanel() {
                     value={verificationNotes}
                     onChange={(e) => setVerificationNotes(e.target.value)}
                     placeholder="Masukkan catatan verifikasi (opsional untuk approve, wajib untuk reject)..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 text-sm"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                     rows="3"
                   />
                 </div>

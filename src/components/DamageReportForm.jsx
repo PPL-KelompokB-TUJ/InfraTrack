@@ -341,16 +341,16 @@ export default function DamageReportForm() {
             <p className="mb-4 text-sm text-slate-600">
               Terima kasih telah melaporkan kerusakan infrastruktur.
             </p>
-            <div className="mb-6 rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
+            <div className="mb-6 rounded-2xl border border-primary/10 bg-primary/5 p-4">
               <p className="text-xs uppercase tracking-wide text-slate-500">Kode Tiket Laporan</p>
-              <p className="mt-1 text-2xl font-bold text-cyan-700">{ticketCode}</p>
+              <p className="mt-1 text-2xl font-bold text-primary">{ticketCode}</p>
               <p className="mt-2 text-xs text-slate-500">
                 Simpan kode ini untuk melacak status laporan Anda
               </p>
             </div>
             <button
               onClick={() => setSuccess(false)}
-              className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
+              className="w-full rounded-xl bg-gradient-to-r from-primary to-primary py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
             >
               Tutup
             </button>
@@ -383,7 +383,7 @@ export default function DamageReportForm() {
             value={formData.reporterName}
             onChange={handleInputChange}
             placeholder="Masukkan nama Anda"
-            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-primary/10 px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
             required
           />
         </div>
@@ -399,7 +399,7 @@ export default function DamageReportForm() {
             value={formData.reporterEmail}
             onChange={handleInputChange}
             placeholder="email@example.com"
-            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-primary/10 px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
             required
           />
         </div>
@@ -415,7 +415,7 @@ export default function DamageReportForm() {
             value={formData.reporterPhone}
             onChange={handleInputChange}
             placeholder="08123456789"
-            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-primary/10 px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
             required
           />
         </div>
@@ -425,9 +425,9 @@ export default function DamageReportForm() {
           <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
             <MapPin className="w-4 h-4" /> Lokasi (GPS) *
           </label>
-          <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4">
+          <div className="rounded-xl border border-primary/10 bg-primary/5/60 p-4">
             {gpsLoading ? (
-              <div className="flex items-center gap-2 text-cyan-700">
+              <div className="flex items-center gap-2 text-primary">
                 <Loader className="w-4 h-4 animate-spin" />
                 <span>Mengakses GPS...</span>
               </div>
@@ -456,7 +456,7 @@ export default function DamageReportForm() {
                         handleCoordinateChange('latitude', event.target.value)
                       }
                       placeholder="-6.200000"
-                      className="mt-1.5 w-full rounded-lg border border-cyan-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-500"
+                      className="mt-1.5 w-full rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm outline-none focus:border-primary"
                       required
                     />
                   </div>
@@ -471,7 +471,7 @@ export default function DamageReportForm() {
                         handleCoordinateChange('longitude', event.target.value)
                       }
                       placeholder="106.816666"
-                      className="mt-1.5 w-full rounded-lg border border-cyan-200 bg-white px-3 py-2 text-sm outline-none focus:border-cyan-500"
+                      className="mt-1.5 w-full rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm outline-none focus:border-primary"
                       required
                     />
                   </div>
@@ -481,7 +481,7 @@ export default function DamageReportForm() {
             <button
               type="button"
               onClick={getGPSLocation}
-              className="mt-3 w-full rounded-lg border border-cyan-200 bg-white py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100"
+              className="mt-3 w-full rounded-lg border border-primary/20 bg-white py-2 text-sm font-semibold text-primary transition hover:bg-primary/10"
             >
               Perbarui Lokasi
             </button>
@@ -497,7 +497,7 @@ export default function DamageReportForm() {
             name="infrastructureCategory"
             value={formData.infrastructureCategory}
             onChange={handleInputChange}
-            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-primary/10 px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
             required
           >
             <option value="">-- Pilih Kategori Infrastruktur --</option>
@@ -518,7 +518,7 @@ export default function DamageReportForm() {
             name="damageType"
             value={formData.damageType}
             onChange={handleInputChange}
-            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-primary/10 px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
             required
           >
             <option value="">-- Pilih Jenis Kerusakan --</option>
@@ -539,7 +539,7 @@ export default function DamageReportForm() {
             name="urgencyLevel"
             value={formData.urgencyLevel}
             onChange={handleInputChange}
-            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-primary/10 px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
             required
           >
             <option value="">-- Pilih Tingkat Urgensi --</option>
@@ -562,7 +562,7 @@ export default function DamageReportForm() {
             onChange={handleInputChange}
             placeholder="Jelaskan detail kerusakan yang Anda temukan..."
             rows="4"
-            className="w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+            className="w-full rounded-xl border border-primary/10 px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
             required
           />
         </div>
@@ -572,7 +572,7 @@ export default function DamageReportForm() {
           <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
             <Camera className="w-4 h-4" /> Foto Kerusakan *
           </label>
-          <div className="cursor-pointer rounded-xl border-2 border-dashed border-cyan-200 p-6 text-center transition hover:border-cyan-500 hover:bg-cyan-50">
+          <div className="cursor-pointer rounded-xl border-2 border-dashed border-primary/20 p-6 text-center transition hover:border-primary hover:bg-primary/5">
             <input
               type="file"
               accept="image/*"
@@ -611,7 +611,7 @@ export default function DamageReportForm() {
           <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4" /> Sensitivitas Deteksi AI
           </label>
-          <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4">
+          <div className="rounded-xl border border-primary/10 bg-primary/5/60 p-4">
             <p className="text-xs text-slate-500 mb-3">
               Atur tingkat confidence untuk deteksi kerusakan otomatis. Semakin rendah nilainya, semakin sensitif deteksi (lebih banyak hasil tapi mungkin kurang akurat).
             </p>
@@ -623,9 +623,9 @@ export default function DamageReportForm() {
                 step="1"
                 value={confidenceThreshold}
                 onChange={(e) => setConfidenceThreshold(Number(e.target.value))}
-                className="flex-1 h-1.5 bg-slate-200 rounded-full accent-cyan-500 cursor-pointer"
+                className="flex-1 h-1.5 bg-slate-200 rounded-full accent-primary cursor-pointer"
               />
-              <span className="text-sm font-bold text-cyan-700 min-w-[3rem] text-right">
+              <span className="text-sm font-bold text-primary min-w-[3rem] text-right">
                 {confidenceThreshold}%
               </span>
             </div>
@@ -636,7 +636,7 @@ export default function DamageReportForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 py-3 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary py-3 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
         >
           {loading ? (
             <>

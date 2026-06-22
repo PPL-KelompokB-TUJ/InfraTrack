@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -19,46 +21,101 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #f8f9ff;
+  background-color: #f9f9f9;
+  background-image: radial-gradient(#e2e2e2 1px, transparent 1px);
+  background-size: 20px 20px;
   color: var(--ink-primary);
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.4;
-  background-image:
-    linear-gradient(rgba(8, 145, 178, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(8, 145, 178, 0.04) 1px, transparent 1px);
-  background-size: 72px 72px;
 }
 
 #root {
   min-height: 100vh;
 }
 
+/* Spring Thief Legacy Utilities */
+.petal-shape {
+  border-radius: 2px 16px 2px 16px;
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(248, 187, 208, 0.3);
+  box-shadow: 0 4px 30px rgba(80, 68, 71, 0.02);
+}
+.chart-line {
+  stroke: #f8bbd0;
+  stroke-width: 1.5;
+  fill: none;
+}
+.chart-area {
+  fill: url(#pink-gradient);
+  opacity: 0.2;
+}
+
+.petal-radius {
+  border-radius: 12px 12px 12px 2px;
+}
+
+.petal-button {
+  border-radius: 20px 20px 20px 4px;
+  background: linear-gradient(135deg, #F8BBD0 0%, #FCE4EC 100%);
+  color: #526069;
+  transition: all 0.3s ease;
+}
+
+.petal-button:hover {
+  box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+  transform: translateY(-1px);
+}
+
+.ghost-button {
+  border: 1px solid #526069;
+  color: #526069;
+  border-radius: 20px 20px 20px 4px;
+  transition: all 0.3s ease;
+}
+
+.ghost-button:hover {
+  background-color: rgba(82, 96, 105, 0.05);
+}
+
+/* Custom Scrollbar for side nav */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(248, 187, 208, 0.5);
+  border-radius: 4px;
+}
+
+/* Chart container styling to ensure canvas fits */
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
 /* Legacy Glass Panels (used by admin pages) */
 .glass-panel {
   background: rgba(255, 255, 255, 0.84);
-  border: 1px solid rgba(8, 145, 178, 0.2);
-  box-shadow: 0 18px 35px rgba(14, 116, 144, 0.12);
+  border: 1px solid rgba(248, 187, 208, 0.3);
+  box-shadow: 0 18px 35px rgba(128, 80, 98, 0.12);
   backdrop-filter: blur(6px);
 }
 
 .surface-panel {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 252, 255, 0.92));
-  border: 1px solid rgba(103, 232, 249, 0.35);
-  box-shadow: 0 16px 34px rgba(15, 58, 82, 0.1);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(252, 245, 248, 0.92));
+  border: 1px solid rgba(248, 187, 208, 0.35);
+  box-shadow: 0 16px 34px rgba(128, 80, 98, 0.1);
   backdrop-filter: blur(8px);
 }
 
 .surface-card {
   background: var(--surface-plain);
-  border: 1px solid rgba(148, 223, 238, 0.55);
-  box-shadow: 0 10px 24px rgba(15, 58, 82, 0.08);
+  border: 1px solid rgba(248, 187, 208, 0.55);
+  box-shadow: 0 10px 24px rgba(128, 80, 98, 0.08);
 }
 
 /* Animations */
@@ -137,8 +194,8 @@ html.dark body {
 
 html.dark body::before {
   background-image:
-    linear-gradient(rgba(6, 182, 212, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(242, 182, 203, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 182, 203, 0.03) 1px, transparent 1px);
 }
 
 /* ── Tailwind custom Material token overrides ── */
@@ -465,3 +522,22 @@ html, body, * {
   transition: background-color 0.25s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
+
+
+@keyframes fall {
+  0% {
+    top: -10%;
+  }
+  100% {
+    top: 110%;
+  }
+}
+
+@keyframes sway {
+  0% {
+    transform: translateX(-20px) rotate(0deg);
+  }
+  100% {
+    transform: translateX(20px) rotate(45deg);
+  }
+}

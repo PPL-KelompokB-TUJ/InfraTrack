@@ -332,7 +332,7 @@ export default function AIAnalyticsPage() {
         {/* ── Header ────────────────────────────────────────────── */}
         <div className="mb-8 fade-slide-in">
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary flex items-center justify-center shadow-lg">
               <Camera className="text-white" size={22} />
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900">
@@ -354,8 +354,8 @@ export default function AIAnalyticsPage() {
               <div
                 className={`glass-panel rounded-2xl p-8 transition-all duration-200 cursor-pointer fade-slide-in ${
                   dragOver
-                    ? 'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-50/50'
-                    : 'hover:border-cyan-300 hover:shadow-lg'
+                    ? 'ring-2 ring-primary/80 border-primary/80 bg-primary/5/50'
+                    : 'hover:border-primary/30 hover:shadow-lg'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -371,8 +371,8 @@ export default function AIAnalyticsPage() {
                   id="image-upload"
                 />
                 <div className="flex flex-col items-center text-center py-8">
-                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-cyan-100 to-teal-100 flex items-center justify-center mb-4">
-                    <Upload className="text-cyan-600" size={28} />
+                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/10 flex items-center justify-center mb-4">
+                    <Upload className="text-primary" size={28} />
                   </div>
                   <h3 className="text-lg font-bold text-slate-800 mb-1">
                     Upload Foto Jalan
@@ -383,7 +383,7 @@ export default function AIAnalyticsPage() {
                   </p>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:brightness-110 hover:shadow-lg"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:brightness-110 hover:shadow-lg"
                   >
                     <ImageIcon size={16} />
                     Pilih Gambar
@@ -396,7 +396,7 @@ export default function AIAnalyticsPage() {
             {imagePreview && (
               <div className="glass-panel rounded-2xl overflow-hidden fade-slide-in">
                 {/* Toolbar */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50/60">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-primary/5/60">
                   <div className="flex items-center gap-2 min-w-0">
                     <ImageIcon size={16} className="text-slate-500 shrink-0" />
                     <span className="text-sm font-medium text-slate-700 truncate">
@@ -459,7 +459,7 @@ export default function AIAnalyticsPage() {
                       step="1"
                       value={confidenceThreshold}
                       onChange={(e) => setConfidenceThreshold(Number(e.target.value))}
-                      className="flex-1 h-1.5 bg-slate-200 rounded-full accent-cyan-500 cursor-pointer"
+                      className="flex-1 h-1.5 bg-slate-200 rounded-full accent-primary cursor-pointer"
                     />
                   </div>
 
@@ -467,7 +467,7 @@ export default function AIAnalyticsPage() {
                     type="button"
                     onClick={runDetection}
                     disabled={isDetecting}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110 hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110 hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isDetecting ? (
                       <>
@@ -525,7 +525,7 @@ export default function AIAnalyticsPage() {
             {/* Loading state */}
             {isDetecting && (
               <div className="glass-panel rounded-2xl p-8 text-center fade-slide-in">
-                <Loader2 size={36} className="text-cyan-500 animate-spin mx-auto mb-4" />
+                <Loader2 size={36} className="text-primary animate-spin mx-auto mb-4" />
                 <h3 className="text-base font-bold text-slate-700 mb-1">
                   Menganalisis Gambar...
                 </h3>
@@ -579,24 +579,24 @@ export default function AIAnalyticsPage() {
                 </div>
 
                 {/* Summary Stats */}
-                <div className="glass-panel rounded-2xl p-5 bg-white border border-slate-200">
+                <div className="glass-panel rounded-2xl p-5 glass-card border-none">
                   <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <Target size={16} className="text-cyan-600" />
+                    <Target size={16} className="text-primary" />
                     Ringkasan Deteksi
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="p-3 bg-primary/5 rounded-xl border border-slate-100">
                       <p className="text-xs text-slate-500 font-medium">Total Deteksi</p>
                       <p className="text-2xl font-extrabold text-slate-900 mt-1">{summary.total}</p>
                     </div>
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="p-3 bg-primary/5 rounded-xl border border-slate-100">
                       <p className="text-xs text-slate-500 font-medium">Avg. Confidence</p>
                       <p className="text-2xl font-extrabold text-slate-900 mt-1">
                         {summary.total > 0 ? `${(summary.avgConfidence * 100).toFixed(0)}%` : '-'}
                       </p>
                     </div>
                     {Object.entries(summary.byClass).map(([cls, count]) => (
-                      <div key={cls} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div key={cls} className="p-3 bg-primary/5 rounded-xl border border-slate-100">
                         <div className="flex items-center gap-1.5">
                           <div
                             className="h-2.5 w-2.5 rounded-full"
@@ -612,20 +612,20 @@ export default function AIAnalyticsPage() {
 
                 {/* Size Metrics */}
                 {sizeMetrics && sizeMetrics.details.length > 0 && (
-                  <div className="glass-panel rounded-2xl p-5 bg-white border border-slate-200">
+                  <div className="glass-panel rounded-2xl p-5 glass-card border-none">
                     <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                      <Ruler size={16} className="text-cyan-600" />
+                      <Ruler size={16} className="text-primary" />
                       Metrik Ukuran Kerusakan
                     </h3>
                     <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="p-3 bg-primary/5 rounded-xl border border-slate-100">
                         <p className="text-xs text-slate-500 font-medium">Total Area Kerusakan</p>
                         <p className="text-2xl font-extrabold text-slate-900 mt-1">
                           {(sizeMetrics.totalAreaRatio * 100).toFixed(1)}%
                         </p>
                         <p className="text-xs text-slate-400 mt-0.5">dari total gambar</p>
                       </div>
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="p-3 bg-primary/5 rounded-xl border border-slate-100">
                         <p className="text-xs text-slate-500 font-medium">Area Terbesar</p>
                         <p className="text-2xl font-extrabold text-slate-900 mt-1">
                           {(sizeMetrics.maxAreaRatio * 100).toFixed(1)}%
@@ -637,7 +637,7 @@ export default function AIAnalyticsPage() {
                       {sizeMetrics.details.map((d, idx) => {
                         const sizeCfg = SIZE_CATEGORY_CONFIG[d.sizeCategory];
                         return (
-                          <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:bg-slate-50 transition">
+                          <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 hover:bg-primary/5 transition">
                             <div className="flex items-center gap-2">
                               <Maximize2 size={14} className="text-slate-400" />
                               <div>
@@ -661,7 +661,7 @@ export default function AIAnalyticsPage() {
 
                 {/* Detail list */}
                 {detectionResult.predictions.length > 0 && (
-                  <div className="glass-panel rounded-2xl p-5 bg-white border border-slate-200">
+                  <div className="glass-panel rounded-2xl p-5 glass-card border-none">
                     <h3 className="text-sm font-bold text-slate-800 mb-3">Detail Deteksi</h3>
                     <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                       {detectionResult.predictions.map((pred, idx) => {
@@ -669,7 +669,7 @@ export default function AIAnalyticsPage() {
                         return (
                           <div
                             key={idx}
-                            className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition"
+                            className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:bg-primary/5 transition"
                           >
                             <div className="flex items-center gap-2.5">
                               <div
@@ -707,7 +707,7 @@ export default function AIAnalyticsPage() {
                 )}
 
                 {/* Model Info */}
-                <div className="glass-panel rounded-2xl p-4 bg-slate-50/50 border border-slate-200">
+                <div className="glass-panel rounded-2xl p-4 bg-primary/5/50 border border-slate-200">
                   <div className="flex items-start gap-2 text-xs text-slate-500">
                     <Info size={14} className="shrink-0 mt-0.5" />
                     <p>
@@ -721,11 +721,11 @@ export default function AIAnalyticsPage() {
 
             {/* ── Detection History ──────────────────────────────── */}
             {history.length > 0 && (
-              <div className="glass-panel rounded-2xl bg-white border border-slate-200 overflow-hidden fade-slide-in">
+              <div className="glass-panel rounded-2xl glass-card border-none overflow-hidden fade-slide-in">
                 <button
                   type="button"
                   onClick={() => setShowHistory(!showHistory)}
-                  className="w-full flex items-center justify-between px-5 py-3.5 text-sm font-bold text-slate-800 hover:bg-slate-50 transition"
+                  className="w-full flex items-center justify-between px-5 py-3.5 text-sm font-bold text-slate-800 hover:bg-primary/5 transition"
                 >
                   <span className="flex items-center gap-2">
                     <Clock size={16} className="text-slate-500" />
@@ -741,7 +741,7 @@ export default function AIAnalyticsPage() {
                       return (
                         <div
                           key={item.id}
-                          className="flex items-center gap-3 px-5 py-3 border-b border-slate-50 last:border-b-0 hover:bg-slate-50 transition"
+                          className="flex items-center gap-3 px-5 py-3 border-b border-slate-50 last:border-b-0 hover:bg-primary/5 transition"
                         >
                           <img
                             src={item.thumbnail}

@@ -120,7 +120,7 @@ export default function ActiveReportsPage() {
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="text-center py-12">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-cyan-200 border-t-cyan-600"></div>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
           <p className="mt-4 text-sm text-slate-600">Memuat laporan aktif...</p>
         </div>
       </main>
@@ -194,7 +194,7 @@ export default function ActiveReportsPage() {
               placeholder="Cari kode tiket, jenis, atau lokasi..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
@@ -207,7 +207,7 @@ export default function ActiveReportsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             >
               <option value="all">Semua Status</option>
               <option value="pending">Pending</option>
@@ -245,7 +245,7 @@ export default function ActiveReportsPage() {
                 {filteredReports.map((report) => (
                   <tr key={report.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                     <td className="py-4 px-6">
-                      <span className="font-mono font-bold text-cyan-700">{report.ticket_code}</span>
+                      <span className="font-mono font-bold text-primary">{report.ticket_code}</span>
                     </td>
                     <td className="py-4 px-6">
                       <span className="text-slate-700">{report.damage_type_name || '-'}</span>
@@ -288,7 +288,7 @@ export default function ActiveReportsPage() {
                     <td className="py-4 px-6 text-center">
                       <button
                         onClick={() => handleViewDetail(report)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 hover:bg-cyan-200 font-semibold text-sm transition-colors"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-container/40 text-primary hover:bg-primary-container/60 font-semibold text-sm transition-colors"
                       >
                         <Eye size={16} />
                         Detail
@@ -407,12 +407,12 @@ function ReportDetailModal({ report, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-6 flex items-center justify-between">
+        <div className="sticky top-0 bg-primary px-6 py-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Detail Laporan</h2>
-            <p className="text-cyan-100 text-sm mt-1">{report.ticket_code}</p>
+            <p className="text-primary-container text-sm mt-1">{report.ticket_code}</p>
           </div>
           <button
             onClick={onClose}
@@ -423,7 +423,7 @@ function ReportDetailModal({ report, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Status */}
           <div>
             <p className="text-sm font-semibold text-slate-600 mb-2">Status</p>
@@ -463,14 +463,14 @@ function ReportDetailModal({ report, onClose }) {
 
           {/* AI Analysis Result */}
           <div className="rounded-xl border border-slate-200 overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 border-b border-slate-200">
-              <Brain size={18} className="text-cyan-600" />
+            <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-primary/5 to-tertiary-container/20 border-b border-slate-200">
+              <Brain size={18} className="text-primary" />
               <h3 className="font-semibold text-slate-800 text-sm">Hasil Analisis AI</h3>
             </div>
             <div className="p-4">
               {isLoadingAi ? (
                 <div className="flex items-center gap-3 py-4 justify-center text-slate-500">
-                  <Loader2 size={20} className="animate-spin text-cyan-500" />
+                  <Loader2 size={20} className="animate-spin text-primary" />
                   <span className="text-sm">Memuat hasil analisis...</span>
                 </div>
               ) : aiResult ? (
@@ -641,11 +641,11 @@ function ReportDetailModal({ report, onClose }) {
                 </div>
 
                 {verificationAction === 'approve' && report.priority_score && (
-                  <div className="p-3 rounded-lg border border-cyan-200 bg-cyan-50 flex items-start gap-3">
-                    <Info className="text-cyan-600 flex-shrink-0 mt-0.5" size={18} />
+                  <div className="p-3 rounded-lg border border-primary/20 bg-primary-container/20 flex items-start gap-3">
+                    <Info className="text-primary flex-shrink-0 mt-0.5" size={18} />
                     <div>
-                      <p className="text-sm font-semibold text-cyan-900">Rekomendasi Prioritas (Skor: {report.priority_score}/100)</p>
-                      <p className="text-xs text-cyan-700 mt-1">Sistem menyarankan prioritas: <strong>{report.priority_recommendation}</strong></p>
+                      <p className="text-sm font-semibold text-primary">Rekomendasi Prioritas (Skor: {report.priority_score}/100)</p>
+                      <p className="text-xs text-primary mt-1">Sistem menyarankan prioritas: <strong>{report.priority_recommendation}</strong></p>
                     </div>
                   </div>
                 )}
@@ -658,7 +658,7 @@ function ReportDetailModal({ report, onClose }) {
                     <select
                       value={priorityLevel}
                       onChange={(e) => setPriorityLevel(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     >
                       <option value="rendah">Rendah</option>
                       <option value="sedang">Sedang</option>
@@ -676,7 +676,7 @@ function ReportDetailModal({ report, onClose }) {
                     value={verificationNotes}
                     onChange={(e) => setVerificationNotes(e.target.value)}
                     placeholder={`Masukkan catatan ${verificationAction === 'approve' ? 'persetujuan' : 'penolakan'}...`}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 resize-none"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                     rows="3"
                   />
                 </div>

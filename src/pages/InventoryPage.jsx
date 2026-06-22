@@ -127,7 +127,7 @@ export default function InventoryPage() {
       <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
               InfraTrack / Administrator
             </p>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
@@ -140,14 +140,14 @@ export default function InventoryPage() {
           <div className="flex items-center gap-3">
             <Link
               to="/dashboard/inventory/history"
-              className="inline-flex items-center gap-2 rounded-xl bg-white border border-cyan-200 px-4 py-2.5 text-sm font-bold text-cyan-700 shadow-sm hover:bg-cyan-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-white border border-primary/20 px-4 py-2.5 text-sm font-bold text-primary shadow-sm hover:bg-primary/5"
             >
               <History size={18} />
               Riwayat Inventaris
             </Link>
             <button
               onClick={() => handleOpenForm()}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow hover:brightness-110"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-4 py-2.5 text-sm font-bold text-white shadow hover:brightness-110"
             >
               <Plus size={18} />
               Tambah Material
@@ -163,7 +163,7 @@ export default function InventoryPage() {
               placeholder="Cari material..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-cyan-100 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+              className="w-full rounded-xl border border-primary/10 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/80 focus:ring-1 focus:ring-primary/80"
             />
           </div>
         </div>
@@ -173,9 +173,9 @@ export default function InventoryPage() {
             <p className="text-slate-500">Memuat inventaris...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-cyan-100 bg-white">
-            <table className="min-w-full divide-y divide-cyan-100 text-sm">
-              <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
+          <div className="overflow-x-auto rounded-2xl border border-primary/10 bg-white">
+            <table className="min-w-full divide-y divide-primary/20 text-sm">
+              <thead className="bg-primary/5/70 text-left text-xs uppercase tracking-wide text-primary">
                 <tr>
                   <th className="px-4 py-3">Nama Material</th>
                   <th className="px-4 py-3">Stok Saat Ini</th>
@@ -185,12 +185,12 @@ export default function InventoryPage() {
                   <th className="px-4 py-3 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cyan-50">
+              <tbody className="divide-y divide-primary/10">
                 {filteredMaterials.map((item) => (
-                  <tr key={item.id} className="hover:bg-cyan-50/30">
+                  <tr key={item.id} className="hover:bg-primary/5/30">
                     <td className="px-4 py-3 font-semibold text-slate-700">
                       <div className="flex items-center gap-2">
-                        <Package size={16} className="text-cyan-500" />
+                        <Package size={16} className="text-primary" />
                         {item.name}
                       </div>
                     </td>
@@ -216,7 +216,7 @@ export default function InventoryPage() {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleOpenRestock(item)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-teal-200 bg-teal-50 px-2 py-1 text-xs font-semibold text-teal-700 hover:bg-teal-100"
+                          className="inline-flex items-center gap-1 rounded-lg border border-primary/20 bg-primary/5 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/10"
                           title="Restock"
                         >
                           <ArrowUpCircle size={14} />
@@ -224,7 +224,7 @@ export default function InventoryPage() {
                         </button>
                         <button
                           onClick={() => handleOpenForm(item)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2 py-1 text-xs font-semibold text-cyan-700 hover:bg-cyan-50"
+                          className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/5"
                         >
                           <Pencil size={14} />
                           Edit
@@ -267,7 +267,7 @@ export default function InventoryPage() {
                   type="text"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-primary"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -279,7 +279,7 @@ export default function InventoryPage() {
                     value={formData.unit}
                     onChange={e => setFormData({ ...formData, unit: e.target.value })}
                     placeholder="cth: sak, kg, buah"
-                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
                 {!formData.id && (
@@ -291,7 +291,7 @@ export default function InventoryPage() {
                       min="0"
                       value={formData.stock}
                       onChange={e => setFormData({ ...formData, stock: e.target.value })}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-primary"
                     />
                   </div>
                 )}
@@ -304,7 +304,7 @@ export default function InventoryPage() {
                   min="0"
                   value={formData.unit_price}
                   onChange={e => setFormData({ ...formData, unit_price: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-primary"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -313,7 +313,7 @@ export default function InventoryPage() {
                   id="isActive"
                   checked={formData.is_active}
                   onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                  className="rounded border-slate-300 text-primary focus:ring-primary"
                 />
                 <label htmlFor="isActive" className="text-sm font-medium text-slate-700">Aktif digunakan</label>
               </div>
@@ -328,7 +328,7 @@ export default function InventoryPage() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700"
+                  className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary"
                 >
                   Simpan
                 </button>
@@ -355,7 +355,7 @@ export default function InventoryPage() {
                   min="1"
                   value={restockData.additionalStock}
                   onChange={e => setRestockData({ ...restockData, additionalStock: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-primary"
                 />
               </div>
               <div>
@@ -365,7 +365,7 @@ export default function InventoryPage() {
                   placeholder="Opsional (misal: No. Invoice / Pemasok)"
                   value={restockData.referenceNote}
                   onChange={e => setRestockData({ ...restockData, referenceNote: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-primary"
                 />
               </div>
               <div className="mt-6 flex justify-end gap-3">
@@ -378,7 +378,7 @@ export default function InventoryPage() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700"
+                  className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary"
                 >
                   Restock
                 </button>

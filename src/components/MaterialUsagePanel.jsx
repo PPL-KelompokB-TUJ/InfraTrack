@@ -125,7 +125,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
   if (loading) {
     return (
       <div className="flex justify-center p-4">
-        <Loader className="animate-spin text-cyan-500" size={24} />
+        <Loader className="animate-spin text-primary" size={24} />
       </div>
     );
   }
@@ -136,7 +136,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
     <div className="mt-6">
       {/* 1. Daftar Material yang Tersedia (Tanpa Harga) - Hanya untuk Petugas */}
       {userRole === 'officer' && (
-        <div className="mb-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="mb-6 rounded-xl border border-slate-200 bg-primary/5 p-4">
           <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Stok Material Tersedia</h4>
           <div className="flex flex-wrap gap-2">
             {materials.map((m) => (
@@ -168,7 +168,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
               setShowForm(true);
               setFormData([{ materialId: '', quantity: '', notes: '' }]);
             }}
-            className="inline-flex items-center gap-1 rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-cyan-700"
+            className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-primary"
           >
             <Plus size={14} />
             Catat Material
@@ -178,13 +178,13 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
 
       {/* 2. Form Pemakaian Material (Inline) */}
       {showForm && (
-        <div className="mb-6 rounded-2xl border border-cyan-100 bg-cyan-50/50 p-5 shadow-inner">
+        <div className="mb-6 rounded-2xl border border-primary/10 bg-primary/5/50 p-5 shadow-inner">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-800">Catat Pemakaian Baru</h3>
             <button
               type="button"
               onClick={handleAddRow}
-              className="rounded-full bg-cyan-100 p-1.5 text-cyan-600 hover:bg-cyan-200 transition shadow-sm"
+              className="rounded-full bg-primary/10 p-1.5 text-primary hover:bg-primary/20 transition shadow-sm"
               title="Tambah Baris Material"
             >
               <Plus size={18} />
@@ -211,7 +211,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
                         required
                         value={row.materialId}
                         onChange={(e) => handleChangeRow(index, 'materialId', e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-primary/80"
                       >
                         <option value="">-- Pilih Material --</option>
                         {materials.map(m => (
@@ -230,7 +230,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
                         step="any"
                         value={row.quantity}
                         onChange={(e) => handleChangeRow(index, 'quantity', e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-primary/80"
                         placeholder="Contoh: 2"
                       />
                     </div>
@@ -240,7 +240,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
                         type="text"
                         value={row.notes}
                         onChange={(e) => handleChangeRow(index, 'notes', e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-cyan-400"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-primary/80"
                         placeholder="Keterangan material ini..."
                       />
                     </div>
@@ -249,21 +249,21 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
               ))}
             </div>
             
-            <div className="mt-4 flex gap-3 justify-end border-t border-cyan-100/50 pt-4">
+            <div className="mt-4 flex gap-3 justify-end border-t border-primary/10/50 pt-4">
               <button
                 type="button"
                 onClick={() => {
                   setShowForm(false);
                   setFormData([{ materialId: '', quantity: '', notes: '' }]);
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-primary/5 transition"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="rounded-xl bg-cyan-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-cyan-700 transition disabled:opacity-70"
+                className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-primary transition disabled:opacity-70"
               >
                 {submitting ? 'Menyimpan...' : 'Simpan Material'}
               </button>
@@ -276,7 +276,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50 text-left text-xs text-slate-500">
+              <thead className="bg-primary/5 text-left text-xs text-slate-500">
                 <tr>
                   <th className="px-4 py-2">Material</th>
                   <th className="px-4 py-2">Jumlah</th>
@@ -290,7 +290,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
                   <tr key={u.id}>
                     <td className="px-4 py-2 font-medium text-slate-700">
                       <div className="flex items-center gap-2">
-                        <Package size={14} className="text-cyan-600" />
+                        <Package size={14} className="text-primary" />
                         {u.materials?.name}
                       </div>
                       <span className="text-[10px] text-slate-400">@ Rp {Number(u.unit_price_at_usage).toLocaleString('id-ID')}</span>
@@ -312,10 +312,10 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="bg-slate-50 font-semibold">
+              <tfoot className="bg-primary/5 font-semibold">
                 <tr>
                   <td colSpan="2" className="px-4 py-2 text-right text-slate-600">Total Biaya Material:</td>
-                  <td colSpan={userRole === 'admin' ? "3" : "2"} className="px-4 py-2 text-cyan-700">Rp {grandTotal.toLocaleString('id-ID')}</td>
+                  <td colSpan={userRole === 'admin' ? "3" : "2"} className="px-4 py-2 text-primary">Rp {grandTotal.toLocaleString('id-ID')}</td>
                 </tr>
                 {taskStatus === 'completed' && taskActualCost !== undefined && taskActualCost !== null && (
                   <>
@@ -323,7 +323,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
                       <td colSpan="2" className="px-4 py-2 text-right text-slate-600">
                         Biaya Lainnya:
                       </td>
-                      <td colSpan={userRole === 'admin' ? "2" : "2"} className="px-4 py-2 text-cyan-700">
+                      <td colSpan={userRole === 'admin' ? "2" : "2"} className="px-4 py-2 text-primary">
                         Rp {Math.max(0, Number(taskActualCost) - grandTotal).toLocaleString('id-ID')}
                       </td>
                       {userRole === 'admin' && (
@@ -343,7 +343,7 @@ export default function MaterialUsagePanel({ taskId, taskStatus, userRole, taskA
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-slate-200 bg-primary/5 p-4 text-center text-sm text-slate-500">
           Belum ada material yang dicatat untuk tugas ini.
         </div>
       )}

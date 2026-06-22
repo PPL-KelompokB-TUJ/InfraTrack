@@ -272,7 +272,7 @@ export default function ExportPage() {
     switch (status) {
       case 'pending':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-primary/5 px-2.5 py-1 text-xs font-semibold text-slate-600">
             <Clock size={13} className="animate-pulse" />
             Antrean
           </span>
@@ -310,7 +310,7 @@ export default function ExportPage() {
         <section className="lg:col-span-2 space-y-6">
           <div className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
                 InfraTrack / Administrator
               </p>
               <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-800">
@@ -331,11 +331,11 @@ export default function ExportPage() {
                     onClick={() => setReportType('asset-condition')}
                     className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-5 text-center transition ${
                       reportType === 'asset-condition'
-                        ? 'border-cyan-500 bg-cyan-50/50 text-cyan-900 shadow-glow'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'border-primary bg-primary/5/50 text-primary shadow-glow'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-primary/5'
                     }`}
                   >
-                    <Database className={reportType === 'asset-condition' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
+                    <Database className={reportType === 'asset-condition' ? 'text-primary' : 'text-slate-400'} size={28} />
                     <div>
                       <p className="text-sm font-semibold">Kondisi Aset</p>
                       <p className="mt-1 text-[10px] leading-normal opacity-85">Kondisi fisik, lokasi, & aduan</p>
@@ -347,11 +347,11 @@ export default function ExportPage() {
                     onClick={() => setReportType('maintenance-recap')}
                     className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-5 text-center transition ${
                       reportType === 'maintenance-recap'
-                        ? 'border-cyan-500 bg-cyan-50/50 text-cyan-900 shadow-glow'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'border-primary bg-primary/5/50 text-primary shadow-glow'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-primary/5'
                     }`}
                   >
-                    <FileText className={reportType === 'maintenance-recap' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
+                    <FileText className={reportType === 'maintenance-recap' ? 'text-primary' : 'text-slate-400'} size={28} />
                     <div>
                       <p className="text-sm font-semibold">Pemeliharaan</p>
                       <p className="mt-1 text-[10px] leading-normal opacity-85">Realisasi & rekap penugasan</p>
@@ -363,11 +363,11 @@ export default function ExportPage() {
                     onClick={() => setReportType('officer-performance')}
                     className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-5 text-center transition ${
                       reportType === 'officer-performance'
-                        ? 'border-cyan-500 bg-cyan-50/50 text-cyan-900 shadow-glow'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'border-primary bg-primary/5/50 text-primary shadow-glow'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-primary/5'
                     }`}
                   >
-                    <Users className={reportType === 'officer-performance' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
+                    <Users className={reportType === 'officer-performance' ? 'text-primary' : 'text-slate-400'} size={28} />
                     <div>
                       <p className="text-sm font-semibold">Kinerja Petugas</p>
                       <p className="mt-1 text-[10px] leading-normal opacity-85">Total tugas & durasi kerja</p>
@@ -379,11 +379,11 @@ export default function ExportPage() {
                     onClick={() => setReportType('inventory-recap')}
                     className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-5 text-center transition ${
                       reportType === 'inventory-recap'
-                        ? 'border-cyan-500 bg-cyan-50/50 text-cyan-900 shadow-glow'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'border-primary bg-primary/5/50 text-primary shadow-glow'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-primary/5'
                     }`}
                   >
-                    <Package className={reportType === 'inventory-recap' ? 'text-cyan-600' : 'text-slate-400'} size={28} />
+                    <Package className={reportType === 'inventory-recap' ? 'text-primary' : 'text-slate-400'} size={28} />
                     <div>
                       <p className="text-sm font-semibold">Manajemen Inventaris</p>
                       <p className="mt-1 text-[10px] leading-normal opacity-85">Stok, harga & total nilai material</p>
@@ -393,9 +393,9 @@ export default function ExportPage() {
               </div>
 
               {/* Step 2: Filters */}
-              <div className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-5">
+              <div className="space-y-4 rounded-2xl border border-slate-100 bg-primary/5/50 p-5">
                 <div className="flex items-center gap-2 border-b border-slate-200/60 pb-3">
-                  <Calendar size={16} className="text-cyan-600" />
+                  <Calendar size={16} className="text-primary" />
                   <h3 className="text-sm font-bold text-slate-700">2. Sesuaikan Filter & Rentang Tanggal</h3>
                 </div>
 
@@ -409,7 +409,7 @@ export default function ExportPage() {
                       id="fromDate"
                       value={fromDate}
                       onChange={(e) => setFromDate(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
 
@@ -422,7 +422,7 @@ export default function ExportPage() {
                       id="toDate"
                       value={toDate}
                       onChange={(e) => setToDate(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -436,7 +436,7 @@ export default function ExportPage() {
                       id="category"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm bg-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                      className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm bg-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="all">Semua Kategori</option>
                       {categoryOptions.map((opt) => (
@@ -453,14 +453,14 @@ export default function ExportPage() {
               <div className="space-y-3">
                 <label className="text-sm font-bold text-slate-700">3. Pilih Format Unduhan</label>
                 <div className="flex gap-4">
-                  <label className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 p-3.5 cursor-pointer hover:bg-slate-50 transition">
+                  <label className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 p-3.5 cursor-pointer hover:bg-primary/5 transition">
                     <input
                       type="radio"
                       name="format"
                       value="pdf"
                       checked={format === 'pdf'}
                       onChange={() => setFormat('pdf')}
-                      className="h-4 w-4 text-cyan-600 focus:ring-cyan-500"
+                      className="h-4 w-4 text-primary focus:ring-primary"
                     />
                     <div>
                       <p className="text-sm font-semibold text-slate-700">Dokumen PDF (.pdf)</p>
@@ -468,14 +468,14 @@ export default function ExportPage() {
                     </div>
                   </label>
 
-                  <label className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 p-3.5 cursor-pointer hover:bg-slate-50 transition">
+                  <label className="flex flex-1 items-center gap-3 rounded-xl border border-slate-200 p-3.5 cursor-pointer hover:bg-primary/5 transition">
                     <input
                       type="radio"
                       name="format"
                       value="xlsx"
                       checked={format === 'xlsx'}
                       onChange={() => setFormat('xlsx')}
-                      className="h-4 w-4 text-cyan-600 focus:ring-cyan-500"
+                      className="h-4 w-4 text-primary focus:ring-primary"
                     />
                     <div>
                       <p className="text-sm font-semibold text-slate-700">Spreadsheet Excel (.xlsx)</p>
@@ -489,7 +489,7 @@ export default function ExportPage() {
               <button
                 type="submit"
                 disabled={isExporting}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 py-4 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-primary py-4 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
               >
                 {isExporting ? (
                   <>
@@ -523,8 +523,8 @@ export default function ExportPage() {
                   }}
                   className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition ${
                     isSelectionMode
-                      ? 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-                      : 'border-cyan-200 bg-cyan-50/50 text-cyan-700 hover:bg-cyan-50'
+                      ? 'border-slate-200 bg-primary/5 text-slate-600 hover:bg-slate-100'
+                      : 'border-primary/20 bg-primary/5/50 text-primary hover:bg-primary/5'
                   }`}
                 >
                   {isSelectionMode ? 'Batal' : 'Pilih'}
@@ -533,10 +533,10 @@ export default function ExportPage() {
             </div>
             <p className="text-xs text-slate-500 mb-3">Tautan unduhan tetap aktif selama server berjalan.</p>
             {currentServer && (
-              <div className="mb-4 flex items-center gap-1.5 rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2">
-                <Server size={11} className="text-cyan-500 flex-shrink-0" />
-                <span className="text-[10px] font-semibold text-cyan-700">Backend aktif:</span>
-                <span className="text-[10px] font-mono font-bold text-cyan-900">{currentServer}</span>
+              <div className="mb-4 flex items-center gap-1.5 rounded-xl border border-primary/10 bg-primary/5/60 px-3 py-2">
+                <Server size={11} className="text-primary flex-shrink-0" />
+                <span className="text-[10px] font-semibold text-primary">Backend aktif:</span>
+                <span className="text-[10px] font-mono font-bold text-primary">{currentServer}</span>
               </div>
             )}
 
@@ -547,7 +547,7 @@ export default function ExportPage() {
                     type="checkbox"
                     checked={history.length > 0 && selectedIds.length === history.length}
                     onChange={handleSelectAll}
-                    className="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 h-4 w-4"
+                    className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4"
                   />
                   Pilih Semua
                 </label>
@@ -580,8 +580,8 @@ export default function ExportPage() {
                     key={job.id}
                     className={`group relative rounded-2xl border p-4 transition ${
                       isSelectionMode && selectedIds.includes(job.id)
-                        ? 'border-cyan-200 bg-cyan-50/10 shadow-sm'
-                        : 'border-slate-100 bg-white hover:border-cyan-100 hover:shadow-sm'
+                        ? 'border-primary/20 bg-primary/5/10 shadow-sm'
+                        : 'border-slate-100 bg-white hover:border-primary/10 hover:shadow-sm'
                     }`}
                   >
                     <div className="flex items-start gap-3">
@@ -590,13 +590,13 @@ export default function ExportPage() {
                           type="checkbox"
                           checked={selectedIds.includes(job.id)}
                           onChange={() => handleToggleSelect(job.id)}
-                          className="mt-0.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 h-4 w-4 cursor-pointer"
+                          className="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
                         />
                       )}
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-xs font-bold text-slate-800 group-hover:text-cyan-800 truncate">
+                          <h4 className="text-xs font-bold text-slate-800 group-hover:text-primary truncate">
                             {getReportName(job.report_type)}
                           </h4>
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex-shrink-0">
@@ -609,8 +609,8 @@ export default function ExportPage() {
                         {(() => {
                           const serverLabel = getServerInfo(job);
                           return serverLabel ? (
-                            <p className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">
-                              <Server size={9} className="flex-shrink-0 text-cyan-500" />
+                            <p className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-primary/5 border border-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-500">
+                              <Server size={9} className="flex-shrink-0 text-primary" />
                               {serverLabel}
                             </p>
                           ) : null;
@@ -626,7 +626,7 @@ export default function ExportPage() {
                           href={job.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded-xl bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-100"
+                          className="inline-flex items-center gap-1 rounded-xl bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10"
                         >
                           <Download size={12} />
                           Unduh
@@ -671,7 +671,7 @@ export default function ExportPage() {
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"
+                className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-600 hover:bg-primary/5 transition"
               >
                 Batal
               </button>

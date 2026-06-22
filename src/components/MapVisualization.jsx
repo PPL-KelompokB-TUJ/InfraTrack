@@ -287,7 +287,7 @@ export default function MapVisualization() {
   });
 
   return (
-    <div className="glass-panel rounded-2xl p-6 bg-white border border-slate-200 lg:col-span-2">
+    <div className="glass-panel rounded-2xl p-6 glass-card border-none lg:col-span-2">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-slate-900">Peta Aset & Laporan Aktif</h2>
@@ -302,7 +302,7 @@ export default function MapVisualization() {
             <Filter size={16} />
             Filter Kategori
             {selectedCategories.length > 0 && (
-              <span className="bg-cyan-500 text-white text-xs rounded-full px-2 py-0.5">
+              <span className="bg-primary text-white text-xs rounded-full px-2 py-0.5">
                 {selectedCategories.length}
               </span>
             )}
@@ -325,7 +325,7 @@ export default function MapVisualization() {
                   placeholder="Cari kategori..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -333,7 +333,7 @@ export default function MapVisualization() {
               {selectedCategories.length > 0 && (
                 <button
                   onClick={handleClearAll}
-                  className="px-4 py-2 text-xs font-semibold text-cyan-600 hover:bg-cyan-50 border-b border-slate-200"
+                  className="px-4 py-2 text-xs font-semibold text-primary hover:bg-primary/5 border-b border-slate-200"
                 >
                   ✕ Hapus Semua Filter
                 </button>
@@ -349,9 +349,9 @@ export default function MapVisualization() {
                       <button
                         key={cat.id}
                         onClick={() => handleCategoryChange(cat.id.toString())}
-                        className={`w-full text-left px-4 py-3 transition-colors border-b border-slate-100 flex items-center justify-between hover:bg-slate-50 ${
+                        className={`w-full text-left px-4 py-3 transition-colors border-b border-slate-100 flex items-center justify-between hover:bg-primary/5 ${
                           isSelected
-                            ? 'bg-cyan-50'
+                            ? 'bg-primary/5'
                             : ''
                         }`}
                       >
@@ -359,13 +359,13 @@ export default function MapVisualization() {
                           <div
                             className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                               isSelected
-                                ? 'bg-cyan-500 border-cyan-500'
-                                : 'border-slate-300 hover:border-cyan-500'
+                                ? 'bg-primary border-primary'
+                                : 'border-slate-300 hover:border-primary'
                             }`}
                           >
                             {isSelected && <span className="text-white text-xs">✓</span>}
                           </div>
-                          <span className={`font-medium ${isSelected ? 'text-cyan-700' : 'text-slate-900'}`}>
+                          <span className={`font-medium ${isSelected ? 'text-primary' : 'text-slate-900'}`}>
                             {cat.name}
                           </span>
                         </div>
@@ -384,7 +384,7 @@ export default function MapVisualization() {
 
               {/* Footer Info */}
               {selectedCategories.length > 0 && (
-                <div className="px-4 py-2 text-xs text-slate-600 border-t border-slate-200 bg-slate-50">
+                <div className="px-4 py-2 text-xs text-slate-600 border-t border-slate-200 bg-primary/5">
                   {filteredReports.length} laporan ditampilkan
                 </div>
               )}

@@ -41,7 +41,7 @@ function DefaultBadge({ isDefault }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-xs font-semibold text-cyan-700">
+    <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-xs font-semibold text-primary">
       <CheckCircle2 size={12} />
       Default
     </span>
@@ -382,7 +382,7 @@ export default function MasterDataPage() {
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
         <div className="mb-6 flex flex-col gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
             InfraTrack / Administrator
           </p>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-800">
@@ -398,12 +398,12 @@ export default function MasterDataPage() {
 
 
         {isLoading ? (
-          <p className="rounded-xl border border-cyan-100 bg-white px-4 py-6 text-sm text-slate-500">
+          <p className="rounded-xl border border-primary/10 bg-white px-4 py-6 text-sm text-slate-500">
             Memuat master data...
           </p>
         ) : (
           <div className="space-y-8">
-            <section className="rounded-2xl border border-cyan-100 bg-white p-4 sm:p-5">
+            <section className="rounded-2xl border border-primary/10 bg-white p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-slate-800">Kategori Infrastruktur</h2>
                 <span className="text-xs text-slate-500">{categories.length} entri</span>
@@ -417,9 +417,9 @@ export default function MasterDataPage() {
                     setNewCategory((prev) => ({ ...prev, name: event.target.value }))
                   }
                   placeholder="Tambah kategori baru"
-                  className="rounded-xl border border-cyan-100 px-3 py-2 text-sm outline-none focus:border-cyan-400 lg:col-span-2"
+                  className="rounded-xl border border-primary/10 px-3 py-2 text-sm outline-none focus:border-primary/80 lg:col-span-2"
                 />
-                <label className="inline-flex items-center gap-2 rounded-xl border border-cyan-100 px-3 py-2 text-xs font-semibold text-slate-600">
+                <label className="inline-flex items-center gap-2 rounded-xl border border-primary/10 px-3 py-2 text-xs font-semibold text-slate-600">
                   <input
                     type="checkbox"
                     checked={newCategory.is_default}
@@ -435,7 +435,7 @@ export default function MasterDataPage() {
                 <button
                   type="submit"
                   disabled={busyAction === 'create-category'}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70"
                 >
                   <Plus size={15} />
                   Tambah
@@ -443,8 +443,8 @@ export default function MasterDataPage() {
               </form>
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-cyan-100 text-sm">
-                  <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
+                <table className="min-w-full divide-y divide-primary/20 text-sm">
+                  <thead className="bg-primary/5/70 text-left text-xs uppercase tracking-wide text-primary">
                     <tr>
                       <th className="px-3 py-2">Nama</th>
                       <th className="px-3 py-2">Default</th>
@@ -452,7 +452,7 @@ export default function MasterDataPage() {
                       <th className="px-3 py-2 text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-cyan-50">
+                  <tbody className="divide-y divide-primary/10">
                     {categories.map((item) => {
                       const isEditing = editingCategoryId === item.id;
                       const rowBusy = busyAction.includes(item.id);
@@ -469,7 +469,7 @@ export default function MasterDataPage() {
                                     name: event.target.value,
                                   }))
                                 }
-                                className="w-full rounded-lg border border-cyan-100 px-2 py-1.5"
+                                className="w-full rounded-lg border border-primary/10 px-2 py-1.5"
                               />
                             ) : (
                               <span className="font-semibold text-slate-700">{item.name}</span>
@@ -541,7 +541,7 @@ export default function MasterDataPage() {
                                   <button
                                     type="button"
                                     onClick={() => beginEditCategory(item)}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2 py-1 text-xs font-semibold text-cyan-700"
+                                    className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-2 py-1 text-xs font-semibold text-primary"
                                   >
                                     <Pencil size={12} />
                                     Edit
@@ -573,7 +573,7 @@ export default function MasterDataPage() {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-cyan-100 bg-white p-4 sm:p-5">
+            <section className="rounded-2xl border border-primary/10 bg-white p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-slate-800">Jenis Kerusakan</h2>
                 <span className="text-xs text-slate-500">{damageTypes.length} entri</span>
@@ -587,7 +587,7 @@ export default function MasterDataPage() {
                     setNewDamageType((prev) => ({ ...prev, name: event.target.value }))
                   }
                   placeholder="Tambah jenis kerusakan"
-                  className="rounded-xl border border-cyan-100 px-3 py-2 text-sm outline-none focus:border-cyan-400 lg:col-span-2"
+                  className="rounded-xl border border-primary/10 px-3 py-2 text-sm outline-none focus:border-primary/80 lg:col-span-2"
                 />
 
                 <select
@@ -598,7 +598,7 @@ export default function MasterDataPage() {
                       infrastructure_category_id: event.target.value,
                     }))
                   }
-                  className="rounded-xl border border-cyan-100 px-3 py-2 text-sm"
+                  className="rounded-xl border border-primary/10 px-3 py-2 text-sm"
                 >
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -607,7 +607,7 @@ export default function MasterDataPage() {
                   ))}
                 </select>
 
-                <label className="inline-flex items-center gap-2 rounded-xl border border-cyan-100 px-3 py-2 text-xs font-semibold text-slate-600">
+                <label className="inline-flex items-center gap-2 rounded-xl border border-primary/10 px-3 py-2 text-xs font-semibold text-slate-600">
                   <input
                     type="checkbox"
                     checked={newDamageType.is_default}
@@ -624,7 +624,7 @@ export default function MasterDataPage() {
                 <button
                   type="submit"
                   disabled={busyAction === 'create-damage-type' || categories.length === 0}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70"
                 >
                   <Plus size={15} />
                   Tambah
@@ -632,8 +632,8 @@ export default function MasterDataPage() {
               </form>
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-cyan-100 text-sm">
-                  <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
+                <table className="min-w-full divide-y divide-primary/20 text-sm">
+                  <thead className="bg-primary/5/70 text-left text-xs uppercase tracking-wide text-primary">
                     <tr>
                       <th className="px-3 py-2">Jenis Kerusakan</th>
                       <th className="px-3 py-2">Kategori</th>
@@ -642,7 +642,7 @@ export default function MasterDataPage() {
                       <th className="px-3 py-2 text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-cyan-50">
+                  <tbody className="divide-y divide-primary/10">
                     {damageTypes.map((item) => {
                       const isEditing = editingDamageTypeId === item.id;
                       const rowBusy = busyAction.includes(item.id);
@@ -659,7 +659,7 @@ export default function MasterDataPage() {
                                     name: event.target.value,
                                   }))
                                 }
-                                className="w-full rounded-lg border border-cyan-100 px-2 py-1.5"
+                                className="w-full rounded-lg border border-primary/10 px-2 py-1.5"
                               />
                             ) : (
                               <span className="font-semibold text-slate-700">{item.name}</span>
@@ -675,7 +675,7 @@ export default function MasterDataPage() {
                                     infrastructure_category_id: event.target.value,
                                   }))
                                 }
-                                className="w-full rounded-lg border border-cyan-100 px-2 py-1.5"
+                                className="w-full rounded-lg border border-primary/10 px-2 py-1.5"
                               >
                                 {categories.map((category) => (
                                   <option key={category.id} value={category.id}>
@@ -753,7 +753,7 @@ export default function MasterDataPage() {
                                   <button
                                     type="button"
                                     onClick={() => beginEditDamageType(item)}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2 py-1 text-xs font-semibold text-cyan-700"
+                                    className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-2 py-1 text-xs font-semibold text-primary"
                                   >
                                     <Pencil size={12} />
                                     Edit
@@ -785,7 +785,7 @@ export default function MasterDataPage() {
               </div>
             </section>
 
-            <section className="rounded-2xl border border-cyan-100 bg-white p-4 sm:p-5">
+            <section className="rounded-2xl border border-primary/10 bg-white p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-bold text-slate-800">Skala Prioritas</h2>
                 <span className="text-xs text-slate-500">{priorityScales.length} entri</span>
@@ -799,7 +799,7 @@ export default function MasterDataPage() {
                     setNewPriorityScale((prev) => ({ ...prev, name: event.target.value }))
                   }
                   placeholder="Nama skala prioritas"
-                  className="rounded-xl border border-cyan-100 px-3 py-2 text-sm outline-none focus:border-cyan-400 lg:col-span-2"
+                  className="rounded-xl border border-primary/10 px-3 py-2 text-sm outline-none focus:border-primary/80 lg:col-span-2"
                 />
 
                 <input
@@ -813,10 +813,10 @@ export default function MasterDataPage() {
                       level: Number(event.target.value),
                     }))
                   }
-                  className="rounded-xl border border-cyan-100 px-3 py-2 text-sm"
+                  className="rounded-xl border border-primary/10 px-3 py-2 text-sm"
                 />
 
-                <label className="inline-flex items-center gap-2 rounded-xl border border-cyan-100 px-3 py-2 text-xs font-semibold text-slate-600">
+                <label className="inline-flex items-center gap-2 rounded-xl border border-primary/10 px-3 py-2 text-xs font-semibold text-slate-600">
                   <input
                     type="checkbox"
                     checked={newPriorityScale.is_default}
@@ -833,7 +833,7 @@ export default function MasterDataPage() {
                 <button
                   type="submit"
                   disabled={busyAction === 'create-priority-scale'}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70"
                 >
                   <Plus size={15} />
                   Tambah
@@ -841,8 +841,8 @@ export default function MasterDataPage() {
               </form>
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-cyan-100 text-sm">
-                  <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
+                <table className="min-w-full divide-y divide-primary/20 text-sm">
+                  <thead className="bg-primary/5/70 text-left text-xs uppercase tracking-wide text-primary">
                     <tr>
                       <th className="px-3 py-2">Nama</th>
                       <th className="px-3 py-2">Level</th>
@@ -851,7 +851,7 @@ export default function MasterDataPage() {
                       <th className="px-3 py-2 text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-cyan-50">
+                  <tbody className="divide-y divide-primary/10">
                     {priorityScales.map((item) => {
                       const isEditing = editingPriorityScaleId === item.id;
                       const rowBusy = busyAction.includes(item.id);
@@ -868,7 +868,7 @@ export default function MasterDataPage() {
                                     name: event.target.value,
                                   }))
                                 }
-                                className="w-full rounded-lg border border-cyan-100 px-2 py-1.5"
+                                className="w-full rounded-lg border border-primary/10 px-2 py-1.5"
                               />
                             ) : (
                               <span className="font-semibold text-slate-700">{item.name}</span>
@@ -887,7 +887,7 @@ export default function MasterDataPage() {
                                     level: Number(event.target.value),
                                   }))
                                 }
-                                className="w-20 rounded-lg border border-cyan-100 px-2 py-1.5"
+                                className="w-20 rounded-lg border border-primary/10 px-2 py-1.5"
                               />
                             ) : (
                               item.level
@@ -959,7 +959,7 @@ export default function MasterDataPage() {
                                   <button
                                     type="button"
                                     onClick={() => beginEditPriorityScale(item)}
-                                    className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2 py-1 text-xs font-semibold text-cyan-700"
+                                    className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-2 py-1 text-xs font-semibold text-primary"
                                   >
                                     <Pencil size={12} />
                                     Edit
@@ -991,7 +991,7 @@ export default function MasterDataPage() {
               </div>
             </section>
 
-            <div className="rounded-2xl border border-cyan-100 bg-cyan-50/70 p-4 text-sm text-cyan-900">
+            <div className="rounded-2xl border border-primary/10 bg-primary/5/70 p-4 text-sm text-primary">
               <p className="mb-1 inline-flex items-center gap-2 font-semibold">
                 <ShieldCheck size={16} />
                 Catatan Integritas Data

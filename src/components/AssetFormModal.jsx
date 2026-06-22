@@ -133,7 +133,7 @@ export default function AssetFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-cyan-200 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+            className="rounded-xl border border-primary/20 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5"
             disabled={isSubmitting}
           >
             Tutup
@@ -149,7 +149,7 @@ export default function AssetFormModal({
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, name: event.target.value }))
               }
-              className="rounded-xl border border-cyan-100 bg-white dark:bg-slate-800 dark:border-cyan-700 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-cyan-400"
+              className="rounded-xl border border-primary/10 bg-white dark:bg-slate-800 dark:border-primary px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-primary/80"
               placeholder="Contoh: Jembatan Cempaka"
               required
             />
@@ -162,7 +162,7 @@ export default function AssetFormModal({
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, category: event.target.value }))
               }
-              className="rounded-xl border border-cyan-100 bg-white dark:bg-slate-800 dark:border-cyan-700 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-cyan-400"
+              className="rounded-xl border border-primary/10 bg-white dark:bg-slate-800 dark:border-primary px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-primary/80"
             >
               {resolvedCategoryOptions.map((category) => (
                 <option key={category} value={category}>
@@ -179,7 +179,7 @@ export default function AssetFormModal({
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, condition: event.target.value }))
               }
-              className="rounded-xl border border-cyan-100 bg-white dark:bg-slate-800 dark:border-cyan-700 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-cyan-400"
+              className="rounded-xl border border-primary/10 bg-white dark:bg-slate-800 dark:border-primary px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 shadow-sm outline-none transition focus:border-primary/80"
             >
               {CONDITION_OPTIONS.map((condition) => (
                 <option key={condition} value={condition}>
@@ -199,14 +199,14 @@ export default function AssetFormModal({
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, year_built: event.target.value }))
               }
-              className="rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-400"
+              className="rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-primary/80"
               required
             />
           </label>
 
           <div className="space-y-3 lg:col-span-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <MapPin size={16} className="text-cyan-600" />
+              <MapPin size={16} className="text-primary" />
               Lokasi Aset (klik peta)
             </div>
             <MapPicker
@@ -222,7 +222,7 @@ export default function AssetFormModal({
                   value={form.lat}
                   placeholder={String(DEFAULT_POSITION.lat)}
                   readOnly
-                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 dark:bg-cyan-800/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                  className="rounded-xl border border-primary/10 bg-primary/5/60 dark:bg-primary/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
                 />
               </label>
               <label className="flex flex-col gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -231,7 +231,7 @@ export default function AssetFormModal({
                   value={form.lng}
                   placeholder={String(DEFAULT_POSITION.lng)}
                   readOnly
-                  className="rounded-xl border border-cyan-100 bg-cyan-50/60 dark:bg-cyan-800/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                  className="rounded-xl border border-primary/10 bg-primary/5/60 dark:bg-primary/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
                 />
               </label>
             </div>
@@ -239,20 +239,20 @@ export default function AssetFormModal({
 
           <div className="lg:col-span-2">
             <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
-              <Upload size={16} className="text-cyan-600" />
+              <Upload size={16} className="text-primary" />
               Upload Foto
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
-              className="w-full rounded-xl border border-dashed border-cyan-200 bg-cyan-50/70 px-4 py-3 text-sm text-slate-700"
+              className="w-full rounded-xl border border-dashed border-primary/20 bg-primary/5/70 px-4 py-3 text-sm text-slate-700"
             />
             {photoPreview ? (
               <img
                 src={photoPreview}
                 alt="Preview aset"
-                className="mt-3 h-40 w-full rounded-2xl border border-cyan-100 object-cover sm:w-72"
+                className="mt-3 h-40 w-full rounded-2xl border border-primary/10 object-cover sm:w-72"
               />
             ) : null}
           </div>
@@ -267,7 +267,7 @@ export default function AssetFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-cyan-200 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+              className="rounded-xl border border-primary/20 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5"
               disabled={isSubmitting}
             >
               Batal
@@ -275,7 +275,7 @@ export default function AssetFormModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-xl bg-gradient-to-r from-primary to-primary px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmitting ? 'Menyimpan...' : isEditMode ? 'Simpan Perubahan' : 'Simpan Aset'}
             </button>

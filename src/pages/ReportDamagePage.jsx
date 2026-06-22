@@ -50,17 +50,17 @@ export default function ReportDamagePage() {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <section className="surface-panel hero-rise relative overflow-hidden rounded-3xl p-6 sm:p-10">
-        <div className="pointer-events-none absolute -right-20 -top-16 h-56 w-56 rounded-full bg-cyan-300/30 blur-3xl" />
-        <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-teal-300/25 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 -top-16 h-56 w-56 rounded-full bg-primary/30/30 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-primary/30/25 blur-3xl" />
 
         <div className="relative grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
               InfraTrack / Pelaporan Publik
             </p>
             <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
               Lapor Kerusakan Infrastruktur
-              <span className="block text-cyan-700">Lebih Cepat, Lebih Transparan</span>
+              <span className="block text-primary">Lebih Cepat, Lebih Transparan</span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
               Bantu pemerintah daerah menjaga kualitas infrastruktur publik. Kirim laporan
@@ -69,16 +69,16 @@ export default function ReportDamagePage() {
           </div>
 
           <div className="surface-card rounded-2xl p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Kenapa InfraTrack
             </p>
             <div className="mt-4 grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-xl bg-cyan-50 px-2 py-3">
-                <p className="text-lg font-extrabold text-cyan-800">24/7</p>
+              <div className="rounded-xl bg-primary/5 px-2 py-3">
+                <p className="text-lg font-extrabold text-primary">24/7</p>
                 <p className="mt-1 text-[11px] text-slate-600">Akses Pelaporan</p>
               </div>
-              <div className="rounded-xl bg-teal-50 px-2 py-3">
-                <p className="text-lg font-extrabold text-teal-800">Tanpa</p>
+              <div className="rounded-xl bg-primary/5 px-2 py-3">
+                <p className="text-lg font-extrabold text-primary">Tanpa</p>
                 <p className="mt-1 text-[11px] text-slate-600">Buat Akun</p>
               </div>
               <div className="rounded-xl bg-sky-50 px-2 py-3">
@@ -95,7 +95,7 @@ export default function ReportDamagePage() {
 
             return (
               <article key={item.title} className="surface-card rounded-2xl p-5">
-                <div className="inline-flex rounded-xl bg-cyan-100 p-2.5 text-cyan-700">
+                <div className="inline-flex rounded-xl bg-primary/10 p-2.5 text-primary">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h2 className="mt-4 text-lg font-bold text-slate-800">{item.title}</h2>
@@ -108,7 +108,7 @@ export default function ReportDamagePage() {
 
       <section className="mt-8 grid gap-8 xl:grid-cols-[1.25fr_0.75fr]">
         <div className="surface-panel rounded-3xl p-5 sm:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             Form Pelaporan
           </p>
           <h2 className="mt-2 text-2xl font-extrabold text-slate-800">Kirim Laporan Anda</h2>
@@ -117,7 +117,7 @@ export default function ReportDamagePage() {
             cepat.
           </p>
 
-          <div className="mt-6 rounded-2xl border border-cyan-100 bg-white/90 p-3 sm:p-5">
+          <div className="mt-6 rounded-2xl border border-primary/10 bg-white/90 p-3 sm:p-5">
             <DamageReportForm />
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function ReportDamagePage() {
             </p>
             <div className="mt-4 space-y-3">
               <div className="surface-card flex items-center gap-3 rounded-xl p-4">
-                <div className="rounded-lg bg-cyan-100 p-2 text-cyan-700">
+                <div className="rounded-lg bg-primary/10 p-2 text-primary">
                   <Phone className="h-4 w-4" />
                 </div>
                 <div>

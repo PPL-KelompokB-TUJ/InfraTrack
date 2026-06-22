@@ -174,14 +174,14 @@ export default function NotificationsPage() {
       case 'task_completed': return <CheckCircle2 className="text-emerald-500" size={24} />;
       case 'preventive_overdue': return <Clock className="text-red-500" size={24} />;
       case 'low_stock': return <PackageMinus className="text-rose-600" size={24} />;
-      default: return <Info className="text-cyan-500" size={24} />;
+      default: return <Info className="text-primary" size={24} />;
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
     <div className="max-w-4xl mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-cyan-100 text-cyan-600 rounded-xl">
+          <div className="p-3 bg-primary/10 text-primary rounded-xl">
             <Bell size={28} />
           </div>
           <div>
@@ -209,7 +209,7 @@ export default function NotificationsPage() {
                 if (isSelectionMode) setSelectedIds([]);
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                isSelectionMode ? 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                isSelectionMode ? 'bg-primary/10 text-primary hover:bg-primary/20' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
               <ListChecks size={18} />
@@ -240,14 +240,14 @@ export default function NotificationsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="glass-card rounded-3xl border border-slate-200 overflow-hidden">
         {isSelectionMode && notifications.length > 0 && (
-          <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex items-center gap-3">
+          <div className="bg-primary/5 px-5 py-3 border-b border-slate-200 flex items-center gap-3">
             <input 
               type="checkbox" 
               checked={notifications.length > 0 && selectedIds.length === notifications.length}
               onChange={toggleAllSelection}
-              className="w-4 h-4 text-cyan-600 rounded border-slate-300 focus:ring-cyan-500 cursor-pointer"
+              className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary cursor-pointer"
             />
             <span className="text-sm font-semibold text-slate-600">Pilih Semua</span>
           </div>
@@ -266,8 +266,8 @@ export default function NotificationsPage() {
                 key={notif.id} 
                 onClick={() => handleNotificationClick(notif)}
                 className={`px-5 py-4 flex gap-4 items-start transition-all cursor-pointer hover:shadow-sm ${
-                  selectedIds.includes(notif.id) ? 'bg-cyan-50/50' : 
-                  notif.is_read ? 'bg-white hover:bg-slate-50' : 'bg-cyan-50/20 hover:bg-cyan-50/60'
+                  selectedIds.includes(notif.id) ? 'bg-primary/5/50' : 
+                  notif.is_read ? 'bg-white hover:bg-primary/5' : 'bg-primary/5/20 hover:bg-primary/5/60'
                 }`}
               >
                 <div className="flex-shrink-0 mt-1 flex items-center gap-3">
@@ -277,7 +277,7 @@ export default function NotificationsPage() {
                         type="checkbox" 
                         checked={selectedIds.includes(notif.id)}
                         onChange={() => toggleSelection(notif.id)}
-                        className="w-4 h-4 text-cyan-600 rounded border-slate-300 focus:ring-cyan-500 cursor-pointer"
+                        className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary cursor-pointer"
                       />
                     </div>
                   )}
@@ -301,7 +301,7 @@ export default function NotificationsPage() {
                 {!isSelectionMode && !notif.is_read && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); markAsRead(notif.id); }}
-                    className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:text-cyan-600 hover:border-cyan-300 transition-colors tooltip-trigger relative group"
+                    className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center glass-card border-none text-slate-400 hover:text-primary hover:border-primary/30 transition-colors tooltip-trigger relative group"
                     title="Tandai dibaca"
                   >
                     <Check size={16} />
@@ -317,7 +317,7 @@ export default function NotificationsPage() {
       {viewingNotification && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
           <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden animate-slide-up">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-primary/5">
               <div className="flex items-center gap-3">
                 {getIcon(viewingNotification.type)}
                 <h3 className="text-lg font-semibold text-slate-800">Detail Pesan</h3>
@@ -341,7 +341,7 @@ export default function NotificationsPage() {
                 </div>
               </div>
               
-              <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 mb-8 overflow-auto">
+              <div className="bg-primary/5 rounded-xl p-5 border border-slate-100 mb-8 overflow-auto">
                 <p className="text-slate-700 leading-relaxed whitespace-pre-wrap font-mono text-sm">
                   {viewingNotification.message}
                 </p>
@@ -350,14 +350,14 @@ export default function NotificationsPage() {
               <div className="flex justify-end gap-3">
                 <button 
                   onClick={() => setViewingNotification(null)}
-                  className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="px-5 py-2.5 text-sm font-semibold text-slate-600 glass-card border-none rounded-lg hover:bg-primary/5 transition-colors"
                 >
                   Tutup
                 </button>
                 {viewingNotification.type !== 'task_cancelled' && (
                   <button 
                     onClick={() => handleActionClick(viewingNotification)}
-                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors shadow-sm"
+                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary rounded-lg transition-colors shadow-sm"
                   >
                     {viewingNotification.type === 'new_report' ? 'Lihat Detail Laporan' : 
                      (viewingNotification.type === 'preventive_overdue' || viewingNotification.type === 'preventive_reminder') ? 'Lihat Jadwal Preventif' : 

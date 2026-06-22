@@ -201,7 +201,7 @@ export default function BudgetMonitoringPage() {
   });
 
   return (
-    <main className="min-h-screen bg-slate-50/50 p-6">
+    <main className="min-h-screen bg-primary/5/50 p-6">
       {/* Title Header */}
       <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
@@ -211,7 +211,7 @@ export default function BudgetMonitoringPage() {
         <button 
           onClick={loadBudgetData} 
           disabled={isLoading}
-          className="flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl glass-card border-none px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-primary/5 active:scale-95 disabled:opacity-50"
         >
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh Data
@@ -222,7 +222,7 @@ export default function BudgetMonitoringPage() {
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 mb-6">
         {/* Total Estimasi */}
         <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm flex items-center gap-4">
-          <div className="rounded-2xl bg-cyan-50 p-3 text-cyan-600">
+          <div className="rounded-2xl bg-primary/5 p-3 text-primary">
             <DollarSign className="h-6 w-6" />
           </div>
           <div>
@@ -299,7 +299,7 @@ export default function BudgetMonitoringPage() {
         <div className="h-[320px] w-full">
           {isLoading ? (
             <div className="flex h-full w-full items-center justify-center">
-              <RefreshCw className="h-8 w-8 animate-spin text-cyan-500" />
+              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : chartData.length === 0 ? (
             <div className="flex h-full w-full flex-col items-center justify-center text-slate-400">
@@ -333,8 +333,8 @@ export default function BudgetMonitoringPage() {
                   contentStyle={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)' }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Bar name="Estimasi Biaya" dataKey="estimated" fill="#22d3ee" radius={[6, 6, 0, 0]} />
-                <Bar name="Realisasi Biaya" dataKey="actual" fill="#10b981" radius={[6, 6, 0, 0]} />
+                <Bar name="Estimasi Biaya" dataKey="estimated" fill="#805062" radius={[6, 6, 0, 0]} />
+                <Bar name="Realisasi Biaya" dataKey="actual" fill="#f2b6cb" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -362,7 +362,7 @@ export default function BudgetMonitoringPage() {
                 {chartData.map((d, index) => {
                   const absorption = d.estimated > 0 ? (d.actual / d.estimated) * 100 : 0;
                   return (
-                    <tr key={index} className="border-b border-slate-50 hover:bg-slate-50/50">
+                    <tr key={index} className="border-b border-slate-50 hover:bg-primary/5/50">
                       <td className="py-3 font-semibold text-slate-700">{formatPeriod(d.period)}</td>
                       <td className="py-3 text-right text-slate-600">{formatCurrency(d.estimated)}</td>
                       <td className="py-3 text-right text-slate-600">{formatCurrency(d.actual)}</td>
@@ -402,12 +402,12 @@ export default function BudgetMonitoringPage() {
                   placeholder="Cari tiket/aset..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2 text-xs outline-none transition focus:border-cyan-400 focus:bg-white"
+                  className="rounded-xl border border-slate-200 bg-primary/5/50 pl-10 pr-4 py-2 text-xs outline-none transition focus:border-primary/80 focus:bg-white"
                 />
               </div>
 
               {/* Status filter */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/50 px-2.5 py-1.5">
+              <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-primary/5/50 px-2.5 py-1.5">
                 <Filter className="h-3.5 w-3.5 text-slate-400" />
                 <select
                   value={statusFilter}
@@ -444,8 +444,8 @@ export default function BudgetMonitoringPage() {
                   const diff = act !== null ? est - act : null;
 
                   return (
-                    <tr key={b.id} className="border-b border-slate-50 hover:bg-slate-50/30 transition-colors">
-                      <td className="py-3 pl-2 font-mono font-bold text-cyan-600">
+                    <tr key={b.id} className="border-b border-slate-50 hover:bg-primary/5/30 transition-colors">
+                      <td className="py-3 pl-2 font-mono font-bold text-primary">
                         {b.task?.report?.ticket_code || 'N/A'}
                       </td>
                       <td className="py-3">
@@ -457,7 +457,7 @@ export default function BudgetMonitoringPage() {
                           b.task?.status === 'completed' ? 'bg-emerald-50 text-emerald-700' :
                           b.task?.status === 'in_progress' ? 'bg-amber-50 text-amber-700' :
                           b.task?.status === 'cancelled' ? 'bg-rose-50 text-rose-700' :
-                          'bg-cyan-50 text-cyan-700'
+                          'bg-primary/5 text-primary'
                         }`}>
                           {b.task?.status === 'completed' ? 'Selesai' :
                            b.task?.status === 'in_progress' ? 'Dikerjakan' :

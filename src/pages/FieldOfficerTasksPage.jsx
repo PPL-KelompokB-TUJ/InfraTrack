@@ -199,7 +199,7 @@ export default function FieldOfficerTasksPage() {
       <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex h-96 items-center justify-center">
           <div className="text-center">
-            <Loader className="mx-auto mb-4 animate-spin text-cyan-500" size={32} />
+            <Loader className="mx-auto mb-4 animate-spin text-primary" size={32} />
             <p className="text-slate-600">Memuat penugasan...</p>
           </div>
         </div>
@@ -248,7 +248,7 @@ export default function FieldOfficerTasksPage() {
 
       {/* Tasks List */}
       {tasks.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-12 text-center">
+        <div className="rounded-2xl border border-slate-200 bg-primary/5 px-6 py-12 text-center">
           <AlertCircle size={32} className="mx-auto mb-4 text-slate-400" />
           <p className="text-slate-600">Tidak ada penugasan untuk Anda saat ini</p>
         </div>
@@ -262,7 +262,7 @@ export default function FieldOfficerTasksPage() {
               <button
                 key={task.id}
                 onClick={() => handleTaskClick(task)}
-                className="w-full rounded-2xl border-2 border-slate-100 bg-white p-4 text-left transition hover:border-cyan-300 hover:shadow-md sm:p-6"
+                className="w-full rounded-2xl border-2 border-slate-100 bg-white p-4 text-left transition hover:border-primary/30 hover:shadow-md sm:p-6"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   {/* Left side - Task info */}
@@ -328,7 +328,7 @@ export default function FieldOfficerTasksPage() {
             </div>
 
             {/* Task Info */}
-            <div className="mb-6 rounded-2xl bg-slate-50 p-4">
+            <div className="mb-6 rounded-2xl bg-primary/5 p-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-semibold text-slate-500 uppercase">Aset</p>
@@ -357,7 +357,7 @@ export default function FieldOfficerTasksPage() {
             {taskDetails.instructions && (
               <div className="mb-6">
                 <p className="text-sm font-semibold text-slate-700">Instruksi Kerja</p>
-                <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="mt-2 rounded-xl border border-slate-200 bg-primary/5 p-4">
                   <p className="text-sm text-slate-700">{taskDetails.instructions}</p>
                 </div>
               </div>
@@ -370,7 +370,7 @@ export default function FieldOfficerTasksPage() {
                 <button
                   type="button"
                   onClick={() => setActivePhotoUrl(taskDetails.report.photo_url)}
-                  className="group relative block overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="group relative block overflow-hidden rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <img
                     src={taskDetails.report.photo_url}
@@ -416,7 +416,7 @@ export default function FieldOfficerTasksPage() {
                 </div>
               </div>
             ) : taskDetails.status === 'pending' || taskDetails.status === 'cancelled' || taskDetails.status === 'completed' ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+              <div className="rounded-2xl border border-slate-200 bg-primary/5 p-4 text-center">
                 <AlertCircle size={24} className="mx-auto mb-2 text-slate-500" />
                 <p className="text-sm font-semibold text-slate-700">
                   {taskDetails.status === 'pending'
@@ -444,7 +444,7 @@ export default function FieldOfficerTasksPage() {
                   <button
                     type="button"
                     onClick={() => setShowDetailModal(false)}
-                    className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-700 hover:bg-primary/5 transition"
                   >
                     Nanti Saja
                   </button>
@@ -469,7 +469,7 @@ export default function FieldOfficerTasksPage() {
                       onChange={(e) => setUpdateNotes(e.target.value)}
                       placeholder="Catat progress saat ini..."
                       rows={3}
-                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
                     />
                   </div>
 
@@ -496,7 +496,7 @@ export default function FieldOfficerTasksPage() {
                           </button>
                         </div>
                       ) : (
-                        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 transition hover:border-cyan-400">
+                        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-primary/5 px-4 py-8 transition hover:border-primary/80">
                           <Upload size={20} className="text-slate-600" />
                           <span className="text-sm font-medium text-slate-700">Pilih foto</span>
                           <input
@@ -531,7 +531,7 @@ export default function FieldOfficerTasksPage() {
                 </form>
 
                 {showCompleteModal && (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 mt-4 shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="rounded-2xl border border-slate-200 bg-primary/5 p-6 mt-4 shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <form onSubmit={(e) => handleUpdateStatus(e, 'completed')} className="text-left">
                       <div className="mb-4">
                         <label className="block text-sm font-semibold text-slate-700">Biaya Lainnya (Rp) (Opsional)</label>
@@ -582,7 +582,7 @@ export default function FieldOfficerTasksPage() {
                 <h3 className="text-sm font-semibold text-slate-700">Riwayat Progress</h3>
                 <div className="mt-4 space-y-3">
                   {taskDetails.progressHistory.map((progress) => (
-                    <div key={progress.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <div key={progress.id} className="rounded-xl border border-slate-200 bg-primary/5 p-3">
                       <div className="flex items-center justify-between">
                         <span className={`text-xs font-semibold text-${getStatusColor(progress.status)}-700 uppercase`}>
                           {getStatusLabel(progress.status)}
@@ -598,7 +598,7 @@ export default function FieldOfficerTasksPage() {
                         <button
                           type="button"
                           onClick={() => setActivePhotoUrl(progress.photo_url)}
-                          className="mt-2 inline-flex items-center gap-1 text-xs text-cyan-600 hover:underline"
+                          className="mt-2 inline-flex items-center gap-1 text-xs text-primary hover:underline"
                         >
                           <ImageIcon size={12} />
                           Lihat Foto

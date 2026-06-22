@@ -98,7 +98,7 @@ export default function UpdateTaskStatusForm({ task, onClose, onSubmit, isLoadin
         {/* Content */}
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Task Info */}
-          <div className="bg-slate-50 p-3 rounded-lg">
+          <div className="bg-primary/5 p-3 rounded-lg">
             <div className="text-sm text-slate-600">Aset: {task?.asset?.name}</div>
             <div className="text-sm text-slate-600">Tiket: {task?.report?.ticket_code}</div>
           </div>
@@ -109,7 +109,7 @@ export default function UpdateTaskStatusForm({ task, onClose, onSubmit, isLoadin
               Status Pekerjaan
             </label>
             <div className="space-y-2">
-              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-primary/5">
                 <input
                   type="radio"
                   name="status"
@@ -122,7 +122,7 @@ export default function UpdateTaskStatusForm({ task, onClose, onSubmit, isLoadin
                 <span className="ml-3 text-sm text-slate-700">Mulai Dikerjakan</span>
               </label>
 
-              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-primary/5">
                 <input
                   type="radio"
                   name="status"
@@ -135,7 +135,7 @@ export default function UpdateTaskStatusForm({ task, onClose, onSubmit, isLoadin
                 <span className="ml-3 text-sm text-slate-700">Dalam Progres</span>
               </label>
 
-              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-slate-50">
+              <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-primary/5">
                 <input
                   type="radio"
                   name="status"
@@ -162,7 +162,7 @@ export default function UpdateTaskStatusForm({ task, onClose, onSubmit, isLoadin
               disabled={isLoading}
               placeholder="Jelaskan kondisi pekerjaan, masalah yang dihadapi, atau hasil perbaikan..."
               rows={4}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -189,7 +189,7 @@ export default function UpdateTaskStatusForm({ task, onClose, onSubmit, isLoadin
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 disabled:opacity-50">
+              <label className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-primary/5 disabled:opacity-50">
                 <Camera className="text-slate-400 mb-2" size={24} />
                 <span className="text-sm text-slate-600">Klik untuk unggah foto</span>
                 <span className="text-xs text-slate-500 mt-1">Maksimal 5MB</span>
@@ -226,14 +226,14 @@ export default function UpdateTaskStatusForm({ task, onClose, onSubmit, isLoadin
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>

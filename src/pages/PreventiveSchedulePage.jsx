@@ -23,17 +23,17 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 const localizer = momentLocalizer(moment);
 
 const STATUS_COLORS = {
-  scheduled: { bg: '#dcfce7', border: '#16a34a', text: '#15803d' },
-  overdue:   { bg: '#fee2e2', border: '#dc2626', text: '#b91c1c' },
-  completed: { bg: '#f1f5f9', border: '#94a3b8', text: '#64748b' },
-  cancelled: { bg: '#f1f5f9', border: '#cbd5e1', text: '#94a3b8' },
+  scheduled: { bg: '#ffd9e6', border: '#805062', text: '#522b3b' },
+  overdue:   { bg: '#ffdad6', border: '#ba1a1a', text: '#410002' },
+  completed: { bg: '#f3e1e6', border: '#705760', text: '#46333c' },
+  cancelled: { bg: '#ebdce0', border: '#857379', text: '#5b4a50' },
 };
 
 const statusStyles = {
-  scheduled: 'border-emerald-200 bg-emerald-100 text-emerald-700',
-  overdue: 'border-rose-200 bg-rose-100 text-rose-700',
-  completed: 'border-slate-200 bg-slate-100 text-slate-600',
-  cancelled: 'border-slate-200 bg-slate-50 text-slate-400',
+  scheduled: 'border-primary/20 bg-primary-container text-on-primary-container',
+  overdue: 'border-error/20 bg-error-container text-on-error-container',
+  completed: 'border-secondary/20 bg-secondary-container text-on-secondary-container',
+  cancelled: 'border-surface-variant bg-surface-variant/50 text-on-surface-variant',
 };
 const statusLabels = {
   scheduled: 'Terjadwal',
@@ -43,10 +43,10 @@ const statusLabels = {
 };
 
 const STATUS_BADGE = {
-  scheduled: 'bg-[#dcfce7] text-[#15803d]',
-  overdue:   'bg-[#fee2e2] text-[#b91c1c]',
-  completed: 'bg-[#f1f5f9] text-[#64748b]',
-  cancelled: 'bg-[#f1f5f9] text-[#94a3b8]',
+  scheduled: 'bg-primary-container text-on-primary-container',
+  overdue:   'bg-error-container text-on-error-container',
+  completed: 'bg-secondary-container text-on-secondary-container',
+  cancelled: 'bg-surface-variant text-on-surface-variant',
 };
 
 function fmtDate(d) {
@@ -234,7 +234,7 @@ export default function PreventiveSchedulePage() {
           <p className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1">
             <span>Ruang Kerja</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-cyan-700">Jadwal Preventif</span>
+            <span className="text-primary">Jadwal Preventif</span>
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
             Jadwal Pemeliharaan Preventif
@@ -248,12 +248,12 @@ export default function PreventiveSchedulePage() {
               placeholder="Cari jadwal..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all bg-white"
+              className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
             />
           </div>
           <button
             onClick={() => setFormModal({ open: true, editData: null })}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-[#006A71] hover:bg-[#005a60] px-4 py-2 text-sm font-semibold text-white transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-primary hover:brightness-90 px-4 py-2 text-sm font-semibold text-white transition-colors"
           >
             <Plus className="h-4 w-4" />
             Tambah Jadwal Baru
@@ -262,12 +262,12 @@ export default function PreventiveSchedulePage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="glass-card border-none rounded-xl p-4 mb-6 flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Aset</label>
             <select value={assetFilter} onChange={(e) => setAssetFilter(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+              className="glass-card border-none rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-primary">
               <option value="">Semua Aset</option>
               {assets.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -277,7 +277,7 @@ export default function PreventiveSchedulePage() {
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Status</label>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+              className="glass-card border-none rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-primary">
               <option value="">Semua Status</option>
               <option value="scheduled">Terjadwal</option>
               <option value="overdue">Overdue</option>
@@ -287,22 +287,22 @@ export default function PreventiveSchedulePage() {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Frekuensi</label>
-            <select className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+            <select className="glass-card border-none rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-primary">
               <option value="">Semua Frekuensi</option>
             </select>
           </div>
         </div>
         <div className="flex bg-[#f1f5f9] p-1 rounded-lg border border-slate-200">
           <button onClick={() => setCalendarView('month')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'month' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'month' ? 'glass-card shadow-md text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
             Bulanan
           </button>
           <button onClick={() => setCalendarView('week')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'week' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'week' ? 'glass-card shadow-md text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
             Mingguan
           </button>
           <button onClick={() => setCalendarView('day')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'day' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'day' ? 'glass-card shadow-md text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
             Harian
           </button>
         </div>
@@ -312,19 +312,19 @@ export default function PreventiveSchedulePage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Calendar */}
         <div className="lg:col-span-8 xl:col-span-9">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-[700px] w-full flex flex-col">
+          <div className="glass-card rounded- border-none p-6 shadow-sm h-[700px] w-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-slate-800">
                 {moment(currentDate).format('MMMM YYYY')}
               </h2>
               <div className="flex items-center gap-2 text-slate-700">
-                <button onClick={() => handleNavigate('TODAY')} className="px-3 py-1 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors border border-cyan-200 mr-2">
+                <button onClick={() => handleNavigate('TODAY')} className="px-3 py-1 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors border border-primary/20 mr-2">
                   Hari Ini
                 </button>
-                <button onClick={() => handleNavigate('PREV')} className="p-1 hover:text-cyan-700 transition font-bold">
+                <button onClick={() => handleNavigate('PREV')} className="p-1 hover:text-primary transition font-bold">
                   <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                 </button>
-                <button onClick={() => handleNavigate('NEXT')} className="p-1 hover:text-cyan-700 transition font-bold">
+                <button onClick={() => handleNavigate('NEXT')} className="p-1 hover:text-primary transition font-bold">
                   <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                 </button>
               </div>
@@ -370,7 +370,7 @@ export default function PreventiveSchedulePage() {
               .custom-calendar-theme .rbc-date-cell { padding: 8px; font-weight: 500; color: #475569; text-align: left; font-size: 12px; }
               .custom-calendar-theme .rbc-off-range-bg { background-color: #ffffff; }
               .custom-calendar-theme .rbc-today { background-color: #ffffff; }
-              .custom-calendar-theme .rbc-today .rbc-date-cell { color: #0369a1; font-weight: 800; }
+              .custom-calendar-theme .rbc-today .rbc-date-cell { color: #805062; font-weight: 800; }
               .custom-calendar-theme .rbc-event { box-shadow: none; margin-bottom: 2px; }
               .custom-calendar-theme .rbc-row-segment { padding: 0 4px; }
             `}</style>
@@ -379,7 +379,7 @@ export default function PreventiveSchedulePage() {
 
         {/* Sidebar: Upcoming Schedules */}
         <div className="lg:col-span-4 xl:col-span-3">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[700px] flex flex-col">
+          <div className="glass-card rounded- border-none shadow-sm overflow-hidden h-[700px] flex flex-col">
             <div className="p-5 border-b border-slate-100">
               <h2 className="text-lg font-bold text-slate-800">Jadwal Mendatang</h2>
               <p className="text-xs text-slate-500 mt-1">Daftar pemeliharaan preventif terdekat</p>
@@ -387,7 +387,7 @@ export default function PreventiveSchedulePage() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {upcomingSchedules.length === 0 ? (
                 <div className="text-center py-10">
-                  <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-3">
                     <CheckCircle2 className="w-6 h-6 text-slate-300" />
                   </div>
                   <p className="text-sm font-medium text-slate-600">Tidak ada jadwal mendatang</p>
@@ -398,7 +398,7 @@ export default function PreventiveSchedulePage() {
                   <div
                     key={s.id}
                     onClick={() => openDetail(s)}
-                    className="bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-cyan-300 hover:shadow-sm transition-all"
+                    className="glass-card border-none rounded-xl p-4 cursor-pointer hover:border-primary/30 hover:shadow-sm transition-all"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${STATUS_BADGE[s.status]}`}>
@@ -424,7 +424,7 @@ export default function PreventiveSchedulePage() {
                 ))
               )}
             </div>
-            <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+            <div className="p-4 border-t border-slate-100 bg-primary/5/50">
               <button className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors">
                 Lihat Semua Jadwal
               </button>
@@ -437,10 +437,10 @@ export default function PreventiveSchedulePage() {
       {detailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8">
           <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-xl overflow-auto rounded-3xl">
-            <div className="flex items-center justify-between border-b border-cyan-100 px-6 py-5">
+            <div className="flex items-center justify-between border-b border-primary/10 px-6 py-5">
               <h2 className="text-xl font-extrabold text-slate-800">Detail Jadwal Preventif</h2>
               <button type="button" onClick={() => setDetailModal(null)}
-                className="rounded-lg p-1 text-slate-400 transition hover:bg-cyan-50 hover:text-slate-600">
+                className="rounded-lg p-1 text-slate-400 transition hover:bg-primary/5 hover:text-slate-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -482,7 +482,7 @@ export default function PreventiveSchedulePage() {
                 </div>
               )}
             </div>
-            <div className="flex flex-wrap gap-2 border-t border-cyan-100 px-6 py-4">
+            <div className="flex flex-wrap gap-2 border-t border-primary/10 px-6 py-4">
               {(detailModal.status === 'scheduled' || detailModal.status === 'overdue') && (
                 <>
                   <button type="button" onClick={() => handleComplete(detailModal.id)}
@@ -493,7 +493,7 @@ export default function PreventiveSchedulePage() {
                     setDetailModal(null);
                     setFormModal({ open: true, editData: detailModal });
                   }}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-cyan-200 px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50">
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-primary/20 px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/5">
                     <Edit3 className="h-4 w-4" /> Edit
                   </button>
                   <button type="button" onClick={() => handleCancel(detailModal.id)}
@@ -509,7 +509,7 @@ export default function PreventiveSchedulePage() {
                 <Trash2 className="h-4 w-4" /> Hapus
               </button>
               <button type="button" onClick={() => setDetailModal(null)}
-                className="ml-auto rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                className="ml-auto rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-primary/5">
                 Tutup
               </button>
             </div>

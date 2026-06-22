@@ -32,7 +32,7 @@ export default function Sidebar({
       {/* Mobile Menu Toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-lg bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 shadow-md hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors"
+        className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-lg bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 shadow-md hover:bg-primary/5 dark:hover:bg-gray-700 transition-colors"
       >
         {isOpen ? <X size={20} className="text-slate-600 dark:text-slate-300" /> : <Menu size={20} className="text-slate-600 dark:text-slate-300" />}
       </button>
@@ -54,10 +54,10 @@ export default function Sidebar({
         {/* Logo Section */}
         <div 
           onClick={handleLogoClick}
-          className="p-4 border-b border-slate-200 dark:border-gray-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+          className="p-4 border-b border-slate-200 dark:border-gray-700 cursor-pointer hover:bg-primary/5 dark:hover:bg-gray-800 transition-colors"
         >
           <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary text-white">
               <Building2 size={20} />
             </div>
             <div>
@@ -98,7 +98,7 @@ export default function Sidebar({
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md'
+                      ? 'bg-gradient-to-r from-primary to-primary text-white shadow-md'
                       : isDisabled
                       ? 'text-slate-400 dark:text-slate-600 cursor-not-allowed'
                       : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-700'
@@ -143,7 +143,7 @@ export default function Sidebar({
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md'
+                      ? 'bg-gradient-to-r from-primary to-primary text-white shadow-md'
                       : isDisabled
                       ? 'text-slate-400 dark:text-slate-600 cursor-not-allowed'
                       : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-700'
@@ -204,7 +204,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={onOpenLoginModal}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-teal-500 px-3 py-2.5 text-xs font-semibold text-white shadow-md transition hover:brightness-110"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-primary to-primary px-3 py-2.5 text-xs font-semibold text-white shadow-md transition hover:brightness-110"
             >
               <ShieldCheck size={14} />
               Login Admin
@@ -212,7 +212,7 @@ export default function Sidebar({
           )}
 
           {/* Role Info */}
-          <div className="px-3 py-2 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-200 dark:border-gray-700">
+          <div className="px-3 py-2 bg-primary/5 dark:bg-gray-800 rounded-lg border border-slate-200 dark:border-gray-700">
             <p className="text-xs text-slate-600 dark:text-slate-400">Role</p>
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
               {isAdmin ? '👤 Admin' : isFieldOfficer(currentUser) ? '🚗 Petugas' : '👥 Publik'}

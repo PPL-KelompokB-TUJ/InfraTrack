@@ -82,13 +82,13 @@ export default function PreventiveScheduleFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4 py-6">
-      <div className="glass-panel fade-slide-in w-full max-w-lg rounded-2xl bg-white border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-cyan-100 px-6 py-4">
+      <div className="glass-panel fade-slide-in w-full max-w-lg rounded-2xl glass-card border-none shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-primary/10 px-6 py-4">
           <h2 className="text-xl font-extrabold text-slate-800">
             {editData ? 'Edit Jadwal Preventif' : 'Buat Jadwal Preventif'}
           </h2>
           <button type="button" onClick={onClose} disabled={isSaving}
-            className="rounded-lg p-1 text-slate-400 transition hover:bg-cyan-50 hover:text-slate-600">
+            className="rounded-lg p-1 text-slate-400 transition hover:bg-primary/5 hover:text-slate-600">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -98,7 +98,7 @@ export default function PreventiveScheduleFormModal({
           <label className="block text-sm font-semibold text-slate-700">
             Aset
             <select value={form.asset_id} onChange={(e) => handleChange('asset_id', e.target.value)}
-              required className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100">
+              required className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10">
               <option value="">Pilih Aset...</option>
               {assets.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -111,7 +111,7 @@ export default function PreventiveScheduleFormModal({
             Judul Jadwal
             <input type="text" value={form.title} onChange={(e) => handleChange('title', e.target.value)}
               required placeholder="Contoh: Inspeksi Rutin Jembatan"
-              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
+              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
           </label>
 
           {/* Frequency */}
@@ -123,7 +123,7 @@ export default function PreventiveScheduleFormModal({
                   onClick={() => handleFrequencyPreset(p.value)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                     (!useCustomFreq && form.frequency_days === p.value) || (useCustomFreq && p.value === 0)
-                      ? 'bg-cyan-500 text-white ring-2 ring-cyan-300'
+                      ? 'bg-primary text-white ring-2 ring-primary/30'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}>
                   {p.label}
@@ -137,7 +137,7 @@ export default function PreventiveScheduleFormModal({
               Jumlah Hari (Kustom)
               <input type="number" min="1" value={form.frequency_days}
                 onChange={(e) => handleChange('frequency_days', Number(e.target.value))}
-                required className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
+                required className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
             </label>
           )}
 
@@ -145,14 +145,14 @@ export default function PreventiveScheduleFormModal({
           <label className="block text-sm font-semibold text-slate-700">
             Terakhir Dilakukan
             <input type="date" value={form.last_done} onChange={(e) => handleChange('last_done', e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
+              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
           </label>
 
           {/* Next Due */}
           <label className="block text-sm font-semibold text-slate-700">
             Jatuh Tempo Berikutnya
             <input type="date" value={form.next_due} onChange={(e) => handleChange('next_due', e.target.value)}
-              required className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
+              required className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
           </label>
 
           {/* Description */}
@@ -160,7 +160,7 @@ export default function PreventiveScheduleFormModal({
             Deskripsi
             <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)}
               rows={3} placeholder="Deskripsi pekerjaan pemeliharaan..."
-              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 resize-none" />
+              className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none" />
           </label>
 
           {/* Actions */}
@@ -170,7 +170,7 @@ export default function PreventiveScheduleFormModal({
               Batal
             </button>
             <button type="submit" disabled={isSaving}
-              className="rounded-lg bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70">
+              className="rounded-lg bg-gradient-to-r from-primary to-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-70">
               {isSaving ? 'Menyimpan...' : editData ? 'Simpan Perubahan' : 'Buat Jadwal'}
             </button>
           </div>

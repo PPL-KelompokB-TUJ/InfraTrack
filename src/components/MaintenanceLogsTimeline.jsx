@@ -66,7 +66,7 @@ export default function MaintenanceLogsTimeline({ logs, isLoading = false }) {
             <div className="flex gap-4">
               {/* Icon */}
               <div
-                className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center border-2 ${statusColors[log.status] || 'text-slate-600 bg-slate-50 border-slate-200'}`}
+                className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center border-2 ${statusColors[log.status] || 'text-slate-600 bg-primary/5 border-slate-200'}`}
               >
                 <StatusIcon size={20} />
               </div>
@@ -90,7 +90,7 @@ export default function MaintenanceLogsTimeline({ logs, isLoading = false }) {
 
                 {/* Notes */}
                 {log.notes && (
-                  <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                  <div className="mt-3 p-3 bg-primary/5 rounded-lg border border-slate-200">
                     <p className="text-sm text-slate-700">{log.notes}</p>
                   </div>
                 )}

@@ -90,7 +90,7 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-cyan-200 border-t-cyan-600"></div>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Memuat dashboard...</p>
         </div>
       </main>
@@ -118,8 +118,8 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
               <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Aset</p>
               <p className="text-3xl font-bold text-slate-900 dark:text-slate-100 mt-2">{stats.totalAssets}</p>
             </div>
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-cyan-100">
-              <Building2 size={28} className="text-cyan-700" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10">
+              <Building2 size={28} className="text-primary" />
             </div>
           </div>
         </div>
@@ -188,9 +188,9 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
               </thead>
               <tbody>
                 {recentReports.map((report) => (
-                  <tr key={report.id} className="border-b border-slate-100 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700/50">
+                  <tr key={report.id} className="border-b border-slate-100 dark:border-gray-700 hover:bg-primary/5 dark:hover:bg-gray-700/50">
                     <td className="py-3 px-4">
-                      <span className="font-mono font-semibold text-cyan-700 dark:text-cyan-400">{report.ticket_code}</span>
+                      <span className="font-mono font-semibold text-primary dark:text-primary/80">{report.ticket_code}</span>
                     </td>
                     <td className="py-3 px-4 text-slate-700 dark:text-slate-300">{report.damage_type_name}</td>
                     <td className="py-3 px-4 text-slate-600 dark:text-slate-400 truncate max-w-xs">{report.location_description}</td>
@@ -203,7 +203,7 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
                     <td className="py-3 px-4">
                       <button
                         onClick={() => handleViewDetail(report)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 hover:bg-cyan-200 font-semibold text-sm transition-colors"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-semibold text-sm transition-colors"
                       >
                         <Eye size={16} />
                         Detail
@@ -325,10 +325,10 @@ function ReportDetailModal({ report, onClose }) {
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-6 flex items-center justify-between">
+        <div className="sticky top-0 bg-gradient-to-r from-primary to-primary px-6 py-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">Detail Laporan</h2>
-            <p className="text-cyan-100 text-sm mt-1">{report.ticket_code}</p>
+            <p className="text-primary/10 text-sm mt-1">{report.ticket_code}</p>
           </div>
           <button
             onClick={onClose}
@@ -352,7 +352,7 @@ function ReportDetailModal({ report, onClose }) {
           {report.photo_url && (
             <div>
               <p className="text-sm font-semibold text-slate-600 mb-3">Foto Laporan</p>
-              <div className="w-full rounded-2xl border border-slate-200 dark:border-gray-700 overflow-hidden bg-slate-50 dark:bg-gray-800">
+              <div className="w-full rounded-2xl border border-slate-200 dark:border-gray-700 overflow-hidden bg-primary/5 dark:bg-gray-800">
                 <img 
                   src={report.photo_url} 
                   alt="Foto laporan" 
@@ -366,7 +366,7 @@ function ReportDetailModal({ report, onClose }) {
           )}
 
           {/* Informasi Pelapor */}
-          <div className="bg-slate-50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
+          <div className="bg-primary/5 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
             <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">Informasi Pelapor</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -377,7 +377,7 @@ function ReportDetailModal({ report, onClose }) {
           </div>
 
           {/* Kerusakan */}
-          <div className="bg-slate-50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
+          <div className="bg-primary/5 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
             <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">Informasi Kerusakan</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
@@ -401,7 +401,7 @@ function ReportDetailModal({ report, onClose }) {
 
           {/* Aset */}
           {report.asset_name !== '-' && (
-            <div className="bg-slate-50 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
+            <div className="bg-primary/5 dark:bg-gray-800 rounded-2xl p-4 border border-slate-200 dark:border-gray-700">
               <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-3">Aset Terkait</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -472,7 +472,7 @@ function ReportDetailModal({ report, onClose }) {
                     <select
                       value={priorityLevel}
                       onChange={(e) => setPriorityLevel(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                     >
                       <option value="rendah">Rendah</option>
                       <option value="sedang">Sedang</option>
@@ -490,7 +490,7 @@ function ReportDetailModal({ report, onClose }) {
                     value={verificationNotes}
                     onChange={(e) => setVerificationNotes(e.target.value)}
                     placeholder={`Masukkan catatan ${verificationAction === 'approve' ? 'persetujuan' : 'penolakan'}...`}
-                    className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 dark:text-slate-200 resize-none"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 dark:text-slate-200 resize-none"
                     rows="3"
                   />
                 </div>

@@ -44,16 +44,16 @@ export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, on
     // Convert Tailwind classes to inline styles for react-big-calendar if needed
     // but react-big-calendar allows className returning in eventStyleGetter too!
     
-    let bgColor = '#e0f2fe';
-    let borderLeftColor = '#0284c7';
-    let textColor = '#0284c7';
+    let bgColor = '#ebdce0';
+    let borderLeftColor = '#857379';
+    let textColor = '#5b4a50';
 
     if (urgency === 'sangat_tinggi' || urgency === 'sangat tinggi') {
-      bgColor = '#fee2e2'; borderLeftColor = '#dc2626'; textColor = '#b91c1c';
+      bgColor = '#ffdad6'; borderLeftColor = '#ba1a1a'; textColor = '#410002';
     } else if (urgency === 'tinggi') {
-      bgColor = '#ffedd5'; borderLeftColor = '#ea580c'; textColor = '#c2410c';
+      bgColor = '#f3e1e6'; borderLeftColor = '#705760'; textColor = '#46333c';
     } else if (urgency === 'sedang') {
-      bgColor = '#dcfce7'; borderLeftColor = '#16a34a'; textColor = '#15803d';
+      bgColor = '#ffd9e6'; borderLeftColor = '#805062'; textColor = '#522b3b';
     }
 
     return {
@@ -88,7 +88,7 @@ export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, on
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-[700px] w-full flex flex-col">
+    <div className="glass-card rounded- border-none p-6 shadow-sm h-[700px] w-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-slate-800">
           {moment(currentDate).format('MMMM YYYY')}
@@ -96,19 +96,19 @@ export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, on
         <div className="flex items-center gap-2 text-slate-700">
           <button 
             onClick={() => onNavigate('TODAY')}
-            className="px-3 py-1 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors border border-cyan-200 mr-2"
+            className="px-3 py-1 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors border border-primary/20 mr-2"
           >
             Hari Ini
           </button>
           <button 
             onClick={() => onNavigate('PREV')}
-            className="p-1 hover:text-cyan-700 transition font-bold"
+            className="p-1 hover:text-primary transition font-bold"
           >
             <span className="material-symbols-outlined text-[20px]">chevron_left</span>
           </button>
           <button 
             onClick={() => onNavigate('NEXT')}
-            className="p-1 hover:text-cyan-700 transition font-bold"
+            className="p-1 hover:text-primary transition font-bold"
           >
             <span className="material-symbols-outlined text-[20px]">chevron_right</span>
           </button>
@@ -194,7 +194,7 @@ export default function MaintenanceCalendar({ tasks, currentDate, onNavigate, on
           background-color: #ffffff;
         }
         .custom-calendar-theme .rbc-today .rbc-date-cell {
-          color: #0369a1;
+          color: #805062;
           font-weight: 800;
         }
         .custom-calendar-theme .rbc-event {

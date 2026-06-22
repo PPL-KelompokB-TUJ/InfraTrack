@@ -7,6 +7,7 @@ import SideNavBar from './components/layout/SideNavBar';
 import NotificationContainer from './components/NotificationContainer';
 import { NotificationProvider, InAppNotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
+import FallingPetals from './components/FallingPetals';
 
 // Auth
 import {
@@ -153,6 +154,7 @@ export default function App() {
 
   return (
     <ThemeProvider>
+      <FallingPetals />
       <NotificationProvider>
         <InAppNotificationProvider>
           <BrowserRouter>

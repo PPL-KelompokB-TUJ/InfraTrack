@@ -122,10 +122,10 @@ const EVENT_CONFIG = {
   },
   preventive_schedule: {
     icon: CalendarClock,
-    color: 'text-teal-600',
-    bg: 'bg-teal-50',
-    border: 'border-teal-200',
-    dot: 'bg-teal-500',
+    color: 'text-primary',
+    bg: 'bg-primary/5',
+    border: 'border-primary/20',
+    dot: 'bg-primary',
   },
 };
 
@@ -141,7 +141,7 @@ const STATUS_STYLE = {
   in_progress: 'bg-amber-100 text-amber-700',
   completed: 'bg-emerald-100 text-emerald-700',
   started: 'bg-slate-100 text-slate-600',
-  aktif: 'bg-teal-100 text-teal-700',
+  aktif: 'bg-primary/10 text-primary',
   selesai_preventif: 'bg-emerald-100 text-emerald-700',
   overdue: 'bg-rose-100 text-rose-700',
 };
@@ -214,12 +214,12 @@ function UploadDocumentModal({ assetId, onClose, onSuccess }) {
             {/* File picker */}
             <div
               onClick={() => inputRef.current?.click()}
-              className="border-2 border-dashed border-cyan-100 rounded-2xl p-4 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/40 transition-all duration-200 bg-slate-50"
+              className="border-2 border-dashed border-primary/10 rounded-2xl p-4 text-center cursor-pointer hover:border-primary/80 hover:bg-primary/5/40 transition-all duration-200 bg-primary/5"
             >
               {file ? (
                 <div className="flex items-center gap-3 text-left">
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-cyan-50 shrink-0">
-                    <FileText size={20} className="text-cyan-600" />
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/5 shrink-0">
+                    <FileText size={20} className="text-primary" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-900 truncate">{file.name}</p>
@@ -247,7 +247,7 @@ function UploadDocumentModal({ assetId, onClose, onSuccess }) {
               <select
                 value={docType}
                 onChange={(e) => setDocType(e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                className="mt-1.5 w-full rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
               >
                 {DOC_TYPE_OPTIONS.filter((o) => o.value).map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -263,7 +263,7 @@ function UploadDocumentModal({ assetId, onClose, onSuccess }) {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
                 placeholder="Masukkan keterangan atau catatan tentang dokumen ini..."
-                className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400 resize-none"
+                className="mt-1.5 w-full rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/80 resize-none"
               />
             </label>
 
@@ -271,14 +271,14 @@ function UploadDocumentModal({ assetId, onClose, onSuccess }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl border border-cyan-200 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                className="rounded-xl border border-primary/20 px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={isUploading}
-                className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                className="rounded-xl bg-gradient-to-r from-primary to-primary px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isUploading ? (
                   <><span className="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>Mengunggah…</>
@@ -368,7 +368,7 @@ function DocumentsTab({ assetId }) {
           <select
             value={filterDocType}
             onChange={(e) => setFilterDocType(e.target.value)}
-            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
           >
             {DOC_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
@@ -376,7 +376,7 @@ function DocumentsTab({ assetId }) {
             type="date"
             value={filterDateFrom}
             onChange={(e) => setFilterDateFrom(e.target.value)}
-            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
             placeholder="Dari"
           />
           <span className="text-xs text-slate-400 font-semibold">–</span>
@@ -384,13 +384,13 @@ function DocumentsTab({ assetId }) {
             type="date"
             value={filterDateTo}
             onChange={(e) => setFilterDateTo(e.target.value)}
-            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
             placeholder="Sampai"
           />
           {(filterDocType || filterDateFrom || filterDateTo) && (
             <button
               onClick={() => { setFilterDocType(''); setFilterDateFrom(''); setFilterDateTo(''); }}
-              className="text-xs font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
+              className="text-xs font-bold text-primary hover:text-primary transition-colors"
             >
               Reset Filter
             </button>
@@ -399,7 +399,7 @@ function DocumentsTab({ assetId }) {
 
         <button
           onClick={() => setShowUpload(true)}
-          className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold shadow-lg hover:shadow-xl hover:brightness-110 shrink-0 transition-all"
+          className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary text-white text-xs font-bold shadow-lg hover:shadow-xl hover:brightness-110 shrink-0 transition-all"
         >
           <Upload size={16} />
           Unggah Dokumen
@@ -424,16 +424,16 @@ function DocumentsTab({ assetId }) {
           {docs.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center gap-4 px-5 py-4 rounded-2xl border border-slate-100 bg-white hover:border-cyan-300 hover:shadow-md hover:bg-cyan-50/30 transition-all duration-200 group"
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl border border-slate-100 bg-white hover:border-primary/30 hover:shadow-md hover:bg-primary/5/30 transition-all duration-200 group"
             >
-              <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-cyan-50 transition-colors">
+              <div className="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
                 <DocTypeIcon docType={doc.doc_type} size={24} />
               </div>
 
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-slate-800 truncate">{doc.name}</p>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                  <span className="inline-block text-xs font-medium text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded-full">{DOC_TYPE_LABELS[doc.doc_type] || doc.doc_type}</span>
+                  <span className="inline-block text-xs font-medium text-primary bg-primary/5 px-2.5 py-0.5 rounded-full">{DOC_TYPE_LABELS[doc.doc_type] || doc.doc_type}</span>
                   <span className="text-xs text-slate-500">{formatFileSize(doc.file_size)}</span>
                   <span className="text-xs text-slate-400">{formatDate(doc.created_at)}</span>
                   {doc.uploader?.name && (
@@ -450,7 +450,7 @@ function DocumentsTab({ assetId }) {
                   onClick={() => handleDownload(doc)}
                   disabled={downloadingId === doc.id}
                   title="Unduh"
-                  className="p-2 rounded-lg hover:bg-cyan-100 text-cyan-600 transition-colors disabled:opacity-50"
+                  className="p-2 rounded-lg hover:bg-primary/10 text-primary transition-colors disabled:opacity-50"
                 >
                   {downloadingId === doc.id
                     ? <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
@@ -520,7 +520,7 @@ function TimelineTab({ assetId }) {
         <select
           value={filterEventType}
           onChange={(e) => setFilterEventType(e.target.value)}
-          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           {EVENT_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
@@ -528,19 +528,19 @@ function TimelineTab({ assetId }) {
           type="date"
           value={filterDateFrom}
           onChange={(e) => setFilterDateFrom(e.target.value)}
-          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
         <span className="text-xs text-slate-400 font-semibold">–</span>
         <input
           type="date"
           value={filterDateTo}
           onChange={(e) => setFilterDateTo(e.target.value)}
-          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+          className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
         {(filterEventType || filterDateFrom || filterDateTo) && (
           <button
             onClick={() => { setFilterEventType(''); setFilterDateFrom(''); setFilterDateTo(''); }}
-            className="text-xs font-bold text-cyan-600 hover:text-cyan-700 transition-colors"
+            className="text-xs font-bold text-primary hover:text-primary transition-colors"
           >
             Reset Filter
           </button>
@@ -626,7 +626,7 @@ function TimelineTab({ assetId }) {
                           href={event.meta.photo_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-cyan-600 hover:underline flex items-center gap-1"
+                          className="text-xs text-primary hover:underline flex items-center gap-1"
                         >
                           <Camera size={12} /> Lihat Foto
                         </a>
@@ -704,7 +704,7 @@ export default function AssetDetailPage() {
       </button>
 
       {/* asset header card */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row gap-6 border border-cyan-50 shadow-lg hover:shadow-xl transition-shadow">
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row gap-6 border border-primary/5 shadow-lg hover:shadow-xl transition-shadow">
         {asset.photo_url ? (
           <img
             src={asset.photo_url}
@@ -720,7 +720,7 @@ export default function AssetDetailPage() {
         <div className="flex-1 space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-widest text-cyan-600 letter-spacing">
+              <p className="text-xs font-extrabold uppercase tracking-widest text-primary letter-spacing">
                 {asset.category}
               </p>
               <h1 className="text-3xl font-extrabold text-slate-900 mt-1.5">{asset.name}</h1>
@@ -742,7 +742,7 @@ export default function AssetDetailPage() {
       {/* tabs */}
       <div className="glass-panel rounded-3xl overflow-hidden shadow-lg">
         {/* tab header */}
-        <div className="flex border-b border-slate-100 bg-gradient-to-r from-white to-cyan-50/30">
+        <div className="flex border-b border-slate-100 bg-gradient-to-r from-white to-primary/5/30">
           {[
             { key: 'documents', label: 'Dokumen', icon: FileText },
             { key: 'timeline', label: 'Riwayat Aktivitas', icon: History },
@@ -753,8 +753,8 @@ export default function AssetDetailPage() {
               className={cn(
                 'flex items-center gap-2.5 px-6 py-4 text-sm font-bold border-b-2 transition-all duration-200',
                 activeTab === key
-                  ? 'border-cyan-500 text-cyan-700 bg-gradient-to-b from-cyan-50/80 to-white'
-                  : 'border-transparent text-slate-600 hover:text-slate-800 hover:bg-slate-50/60',
+                  ? 'border-primary text-primary bg-gradient-to-b from-primary/5/80 to-white'
+                  : 'border-transparent text-slate-600 hover:text-slate-800 hover:bg-primary/5/60',
               )}
             >
               <Icon size={18} />

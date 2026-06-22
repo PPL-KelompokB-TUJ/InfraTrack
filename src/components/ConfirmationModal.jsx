@@ -28,7 +28,7 @@ export default function ConfirmationModal({ isOpen, title, message, onConfirm, o
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+            className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium hover:bg-primary/5 dark:hover:bg-slate-700 transition"
           >
             Batal
           </button>

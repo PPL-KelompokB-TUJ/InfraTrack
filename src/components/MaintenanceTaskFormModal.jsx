@@ -119,14 +119,14 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8">
       <div className="glass-panel fade-slide-in max-h-[92vh] w-full max-w-2xl overflow-auto rounded-3xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-cyan-100 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-primary/10 px-6 py-5">
           <h2 className="text-xl font-extrabold text-slate-800">
             {editingTask ? 'Edit Penugasan Pemeliharaan' : 'Buat Penugasan Pemeliharaan'}
           </h2>
           <button
             onClick={onClose}
             disabled={isSaving}
-            className="rounded-lg p-1 text-slate-400 transition hover:bg-cyan-50 hover:text-slate-600 disabled:opacity-50"
+            className="rounded-lg p-1 text-slate-400 transition hover:bg-primary/5 hover:text-slate-600 disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
@@ -146,14 +146,14 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
 
           {/* Report Info */}
           {report && (
-            <div className="rounded-xl border border-cyan-200 bg-cyan-50/80 p-4">
-              <p className="text-sm font-semibold text-cyan-900">
-                Laporan: <span className="font-mono text-cyan-700">{report.ticket_code}</span>
+            <div className="rounded-xl border border-primary/20 bg-primary/5/80 p-4">
+              <p className="text-sm font-semibold text-primary">
+                Laporan: <span className="font-mono text-primary">{report.ticket_code}</span>
               </p>
-              <p className="mt-1 text-sm text-cyan-800">
+              <p className="mt-1 text-sm text-primary">
                 Jenis: <span className="font-medium">{report.damage_type}</span>
               </p>
-              <p className="text-sm text-cyan-800">
+              <p className="text-sm text-primary">
                 Urgensi: <span className="font-medium capitalize text-amber-700">{report.urgency_level}</span>
               </p>
             </div>
@@ -187,7 +187,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               value={formData.assigned_to}
               onChange={handleInputChange}
               disabled={isLocked || isLoadingOfficers || isSaving}
-              className={`w-full rounded-xl border border-cyan-100 px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 ${isLocked ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white disabled:bg-slate-100'}`}
+              className={`w-full rounded-xl border border-primary/10 px-3 py-2.5 text-sm outline-none transition focus:border-primary/80 ${isLocked ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white disabled:bg-slate-100'}`}
             >
               <option value="">-- Pilih Petugas --</option>
               {fieldOfficers.map((officer) => (
@@ -218,7 +218,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               onChange={handleInputChange}
               disabled={isLocked || isSaving}
               min={!isLocked ? new Date().toISOString().split('T')[0] : undefined}
-              className={`w-full rounded-xl border border-cyan-100 px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 ${isLocked ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white disabled:bg-slate-100'}`}
+              className={`w-full rounded-xl border border-primary/10 px-3 py-2.5 text-sm outline-none transition focus:border-primary/80 ${isLocked ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white disabled:bg-slate-100'}`}
             />
           </div>
 
@@ -239,7 +239,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               disabled={isSaving}
               min="0"
               step="1000"
-              className="w-full rounded-xl border border-cyan-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 disabled:bg-slate-100"
+              className="w-full rounded-xl border border-primary/10 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-primary/80 disabled:bg-slate-100"
             />
             <p className="mt-1 text-xs text-slate-500">Dalam Rupiah</p>
           </div>
@@ -260,7 +260,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
               placeholder="Jelaskan detail pekerjaan yang harus dilakukan petugas..."
               rows="4"
               maxLength={500}
-              className="w-full resize-none rounded-xl border border-cyan-100 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-cyan-400 disabled:bg-slate-100"
+              className="w-full resize-none rounded-xl border border-primary/10 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-primary/80 disabled:bg-slate-100"
             />
             <p className="mt-1 text-xs text-slate-500">
               {formData.instructions.length}/500 karakter
@@ -269,11 +269,11 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
         </form>
 
         {/* Footer */}
-        <div className="flex gap-3 border-t border-cyan-100 bg-white/80 px-6 py-5">
+        <div className="flex gap-3 border-t border-primary/10 bg-white/80 px-6 py-5">
           <button
             onClick={onClose}
             disabled={isSaving}
-            className="flex-1 rounded-xl border border-cyan-200 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50 disabled:opacity-50"
+            className="flex-1 rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/5 disabled:opacity-50"
           >
             Batal
           </button>
@@ -281,7 +281,7 @@ export default function MaintenanceTaskFormModal({ isOpen, onClose, report, asse
             type="submit"
             form="maintenance-task-form"
             disabled={isSaving}
-            className="flex-1 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
+            className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-60"
           >
             {isSaving ? 'Menyimpan...' : (editingTask ? 'Simpan Perubahan' : 'Buat Penugasan')}
           </button>

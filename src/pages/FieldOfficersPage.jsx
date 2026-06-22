@@ -157,105 +157,89 @@ export default function FieldOfficersPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    
+    <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8 relative z-10">
+      {/* Header */}
       <div className="mb-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-800">Manajemen Petugas Lapangan</h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Kelola data petugas lapangan yang bertugas untuk penugasan pemeliharaan infrastruktur
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleOpenForm()}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
-          >
-            <Plus size={18} />
-            Tambah Petugas
-          </button>
-        </div>
+        <h1 className="text-5xl font-bold font-serif text-slate-800 tracking-tight">Manajemen Petugas</h1>
+        <p className="mt-2 text-slate-600 text-lg">Kelola entitas dan peran petugas yang tersebar di infrastruktur saat ini.</p>
       </div>
 
-      {/* Table */}
-      <div className="glass-panel rounded-2xl overflow-hidden">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-8">
+        <div className="flex gap-4">
+          <button className="px-6 py-2 bg-white/50 border border-primary-container/20 text-slate-600 font-bold text-sm tracking-widest uppercase rounded-full hover:bg-white/80 transition-colors shadow-sm whitespace-nowrap">
+            Filter Peran
+          </button>
+          <button className="px-6 py-2 bg-white/50 border border-primary-container/20 text-slate-600 font-bold text-sm tracking-widest uppercase rounded-full hover:bg-white/80 transition-colors shadow-sm whitespace-nowrap">
+            Urut Status
+          </button>
+        </div>
+        <button
+          onClick={() => handleOpenForm()}
+          className="px-6 py-2 bg-primary/20 text-primary-dark font-bold text-sm tracking-widest uppercase rounded-full hover:bg-primary/30 transition-colors shadow-sm flex items-center gap-2 whitespace-nowrap"
+        >
+          <span>+ Tambah Petugas</span>
+        </button>
+      </div>
+
+      {/* Grid of Cards */}
+      <div className="mb-8">
         {isLoading ? (
-          <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-cyan-300 border-t-cyan-600" />
-              </div>
-              <p className="mt-2 text-sm text-slate-600">Memuat data petugas...</p>
+          <div className="flex items-center justify-center p-12">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             </div>
           </div>
         ) : officers.length === 0 ? (
-          <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <p className="text-sm text-slate-600">Tidak ada data petugas</p>
-              <button
-                type="button"
-                onClick={() => handleOpenForm()}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-cyan-200 px-3 py-1.5 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50"
-              >
-                <Plus size={14} />
-                Tambah Petugas
-              </button>
-            </div>
+          <div className="glass-card bg-white/50 border border-primary-container/20 rounded-3xl p-16 text-center">
+            <span className="material-symbols-outlined text-6xl text-slate-300 mb-4 block">group_off</span>
+            <p className="text-slate-500 text-lg">Tidak ada data petugas yang ditemukan</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700">Nama</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700">Telepon</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700">
-                    Spesialisasi
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700">Area Kerja</th>
-                  <th className="px-6 py-3 text-center text-xs font-semibold text-slate-700">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {officers.map((officer, idx) => (
-                  <tr
-                    key={officer.id}
-                    className={`border-b border-slate-100 transition hover:bg-slate-50 ${
-                      idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'
-                    }`}
-                  >
-                    <td className="px-6 py-4 text-sm font-medium text-slate-800">{officer.name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{officer.email}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{officer.phone || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {officer.specialization || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{officer.work_area || '-'}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenForm(officer)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-blue-200 px-2.5 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
-                        >
-                          <Edit2 size={14} />
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(officer)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
-                        >
-                          <Trash2 size={14} />
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {officers.map((officer) => {
+              const initials = officer.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+              return (
+                <div key={officer.id} className="glass-card bg-white/70 border border-primary-container/20 rounded-3xl p-6 relative overflow-hidden group hover:shadow-md transition-shadow">
+                  {/* Action Menu (dots) */}
+                  <div className="absolute top-6 right-6 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => handleOpenForm(officer)} className="p-1.5 text-slate-400 hover:text-blue-500 bg-white/80 rounded-full shadow-sm"><span className="material-symbols-outlined text-[18px] block">edit</span></button>
+                    <button onClick={() => handleDelete(officer)} className="p-1.5 text-slate-400 hover:text-red-500 bg-white/80 rounded-full shadow-sm"><span className="material-symbols-outlined text-[18px] block">delete</span></button>
+                  </div>
+                  
+                  {/* Header: Avatar + Info */}
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/80 to-primary-container/80 flex items-center justify-center text-white font-serif font-bold text-xl shadow-inner">
+                      {initials}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold font-serif text-slate-800 tracking-tight leading-tight">{officer.name}</h3>
+                      <p className="text-sm text-slate-500 mt-1">{officer.email}</p>
+                    </div>
+                  </div>
+
+                  {/* Details Grid */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center border-b border-primary-container/10 pb-3">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PERAN</span>
+                      <span className="text-sm font-semibold text-slate-800">{officer.specialization || '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-primary-container/10 pb-3">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">DEPARTEMEN</span>
+                      <span className="text-sm font-semibold text-slate-800">{officer.work_area || '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">STATUS</span>
+                      <span className="text-xs font-bold text-emerald-600 tracking-wider">Aktif</span>
+                    </div>
+                  </div>
+                  
+                  {/* Background Petal Decoration */}
+                  <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-primary/5 rounded-[40%_60%_70%_30%] transform rotate-45 blur-xl pointer-events-none"></div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -280,7 +264,7 @@ export default function FieldOfficersPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                  className="mt-1.5 w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/60"
                   placeholder="Contoh: Ahmad Sutrisno"
                   required
                 />
@@ -292,15 +276,15 @@ export default function FieldOfficersPage() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleFormChange('email', e.target.value)}
-                  className={`mt-1.5 w-full rounded-xl border border-cyan-100 px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400 ${
-                    !editingId ? 'bg-slate-50 text-slate-500' : 'bg-white'
+                  className={`mt-1.5 w-full rounded-xl border border-primary/20 px-4 py-2.5 text-sm outline-none transition focus:border-primary/60 ${
+                    !editingId ? 'bg-primary/5 text-slate-500' : 'bg-white'
                   }`}
                   placeholder="ahmad@example.com"
                   readOnly={!editingId}
                   required
                 />
                 {!editingId && formData.email && (
-                  <p className="mt-1 text-xs text-cyan-600">
+                  <p className="mt-1 text-xs text-primary">
                     📧 Email otomatis: {formData.email}
                   </p>
                 )}
@@ -322,7 +306,7 @@ export default function FieldOfficersPage() {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleFormChange('phone', e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                  className="mt-1.5 w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/60"
                   placeholder="08123456789"
                 />
               </label>
@@ -332,7 +316,7 @@ export default function FieldOfficersPage() {
                 <select
                   value={formData.specialization}
                   onChange={(e) => handleFormChange('specialization', e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                  className="mt-1.5 w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/60"
                 >
                   <option value="">- Pilih Spesialisasi -</option>
                   <option value="Perbaikan Jalan">Perbaikan Jalan</option>
@@ -348,7 +332,7 @@ export default function FieldOfficersPage() {
                   type="text"
                   value={formData.work_area}
                   onChange={(e) => handleFormChange('work_area', e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                  className="mt-1.5 w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/60"
                   placeholder="Contoh: Kelurahan Cikini, Jakarta Pusat"
                 />
               </label>
@@ -357,13 +341,13 @@ export default function FieldOfficersPage() {
                 <button
                   type="button"
                   onClick={handleCloseForm}
-                  className="rounded-xl border border-cyan-200 px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                  className="rounded-xl border border-primary/30 px-4 py-2 text-sm font-semibold text-primary-dark transition hover:bg-primary/5"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
+                  className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
                 >
                   {editingId ? 'Perbarui' : 'Tambah'} Petugas
                 </button>
@@ -386,7 +370,7 @@ export default function FieldOfficersPage() {
             </p>
 
             <div className="mt-5 space-y-3">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl border border-slate-200 bg-primary/5 p-4">
                 <label className="block text-xs font-semibold text-slate-600">Email</label>
                 <div className="mt-1.5 flex items-center gap-2">
                   <p className="font-mono text-sm text-slate-800">{createdCredentials.email}</p>
@@ -434,7 +418,7 @@ export default function FieldOfficersPage() {
                 setShowPasswordModal(false);
                 setCreatedCredentials({ email: '', password: '' });
               }}
-              className="mt-5 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
+              className="mt-5 w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
             >
               Selesai
             </button>

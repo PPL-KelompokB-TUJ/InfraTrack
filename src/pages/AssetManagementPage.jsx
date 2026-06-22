@@ -149,7 +149,7 @@ export default function AssetManagementPage() {
       <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
               InfraTrack / Administrator
             </p>
             <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-800">
@@ -162,14 +162,14 @@ export default function AssetManagementPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="rounded-2xl border border-cyan-100 bg-cyan-50/80 px-4 py-3">
-              <p className="text-xs uppercase tracking-wide text-cyan-700">Total Aset</p>
-              <p className="text-2xl font-bold text-cyan-900">{totalAssets}</p>
+            <div className="rounded-2xl border border-primary/10 bg-primary/5/80 px-4 py-3">
+              <p className="text-xs uppercase tracking-wide text-primary">Total Aset</p>
+              <p className="text-2xl font-bold text-primary">{totalAssets}</p>
             </div>
             <button
               type="button"
               onClick={handleOpenCreate}
-              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
+              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-primary px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:brightness-110"
             >
               <Plus size={16} />
               Tambah Aset
@@ -177,10 +177,10 @@ export default function AssetManagementPage() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-cyan-100 bg-white">
+        <div className="overflow-hidden rounded-2xl border border-primary/10 bg-white">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-cyan-100 text-sm">
-              <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
+            <table className="min-w-full divide-y divide-primary/20 text-sm">
+              <thead className="bg-primary/5/70 text-left text-xs uppercase tracking-wide text-primary">
                 <tr>
                   <th className="px-4 py-3">Nama</th>
                   <th className="px-4 py-3">Kategori</th>
@@ -191,7 +191,7 @@ export default function AssetManagementPage() {
                   <th className="px-4 py-3 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cyan-50">
+              <tbody className="divide-y divide-primary/10">
                 {isLoading ? (
                   <tr>
                     <td className="px-4 py-7 text-center text-slate-500" colSpan={7}>
@@ -206,7 +206,7 @@ export default function AssetManagementPage() {
                   </tr>
                 ) : (
                   assets.map((asset) => (
-                    <tr key={asset.id} className="transition hover:bg-cyan-50/30">
+                    <tr key={asset.id} className="transition hover:bg-primary/5/30">
                       <td className="px-4 py-3 font-semibold text-slate-800">{asset.name}</td>
                       <td className="px-4 py-3 text-slate-600">{asset.category}</td>
                       <td className="px-4 py-3">
@@ -239,7 +239,7 @@ export default function AssetManagementPage() {
                           <button
                             type="button"
                             onClick={() => navigate(`/dashboard/assets/${asset.id}`)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-50"
+                            className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-2.5 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/5"
                           >
                             <Eye size={13} />
                             Detail
@@ -247,7 +247,7 @@ export default function AssetManagementPage() {
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(asset)}
-                            className="inline-flex items-center gap-1 rounded-lg border border-cyan-200 px-2.5 py-1.5 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                            className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-2.5 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/5"
                           >
                             <Pencil size={13} />
                             Edit

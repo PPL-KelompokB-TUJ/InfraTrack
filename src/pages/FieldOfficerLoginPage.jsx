@@ -70,7 +70,7 @@ export default function FieldOfficerLoginPage({ onLoginSuccess }) {
                 type="email"
                 value={credentials.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-cyan-400"
+                className="mt-1.5 w-full rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary/80"
                 placeholder="ahmad.sutrisno@example.com"
                 required
                 disabled={isLoading}
@@ -84,7 +84,7 @@ export default function FieldOfficerLoginPage({ onLoginSuccess }) {
                   type={showPassword ? 'text' : 'password'}
                   value={credentials.password}
                   onChange={(e) => handleChange('password', e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-cyan-100 bg-white px-4 py-2.5 pr-10 text-sm outline-none transition focus:border-cyan-400"
+                  className="mt-1.5 w-full rounded-xl border border-primary/10 bg-white px-4 py-2.5 pr-10 text-sm outline-none transition focus:border-primary/80"
                   placeholder="Ahmad123!@#"
                   required
                   disabled={isLoading}
@@ -103,7 +103,7 @@ export default function FieldOfficerLoginPage({ onLoginSuccess }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
+              className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-70"
             >
               <LogIn size={16} />
               {isLoading ? 'Memproses...' : 'Masuk sebagai Petugas'}

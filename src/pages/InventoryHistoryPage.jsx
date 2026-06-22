@@ -55,7 +55,7 @@ export default function InventoryHistoryPage() {
       <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <Link to="/dashboard/inventory" className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-cyan-600 hover:text-cyan-700">
+            <Link to="/dashboard/inventory" className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary">
               <ArrowLeft size={16} />
               Kembali ke Inventaris
             </Link>
@@ -76,7 +76,7 @@ export default function InventoryHistoryPage() {
               placeholder="Cari nama material atau catatan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-cyan-100 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+              className="w-full rounded-xl border border-primary/10 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/80 focus:ring-1 focus:ring-primary/80"
             />
           </div>
           <div className="relative w-full sm:w-48">
@@ -84,7 +84,7 @@ export default function InventoryHistoryPage() {
             <select
               value={filterAction}
               onChange={(e) => setFilterAction(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-cyan-100 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+              className="w-full appearance-none rounded-xl border border-primary/10 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/80 focus:ring-1 focus:ring-primary/80"
             >
               <option value="Semua">Semua Aktivitas</option>
               <option value="Pemakaian">Pemakaian</option>
@@ -100,9 +100,9 @@ export default function InventoryHistoryPage() {
             <p className="text-slate-500">Memuat riwayat...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-cyan-100 bg-white">
-            <table className="min-w-full divide-y divide-cyan-100 text-sm">
-              <thead className="bg-cyan-50/70 text-left text-xs uppercase tracking-wide text-cyan-800">
+          <div className="overflow-x-auto rounded-2xl border border-primary/10 bg-white">
+            <table className="min-w-full divide-y divide-primary/20 text-sm">
+              <thead className="bg-primary/5/70 text-left text-xs uppercase tracking-wide text-primary">
                 <tr>
                   <th className="px-4 py-3">Waktu</th>
                   <th className="px-4 py-3">Material</th>
@@ -113,9 +113,9 @@ export default function InventoryHistoryPage() {
                   <th className="px-4 py-3">Keterangan</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cyan-50">
+              <tbody className="divide-y divide-primary/10">
                 {filteredHistory.map((item) => (
-                  <tr key={item.id} className="hover:bg-cyan-50/30">
+                  <tr key={item.id} className="hover:bg-primary/5/30">
                     <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Clock size={14} className="text-slate-400" />

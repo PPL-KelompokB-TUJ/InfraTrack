@@ -31,12 +31,12 @@ import { getAllDamageReports } from '../lib/damageReportService';
 import { getInfrastructureAssets } from '../lib/infrastructureAssetsService';
 
 const statusLabelStyles = {
-  pending: 'border-slate-200 bg-slate-100 text-slate-700',
-  scheduled: 'border-purple-200 bg-purple-100 text-purple-700',
-  assigned: 'border-cyan-200 bg-cyan-100 text-cyan-700',
-  in_progress: 'border-amber-200 bg-amber-100 text-amber-700',
-  completed: 'border-emerald-200 bg-emerald-100 text-emerald-700',
-  cancelled: 'border-rose-200 bg-rose-100 text-rose-700',
+  pending: 'border-secondary/20 bg-secondary-container text-on-secondary-container',
+  scheduled: 'border-primary/20 bg-primary-container text-on-primary-container',
+  assigned: 'border-primary/20 bg-primary/10 text-primary',
+  in_progress: 'border-tertiary/20 bg-tertiary-container text-on-tertiary-container',
+  completed: 'border-secondary/20 bg-secondary-container text-on-secondary-container',
+  cancelled: 'border-error/20 bg-error-container text-on-error-container',
 };
 
 const statusLabels = {
@@ -405,7 +405,7 @@ export default function MaintenanceTaskPage() {
           <p className="text-xs font-semibold text-slate-500 flex items-center gap-2 mb-1">
             <span>Ruang Kerja</span>
             <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-            <span className="text-cyan-700">Penjadwalan</span>
+            <span className="text-primary">Penjadwalan</span>
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">
             Penjadwalan Perbaikan
@@ -420,7 +420,7 @@ export default function MaintenanceTaskPage() {
               placeholder="Cari jadwal..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all bg-white"
+              className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
             />
           </div>
           <button
@@ -434,11 +434,11 @@ export default function MaintenanceTaskPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-wrap items-end justify-between gap-4">
+      <div className="glass-card border-none rounded-xl p-4 mb-6 flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Teknisi</label>
-            <select className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+            <select className="glass-card border-none rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-primary">
               <option value="">Semua Teknisi</option>
             </select>
           </div>
@@ -447,7 +447,7 @@ export default function MaintenanceTaskPage() {
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500"
+              className="glass-card border-none rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-primary"
             >
               <option value="">Semua Status</option>
               <option value="pending">Pending</option>
@@ -459,7 +459,7 @@ export default function MaintenanceTaskPage() {
           </div>
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prioritas</label>
-            <select className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-cyan-500">
+            <select className="glass-card border-none rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-40 focus:border-primary">
               <option value="">Semua Prioritas</option>
             </select>
           </div>
@@ -468,19 +468,19 @@ export default function MaintenanceTaskPage() {
         <div className="flex bg-[#f1f5f9] p-1 rounded-lg border border-slate-200">
           <button 
             onClick={() => setCalendarView('month')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'month' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'month' ? 'glass-card shadow-md text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
           >
             Bulanan
           </button>
           <button 
             onClick={() => setCalendarView('week')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'week' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'week' ? 'glass-card shadow-md text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
           >
             Mingguan
           </button>
           <button 
             onClick={() => setCalendarView('day')}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'day' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${calendarView === 'day' ? 'glass-card shadow-md text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
           >
             Harian
           </button>
@@ -492,7 +492,7 @@ export default function MaintenanceTaskPage() {
         {/* Calendar Section */}
         <div className="lg:col-span-8 xl:col-span-9">
           {isLoading ? (
-            <div className="bg-white rounded-2xl border border-slate-200 h-[700px] flex items-center justify-center">
+            <div className="glass-card rounded- border-none h-[700px] flex items-center justify-center">
               <span className="material-symbols-outlined animate-spin text-4xl text-slate-300">progress_activity</span>
             </div>
           ) : (
@@ -509,7 +509,7 @@ export default function MaintenanceTaskPage() {
 
         {/* Upcoming Tasks Sidebar */}
         <div className="lg:col-span-4 xl:col-span-3">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[700px] flex flex-col">
+          <div className="glass-card rounded- border-none shadow-sm overflow-hidden h-[700px] flex flex-col">
             <div className="p-5 border-b border-slate-100">
               <h2 className="text-lg font-bold text-slate-800">Tugas Mendatang</h2>
               <p className="text-xs text-slate-500 mt-1">Daftar inspeksi prioritas minggu ini</p>
@@ -518,7 +518,7 @@ export default function MaintenanceTaskPage() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {upcomingTasks.length === 0 ? (
                 <div className="text-center py-10">
-                  <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-3">
                     <CheckCircle2 className="w-6 h-6 text-slate-300" />
                   </div>
                   <p className="text-sm font-medium text-slate-600">Tidak ada tugas mendatang</p>
@@ -533,7 +533,7 @@ export default function MaintenanceTaskPage() {
                     <div 
                       key={task.id} 
                       onClick={() => handleViewDetail(task.id)}
-                      className="bg-white border border-slate-200 rounded-xl p-4 cursor-pointer hover:border-cyan-300 hover:shadow-sm transition-all"
+                      className="glass-card border-none rounded-xl p-4 cursor-pointer hover:border-primary/30 hover:shadow-sm transition-all"
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div className="flex gap-2 flex-wrap">
@@ -573,7 +573,7 @@ export default function MaintenanceTaskPage() {
                             {task.assigned_officer?.name?.split(' ')[0] || 'Unassigned'}
                           </span>
                         </div>
-                        <span className="text-xs font-mono font-medium text-cyan-600">
+                        <span className="text-xs font-mono font-medium text-primary">
                           #{task.report?.ticket_code?.split('-')[2] || 'TICKET'}
                         </span>
                       </div>
@@ -583,7 +583,7 @@ export default function MaintenanceTaskPage() {
               )}
             </div>
             
-            <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+            <div className="p-4 border-t border-slate-100 bg-primary/5/50">
               <button 
                 onClick={() => setIsAllSchedulesModalOpen(true)}
                 className="w-full py-2.5 bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0284c7] rounded-lg text-sm font-semibold transition-colors"
@@ -608,10 +608,10 @@ export default function MaintenanceTaskPage() {
       {detailModal ? (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl fade-slide-in">
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-6 flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-primary to-primary px-6 py-6 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">Detail Penugasan</h2>
-                <p className="text-cyan-100 text-sm mt-1">{detailModal.report?.ticket_code || 'Tugas Perawatan'}</p>
+                <p className="text-primary/10 text-sm mt-1">{detailModal.report?.ticket_code || 'Tugas Perawatan'}</p>
               </div>
               <button
                 type="button"
@@ -625,7 +625,7 @@ export default function MaintenanceTaskPage() {
             <div className="space-y-4 px-6 py-6 text-sm">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Laporan</p>
-                <p className="mt-1 font-mono text-cyan-700">{detailModal.report?.ticket_code || '-'}</p>
+                <p className="mt-1 font-mono text-primary">{detailModal.report?.ticket_code || '-'}</p>
               </div>
 
               <div>
@@ -715,7 +715,7 @@ export default function MaintenanceTaskPage() {
               </div>
             </div>
 
-            <div className="flex gap-3 border-t border-slate-100 px-6 py-5 bg-slate-50/50">
+            <div className="flex gap-3 border-t border-slate-100 px-6 py-5 bg-primary/5/50">
               {!String(detailModal.id).startsWith('mock-') ? (
                 <>
                   <button
@@ -727,7 +727,7 @@ export default function MaintenanceTaskPage() {
                       setDetailModal(null);
                       setIsModalOpen(true);
                     }}
-                    className="flex-1 rounded-lg border border-cyan-200 bg-white px-4 py-2.5 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                    className="flex-1 rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/5"
                   >
                     Edit Detail
                   </button>
@@ -741,7 +741,7 @@ export default function MaintenanceTaskPage() {
               <button
                 type="button"
                 onClick={() => setDetailModal(null)}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-primary/5"
               >
                 Tutup
               </button>

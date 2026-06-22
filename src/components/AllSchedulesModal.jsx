@@ -4,7 +4,7 @@ import { X, Calendar, MapPin, Search } from 'lucide-react';
 const statusLabelStyles = {
   pending: 'border-slate-200 bg-slate-100 text-slate-700',
   scheduled: 'border-purple-200 bg-purple-100 text-purple-700',
-  assigned: 'border-cyan-200 bg-cyan-100 text-cyan-700',
+  assigned: 'border-primary/20 bg-primary/10 text-primary',
   in_progress: 'border-amber-200 bg-amber-100 text-amber-700',
   completed: 'border-emerald-200 bg-emerald-100 text-emerald-700',
   cancelled: 'border-rose-200 bg-rose-100 text-rose-700',
@@ -76,7 +76,7 @@ export default function AllSchedulesModal({ isOpen, onClose, tasks, onViewDetail
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-cyan-100 p-2.5 text-cyan-600">
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary">
               <Calendar size={24} />
             </div>
             <div>
@@ -93,7 +93,7 @@ export default function AllSchedulesModal({ isOpen, onClose, tasks, onViewDetail
         </div>
 
         {/* Filter Section */}
-        <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
+        <div className="border-b border-slate-100 bg-primary/5/50 px-6 py-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="flex-1">
               <label className="mb-1 block text-xs font-semibold text-slate-600 uppercase tracking-wide">Mulai Tanggal</label>
@@ -101,7 +101,7 @@ export default function AllSchedulesModal({ isOpen, onClose, tasks, onViewDetail
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
             <div className="flex-1">
@@ -110,13 +110,13 @@ export default function AllSchedulesModal({ isOpen, onClose, tasks, onViewDetail
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
             <div className="flex sm:self-end">
               <button
                 onClick={() => { setStartDate(''); setEndDate(''); }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-primary/5"
               >
                 Reset Filter
               </button>
@@ -125,7 +125,7 @@ export default function AllSchedulesModal({ isOpen, onClose, tasks, onViewDetail
         </div>
 
         {/* List Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto p-6 bg-primary/5/30">
           {filteredTasks.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <div className="mb-4 rounded-full bg-slate-100 p-4">
@@ -149,7 +149,7 @@ export default function AllSchedulesModal({ isOpen, onClose, tasks, onViewDetail
                       onViewDetail(task.id);
                       onClose();
                     }}
-                    className="flex flex-col bg-white border border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-cyan-300 hover:shadow-md transition-all"
+                    className="flex flex-col glass-card border-none rounded-2xl p-4 cursor-pointer hover:border-primary/30 hover:shadow-md transition-all"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex gap-2 flex-wrap">
@@ -192,7 +192,7 @@ export default function AllSchedulesModal({ isOpen, onClose, tasks, onViewDetail
                           <p className="text-[10px] text-slate-400">Teknisi</p>
                         </div>
                       </div>
-                      <span className="text-xs font-mono font-bold text-cyan-600 bg-cyan-50 px-2 py-1 rounded-md">
+                      <span className="text-xs font-mono font-bold text-primary bg-primary/5 px-2 py-1 rounded-md">
                         #{task.report?.ticket_code?.split('-')[2] || 'TICKET'}
                       </span>
                     </div>

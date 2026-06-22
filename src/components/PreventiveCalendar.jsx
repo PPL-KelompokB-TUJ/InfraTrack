@@ -104,7 +104,7 @@ export default function PreventiveCalendar({ onSelectEvent }) {
   }, []);
 
   return (
-    <div className="rounded-2xl border border-cyan-100 bg-white p-4">
+    <div className="rounded-2xl border border-primary/10 bg-white p-4">
       {/* Legend */}
       <div className="mb-4 flex flex-wrap gap-3 text-xs font-semibold">
         <span className="flex items-center gap-1.5">
