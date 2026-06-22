@@ -125,8 +125,8 @@ export default function LoginPage() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="flex flex-col items-center gap-6"
           >
-            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl flex items-center justify-center border border-white/10 shadow-[0_0_40px_rgba(206,128,147,0.15)] group hover:scale-105 transition-transform duration-500">
-              <span className="material-symbols-outlined text-5xl text-transparent bg-clip-text bg-gradient-to-br from-white to-[#e8a0b0] icon-fill">verified_user</span>
+            <div className="w-28 h-28 flex items-center justify-center group hover:scale-105 transition-transform duration-500">
+              <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tighter">InfraTrack</p>
@@ -202,8 +202,8 @@ export default function LoginPage() {
           {/* Header */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 md:hidden mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-container flex items-center justify-center">
-                <span className="material-symbols-outlined text-white text-lg icon-fill">verified_user</span>
+              <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center overflow-hidden">
+                <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-contain" style={{ filter: 'invert(1)' }} />
               </div>
               <span className="text-xl font-black text-on-surface tracking-tight">InfraTrack</span>
             </div>

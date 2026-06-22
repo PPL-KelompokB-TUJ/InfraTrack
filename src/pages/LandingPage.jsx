@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, animate, useInView } from 'framer-motion';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 function AnimatedLetters({ text, delayOffset = 0 }) {
   return (
@@ -206,6 +206,7 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fdf8f8] overflow-x-hidden">
+      <YorushikaMusicPlayer />
       {/* ── HERO SECTION ─────────────────────────────────────────── */}
       <header ref={heroRef} className="relative min-h-screen flex items-center pt-20 overflow-hidden">
         <CherryBlossomDecor scrollYProgress={scrollYProgress} />
@@ -644,8 +645,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 pb-12 border-b border-white/10">
             <motion.div variants={itemVariants} className="space-y-4 md:col-span-1">
               <div className="flex items-center gap-2 group cursor-pointer">
-                <motion.div whileHover={{ rotate: 15 }} className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center transition-colors">
-                  <span className="material-symbols-outlined text-white text-lg icon-fill">verified_user</span>
+                <motion.div whileHover={{ rotate: 15 }} className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center transition-colors overflow-hidden">
+                  <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </motion.div>
                 <span className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">InfraTrack</span>
               </div>
@@ -690,6 +691,64 @@ export default function LandingPage() {
           </motion.div>
         </motion.div>
       </footer>
+    </div>
+  );
+}
+
+function YorushikaMusicPlayer() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const audioRef = useRef(null);
+
+  const playlist = ['/track1.mp3', '/track2.mp3'];
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.4;
+    }
+  }, []);
+
+  const handleEnded = () => {
+    setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % playlist.length);
+  };
+
+  useEffect(() => {
+    if (audioRef.current && isPlaying) {
+      audioRef.current.play().catch(e => console.log('Autoplay blocked:', e));
+    }
+  }, [currentTrackIndex]);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(e => console.log('Autoplay blocked:', e));
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+      <audio 
+        ref={audioRef} 
+        src={playlist[currentTrackIndex]} 
+        onEnded={handleEnded}
+      />
+      <div className={`transition-all duration-500 overflow-hidden bg-white/80 backdrop-blur-md rounded-full px-4 py-2 border border-primary/20 shadow-lg flex flex-col justify-center ${isPlaying ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'}`}>
+        <p className="text-[10px] font-bold text-primary tracking-widest uppercase mb-0.5">Sedang Memutar ({currentTrackIndex + 1}/2)</p>
+        <p className="text-xs font-serif text-on-surface whitespace-nowrap">Yorushika — 春泥棒</p>
+      </div>
+      <button 
+        onClick={togglePlay}
+        className="w-12 h-12 bg-gradient-to-br from-[#ce8093] to-[#8c3a56] rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-300 relative group"
+      >
+        {isPlaying && <span className="absolute inset-0 rounded-full border-2 border-primary animate-ping opacity-50" />}
+        <span className="material-symbols-outlined icon-fill">
+          {isPlaying ? 'pause' : 'music_note'}
+        </span>
+      </button>
     </div>
   );
 }

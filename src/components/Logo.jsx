@@ -7,8 +7,8 @@ export default function Logo({ onClick, className = '' }) {
       className={`flex items-center gap-2 rounded-lg px-3 py-2 transition hover:opacity-80 ${className}`}
       title="Kembali ke Dashboard"
     >
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary shadow-md">
-        <Building2 size={20} className="text-white" />
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg shadow-md overflow-hidden bg-white">
+        <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-cover" />
       </div>
       <div className="flex flex-col leading-tight">
         <span className="text-sm font-bold text-slate-900">InfraTrack</span>

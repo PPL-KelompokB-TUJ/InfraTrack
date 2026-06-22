@@ -94,23 +94,8 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* Custom SVG logo */}
-          <div style={{ flexShrink: 0 }}>
-            <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
-              <defs>
-                <linearGradient id="sbLogoGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#e8a0b0" />
-                  <stop offset="100%" stopColor="#8c3a56" />
-                </linearGradient>
-                <linearGradient id="sbLogoShine" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fff" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#fff" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-              <rect width="40" height="40" rx="11" fill="url(#sbLogoGrad)" />
-              <rect width="40" height="22" rx="11" fill="url(#sbLogoShine)" />
-              <path d="M20 9 L27 14 L27 25 L20 30 L13 25 L13 14 Z" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinejoin="round" />
-              <circle cx="20" cy="19.5" r="2.5" fill="rgba(255,255,255,0.95)" />
-            </svg>
+          <div style={{ flexShrink: 0, width: '38px', height: '38px', borderRadius: '11px', overflow: 'hidden', background: 'transparent' }}>
+            <img src="/yorushika-logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div>
             <p style={{ fontWeight: 900, fontSize: '17px', color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>

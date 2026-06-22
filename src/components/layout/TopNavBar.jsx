@@ -18,23 +18,8 @@ export default function TopNavBar() {
             <div className="flex items-center gap-12">
                 {/* Custom SVG Logo matching the Sidebar */}
                 <Link to="/" className="flex items-center gap-3 cursor-pointer group">
-                    <div className="flex-shrink-0 group-hover:rotate-12 transition-transform duration-500">
-                        <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
-                            <defs>
-                                <linearGradient id="topNavLogoGrad" x1="0" y1="0" x2="1" y2="1">
-                                    <stop offset="0%" stopColor="#e8a0b0" />
-                                    <stop offset="100%" stopColor="#8c3a56" />
-                                </linearGradient>
-                                <linearGradient id="topNavLogoShine" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#fff" stopOpacity="0.3" />
-                                    <stop offset="100%" stopColor="#fff" stopOpacity="0.0" />
-                                </linearGradient>
-                            </defs>
-                            <rect width="40" height="40" rx="12" fill="url(#topNavLogoGrad)" />
-                            <rect width="40" height="20" rx="12" fill="url(#topNavLogoShine)" />
-                            <path d="M20 9 L27 14 L27 25 L20 30 L13 25 L13 14 Z" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinejoin="round" />
-                            <circle cx="20" cy="19.5" r="3" fill="rgba(255,255,255,1)" />
-                        </svg>
+                    <div className="flex-shrink-0 group-hover:rotate-12 transition-transform duration-500 w-[34px] h-[34px] bg-transparent rounded-xl overflow-hidden">
+                        <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-contain" style={{ filter: 'invert(1)' }} />
                     </div>
                     <span className="text-xl font-black text-on-surface tracking-tight group-hover:text-primary transition-colors">InfraTrack</span>
                 </Link>

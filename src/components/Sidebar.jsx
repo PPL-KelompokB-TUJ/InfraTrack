@@ -57,8 +57,8 @@ export default function Sidebar({
           className="p-4 border-b border-slate-200 dark:border-gray-700 cursor-pointer hover:bg-primary/5 dark:hover:bg-gray-800 transition-colors"
         >
           <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary text-white">
-              <Building2 size={20} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-white overflow-hidden shadow-md">
+              <img src="/yorushika-logo.png" alt="Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">InfraTrack</p>
