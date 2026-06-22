@@ -274,7 +274,7 @@ export default function LoginPage() {
                 </div>
               </motion.button>
             ))}
-          </div>
+          </motion.div>
 
           {/* Error Message */}
           <motion.div variants={{ hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0 } }}>
