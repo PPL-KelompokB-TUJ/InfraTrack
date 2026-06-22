@@ -208,7 +208,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">TOTAL ASET</p>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-bold text-primary">{(stats.totalAssets / 1000).toFixed(1)}K</p>
+                  <p className="text-3xl font-bold text-primary">{stats.totalAssets}</p>
                 </div>
               </div>
               <div>
