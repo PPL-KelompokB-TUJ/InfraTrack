@@ -335,23 +335,36 @@ export default function DashboardPage() {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4ade80' },
-                      { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#fcd34d' },
-                      { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#f87171' }
+                      { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4c56af' },
+                      { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#526069' },
+                      { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#ba1a1a' }
                     ]}
                     cx="50%"
                     cy="50%"
-                    innerRadius={70}
-                    outerRadius={90}
+                    innerRadius={65}
+                    outerRadius={95}
                     paddingAngle={5}
                     dataKey="value"
                     stroke="none"
+                    labelLine={false}
+                    label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                      if (percent === 0) return null;
+                      const RADIAN = Math.PI / 180;
+                      const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+                      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+                      return (
+                        <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight="bold">
+                          {`${(percent * 100).toFixed(0)}%`}
+                        </text>
+                      );
+                    }}
                   >
                     {
                       [
-                        { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4ade80' },
-                        { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#fcd34d' },
-                        { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#f87171' }
+                        { name: 'Baik', value: dashboardData.assetCondition.good || 0, color: '#4c56af' },
+                        { name: 'Rusak Ringan', value: dashboardData.assetCondition.light_damage || 0, color: '#526069' },
+                        { name: 'Rusak Berat', value: dashboardData.assetCondition.heavy_damage || 0, color: '#ba1a1a' }
                       ].map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))
