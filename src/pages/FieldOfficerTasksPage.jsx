@@ -196,7 +196,7 @@ export default function FieldOfficerTasksPage() {
 
   if (loading) {
     return (
-      <main className="mx-auto w-full max-w-full px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex h-96 items-center justify-center">
           <div className="text-center">
             <Loader className="mx-auto mb-4 animate-spin text-primary" size={32} />
@@ -208,7 +208,7 @@ export default function FieldOfficerTasksPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-full px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>

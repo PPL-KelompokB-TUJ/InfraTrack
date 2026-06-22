@@ -154,7 +154,7 @@ export default function ActiveReportsPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '100%', margin: '0 auto', padding: '28px 24px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '28px 24px' }}>
         
         {/* ── HEADER ── */}
         <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'flex-end', justifyItems: 'space-between', justifyContent: 'space-between' }}>

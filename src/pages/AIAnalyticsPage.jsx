@@ -328,7 +328,7 @@ export default function AIAnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-full">
+      <div className="mx-auto max-w-[1400px]">
         {/* ── Header ────────────────────────────────────────────── */}
         <div className="mb-8 fade-slide-in">
           <div className="flex items-center gap-3 mb-2">

@@ -88,7 +88,7 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
 
   if (isLoading) {
     return (
-      <main className="mx-auto w-full max-w-full px-4 py-10 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1400px] px-4 py-10 sm:px-6 lg:px-8">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary/20 border-t-primary"></div>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Memuat dashboard...</p>
@@ -98,7 +98,7 @@ export default function AdminDashboardPage({ onNavigateToModule }) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-full px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1400px] px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">Dashboard</h1>
         <p className="mt-2 text-slate-600 dark:text-slate-400">Ringkasan aktivitas dan statistik sistem InfraTrack</p>

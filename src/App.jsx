@@ -140,7 +140,7 @@ function DashboardLayout({ currentUser, isAdmin, isOfficer, isBootstrapping, log
         isFieldOfficer={isOfficer}
         onLogout={handleLogout}
       />
-      <main className="flex-1 md:ml-64 transition-all">
+      <main className="flex-1 md:ml-64 p-6 md:p-8 transition-all">
         <Outlet />
       </main>
     </div>

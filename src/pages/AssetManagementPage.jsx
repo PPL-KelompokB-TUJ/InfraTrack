@@ -145,7 +145,7 @@ export default function AssetManagementPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-full px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1400px] px-4 py-10 sm:px-6 lg:px-8">
       <section className="glass-panel fade-slide-in rounded-3xl p-6 sm:p-8">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>

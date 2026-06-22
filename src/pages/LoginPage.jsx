@@ -94,7 +94,7 @@ export default function LoginPage() {
     <main className="min-h-screen w-full flex flex-col md:flex-row overflow-hidden">
 
       {/* ── LEFT: Yorushika Visual Panel ─────────────────────────── */}
-      <section className="hidden md:flex md:w-1/2 lg:w-[55%] relative bg-on-background overflow-hidden items-center justify-center">
+      <section className="hidden md:flex md:w-1/2 lg:w-[55%] relative overflow-hidden items-center justify-center" style={{ background: 'linear-gradient(135deg, #1e0f16 0%, #2d1520 100%)' }}>
 
         {/* Petals decoration */}
         {petals.map((p) => (
@@ -105,37 +105,32 @@ export default function LoginPage() {
               top: p.top,
               width: p.size + 'px',
               height: p.size + 'px',
-              color: '#f8bbd0',
-              opacity: p.opacity,
+              color: '#ce8093',
+              opacity: p.opacity * 2,
               transform: `rotate(${p.rotate}deg)`,
             }}
           />
         ))}
 
         {/* Glow blobs */}
-        <div className="absolute top-0 left-0 w-80 h-80 bg-primary/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl" />
-
-        {/* Giant kanji */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-          <span className="text-[300px] font-black text-white/[0.02] font-serif leading-none">春</span>
-        </div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[#e8a0b0]/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#8c3a56]/10 rounded-full blur-[100px]" />
 
         {/* Content */}
         <div className="relative z-10 max-w-md px-12 text-center flex flex-col items-center space-y-12">
           {/* Logo */}
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col items-center gap-4"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="flex flex-col items-center gap-6"
           >
-            <div className="w-20 h-20 rounded-[28px] bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/15 shadow-2xl">
-              <span className="material-symbols-outlined text-5xl text-white icon-fill">engineering</span>
+            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl flex items-center justify-center border border-white/10 shadow-[0_0_40px_rgba(206,128,147,0.15)] group hover:scale-105 transition-transform duration-500">
+              <span className="material-symbols-outlined text-5xl text-transparent bg-clip-text bg-gradient-to-br from-white to-[#e8a0b0] icon-fill">verified_user</span>
             </div>
             <div>
-              <p className="text-4xl font-black text-white tracking-tighter">InfraTrack</p>
-              <p className="text-[10px] text-white/40 font-bold tracking-[0.3em] mt-1">INFRASTRUCTURE MANAGEMENT</p>
+              <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tighter">InfraTrack</p>
+              <p className="text-[10px] text-[#e8a0b0]/60 font-bold tracking-[0.4em] mt-2">INFRASTRUCTURE MANAGEMENT</p>
             </div>
           </motion.div>
 
@@ -221,26 +216,32 @@ export default function LoginPage() {
           </div>
 
           {/* Role Selector */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {roleOptions.map((role) => (
               <motion.button
                 key={role.key}
                 type="button"
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ y: -2 }}
                 onClick={() => { setSelectedRole(role.key); setAuthError(''); }}
-                className={`py-4 px-4 rounded-2xl text-left transition-all border-2 ${
+                className={`relative py-5 px-5 rounded-[2rem] text-left overflow-hidden transition-all duration-300 ${
                   selectedRole === role.key
-                    ? 'bg-primary text-on-primary border-primary shadow-lg shadow-primary/20'
-                    : 'bg-surface-container-low text-on-surface-variant border-outline-variant/20 hover:border-primary/30 hover:bg-white'
+                    ? 'shadow-xl shadow-primary/20'
+                    : 'bg-[#fdf8f8] hover:bg-white hover:shadow-md'
                 }`}
               >
-                <span className={`material-symbols-outlined text-2xl block mb-2 ${selectedRole === role.key ? 'text-on-primary' : 'text-primary'}`}>
-                  {role.icon}
-                </span>
-                <p className="font-bold text-sm">{role.label}</p>
-                <p className={`text-[11px] mt-0.5 ${selectedRole === role.key ? 'text-on-primary/70' : 'text-on-surface-variant/70'}`}>
-                  {role.desc}
-                </p>
+                {/* Active Gradient Background */}
+                <div className={`absolute inset-0 bg-gradient-to-br from-primary to-primary-container transition-opacity duration-300 ${selectedRole === role.key ? 'opacity-100' : 'opacity-0'}`} />
+                
+                <div className="relative z-10">
+                  <span className={`material-symbols-outlined text-3xl block mb-3 transition-colors duration-300 ${selectedRole === role.key ? 'text-white' : 'text-primary/70'}`}>
+                    {role.icon}
+                  </span>
+                  <p className={`font-black text-sm tracking-tight transition-colors duration-300 ${selectedRole === role.key ? 'text-white' : 'text-on-surface'}`}>{role.label}</p>
+                  <p className={`text-[10px] mt-1 font-medium transition-colors duration-300 ${selectedRole === role.key ? 'text-white/70' : 'text-on-surface-variant/60'}`}>
+                    {role.desc}
+                  </p>
+                </div>
               </motion.button>
             ))}
           </div>

@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 
 export default function TopNavBar() {
@@ -8,62 +9,112 @@ export default function TopNavBar() {
     if (isLoginPage) return null;
 
     return (
-        <nav className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-md border-b border-primary-container/30 shadow-sm shadow-secondary/5">
-            <div className="flex justify-between items-center px-4 md:px-8 mx-auto h-20 max-w-7xl">
-                <Link to="/" className="flex items-center gap-2 group">
-                    <div className="w-10 h-10 rounded-full bg-primary-container/30 flex items-center justify-center text-primary group-hover:rotate-12 transition-transform">
-                        <span className="material-symbols-outlined text-[24px]">energy_savings_leaf</span>
+        <motion.nav 
+            initial={{ y: -60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 bg-white/70 backdrop-blur-xl border-b border-primary/5 shadow-sm shadow-primary/5"
+        >
+            <div className="flex items-center gap-12">
+                {/* Custom SVG Logo matching the Sidebar */}
+                <Link to="/" className="flex items-center gap-3 cursor-pointer group">
+                    <div className="flex-shrink-0 group-hover:rotate-12 transition-transform duration-500">
+                        <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+                            <defs>
+                                <linearGradient id="topNavLogoGrad" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stopColor="#e8a0b0" />
+                                    <stop offset="100%" stopColor="#8c3a56" />
+                                </linearGradient>
+                                <linearGradient id="topNavLogoShine" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#fff" stopOpacity="0.3" />
+                                    <stop offset="100%" stopColor="#fff" stopOpacity="0.0" />
+                                </linearGradient>
+                            </defs>
+                            <rect width="40" height="40" rx="12" fill="url(#topNavLogoGrad)" />
+                            <rect width="40" height="20" rx="12" fill="url(#topNavLogoShine)" />
+                            <path d="M20 9 L27 14 L27 25 L20 30 L13 25 L13 14 Z" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinejoin="round" />
+                            <circle cx="20" cy="19.5" r="3" fill="rgba(255,255,255,1)" />
+                        </svg>
                     </div>
-                    <span className="font-headline-sm text-headline-sm italic tracking-tight text-primary">InfraTrack</span>
+                    <span className="text-xl font-black text-on-surface tracking-tight group-hover:text-primary transition-colors">InfraTrack</span>
                 </Link>
-                
-                <div className="hidden md:flex gap-8 items-center">
-                    <Link 
-                        to="/" 
-                        onClick={() => {
-                            if (location.pathname === '/') {
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }
-                        }}
-                        className={cn(
-                            "font-label-md text-label-md transition-all duration-300 px-3 py-2 rounded-lg",
-                            location.pathname === '/' && !location.hash ? "text-primary border-b-2 border-primary rounded-none" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50"
-                        )}
-                    >
-                        Beranda
-                    </Link>
-                    <Link 
-                        to="/layanan" 
-                        className={cn(
-                            "font-label-md text-label-md transition-all duration-300 px-3 py-2 rounded-lg",
-                            location.pathname === '/layanan' ? "text-primary border-b-2 border-primary rounded-none" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50"
-                        )}
-                    >
-                        Layanan
-                    </Link>
-                    <Link 
-                        to="/#tentang"
-                        onClick={(e) => {
-                            if (location.pathname === '/') {
-                                e.preventDefault();
-                                document.getElementById('tentang')?.scrollIntoView({ behavior: 'smooth' });
-                                window.history.pushState(null, '', '/#tentang');
-                                window.dispatchEvent(new Event('popstate'));
-                            }
-                        }}
-                        className={cn(
-                            "font-label-md text-label-md transition-all duration-300 px-3 py-2 rounded-lg",
-                            location.pathname === '/' && location.hash === '#tentang' ? "text-primary border-b-2 border-primary rounded-none" : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50"
-                        )}
-                    >
-                        Tentang
-                    </Link>
-                </div>
 
-                <Link to="/login" className="petal-button px-6 py-2.5 shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 font-label-md text-label-md">
-                    Login Petugas
+                {/* Subtle Yorushika indicator for aesthethics */}
+                <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10">
+                    <motion.div 
+                        animate={{ scale: [1, 1.5, 1] }} 
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="w-1 h-1 rounded-full bg-primary"
+                    />
+                    <span className="text-[9px] font-bold text-primary tracking-widest uppercase">春泥棒</span>
+                </div>
+            </div>
+            
+            {/* Center Navigation Links - Fills empty space */}
+            <div className="hidden md:flex gap-8 items-center absolute left-1/2 -translate-x-1/2">
+                <Link 
+                    to="/" 
+                    onClick={() => {
+                        if (location.pathname === '/') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    }}
+                    className={cn(
+                        "text-sm font-semibold transition-all duration-300 relative group",
+                        location.pathname === '/' && !location.hash ? "text-primary" : "text-on-surface-variant hover:text-primary"
+                    )}
+                >
+                    Beranda
+                    <div className={cn(
+                        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                        location.pathname === '/' && !location.hash ? "w-full" : "w-0 group-hover:w-full"
+                    )} />
+                </Link>
+                <Link 
+                    to="/layanan" 
+                    className={cn(
+                        "text-sm font-semibold transition-all duration-300 relative group",
+                        location.pathname === '/layanan' ? "text-primary" : "text-on-surface-variant hover:text-primary"
+                    )}
+                >
+                    Layanan
+                    <div className={cn(
+                        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                        location.pathname === '/layanan' ? "w-full" : "w-0 group-hover:w-full"
+                    )} />
+                </Link>
+                <Link 
+                    to="/#tentang"
+                    onClick={(e) => {
+                        if (location.pathname === '/') {
+                            e.preventDefault();
+                            document.getElementById('tentang')?.scrollIntoView({ behavior: 'smooth' });
+                            window.history.pushState(null, '', '/#tentang');
+                            window.dispatchEvent(new Event('popstate'));
+                        }
+                    }}
+                    className={cn(
+                        "text-sm font-semibold transition-all duration-300 relative group",
+                        location.pathname === '/' && location.hash === '#tentang' ? "text-primary" : "text-on-surface-variant hover:text-primary"
+                    )}
+                >
+                    Tentang
+                    <div className={cn(
+                        "absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300",
+                        location.pathname === '/' && location.hash === '#tentang' ? "w-full" : "w-0 group-hover:w-full"
+                    )} />
                 </Link>
             </div>
-        </nav>
+
+            <div className="flex items-center gap-4">
+                <Link 
+                    to="/login" 
+                    className="relative overflow-hidden group flex items-center justify-center px-6 py-2.5 rounded-full bg-gradient-to-r from-primary to-primary-container text-white font-bold text-sm shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-95"
+                >
+                    <span className="relative z-10">Login Petugas</span>
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                </Link>
+            </div>
+        </motion.nav>
     );
 }
