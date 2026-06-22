@@ -107,9 +107,6 @@ const processExport = async (data, queueMode = 'redis') => {
     // 4. File Storage Upload (S3/MinIO vs Local Fallback)
     let fileUrl = '';
     const hasS3Config = process.env.S3_ACCESS_KEY && process.env.S3_SECRET_KEY;
-    const storageType = hasS3Config ? 'S3 / MinIO' : 'Local Storage';
-    const queueLabel = queueMode === 'redis' ? 'Redis Bull Queue' : 'In-Memory Fallback';
-    const serverInfo = `${queueLabel} • ${storageType}`;
 
     if (hasS3Config) {
       console.log(`Uploading ${filename} to S3 bucket...`);
