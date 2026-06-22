@@ -228,7 +228,7 @@ export default function DashboardPage() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(200,200,200,0.2)" />
                   <XAxis 
-                    dataKey="month" 
+                    dataKey="period" 
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 10, fill: '#94a3b8' }}
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                   />
                   <Area 
                     type="monotone" 
-                    dataKey="count" 
+                    dataKey="total" 
                     stroke="#805062" 
                     strokeWidth={3}
                     fillOpacity={1} 
