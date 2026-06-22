@@ -51,7 +51,7 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
   const roleColor = isAdmin ? '#4ade80' : isFieldOfficer ? '#f9bbd0' : '#94a3b8';
   const roleBg    = isAdmin ? 'rgba(74,222,128,0.08)' : isFieldOfficer ? 'rgba(206,128,147,0.08)' : 'rgba(148,163,184,0.08)';
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <nav
       style={{
         background: 'linear-gradient(180deg, #1e0f16 0%, #2d1520 60%, #1a0d13 100%)',
@@ -129,7 +129,7 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
       <div style={{ height: '1px', background: 'rgba(206,128,147,0.08)', margin: '0 16px 8px' }} />
 
       {/* ── NAVIGATION ── */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', scrollbarWidth: 'none' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', scrollbarWidth: 'none', minHeight: 0 }}>
 
         {/* Main section */}
         {mainItems.length > 0 && (
@@ -347,7 +347,7 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
     <>
       {/* Desktop sidebar */}
       <div className="hidden md:block fixed left-0 top-0 h-screen z-40" style={{ width: '256px' }}>
-        <SidebarContent />
+        {sidebarContent}
       </div>
 
       {/* Mobile toggle button */}
@@ -377,7 +377,7 @@ export default function SideNavBar({ currentUser, isAdmin, isFieldOfficer, onLog
               className="md:hidden fixed left-0 top-0 h-screen z-50"
               style={{ width: '256px' }}
             >
-              <SidebarContent />
+              {sidebarContent}
             </motion.div>
           </>
         )}
