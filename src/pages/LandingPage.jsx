@@ -94,10 +94,19 @@ function YorushikaMarquee({ reverse = false, fadeColor = "#fdf8f8", theme = "lig
       >
         {[...YORUSHIKA_QUOTES, ...YORUSHIKA_QUOTES, ...YORUSHIKA_QUOTES, ...YORUSHIKA_QUOTES, ...YORUSHIKA_QUOTES].map((q, i) => (
           <div key={i} className="flex items-center gap-6 opacity-60 hover:opacity-100 transition-opacity duration-500">
-            <div className="text-center">
-              <p className={`text-xl md:text-2xl font-black ${textColor} leading-none font-serif`}>{q.text}</p>
-              <p className={`text-[8px] md:text-[9px] ${subTextColor} mt-1 tracking-[0.4em] uppercase`}>{q.romanji}</p>
-            </div>
+            <a 
+              href={q.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-center group/marquee cursor-pointer hover:scale-105 transition-all block"
+              title={`Tonton MV ${q.romanji} di YouTube`}
+            >
+              <p className={`text-xl md:text-2xl font-black ${textColor} group-hover/marquee:text-primary leading-none font-serif transition-colors`}>{q.text}</p>
+              <p className={`text-[8px] md:text-[9px] ${subTextColor} group-hover/marquee:text-primary/70 mt-1.5 tracking-[0.4em] uppercase transition-colors flex items-center justify-center gap-1`}>
+                {q.romanji}
+                <span className="material-symbols-outlined text-[10px] opacity-0 group-hover/marquee:opacity-100 transition-opacity">open_in_new</span>
+              </p>
+            </a>
             <span className={`text-sm ${iconColor}`}>🌸</span>
           </div>
         ))}
@@ -107,10 +116,10 @@ function YorushikaMarquee({ reverse = false, fadeColor = "#fdf8f8", theme = "lig
 }
 
 const YORUSHIKA_QUOTES = [
-  { text: "雨とカプチーノ", romanji: "Ame to Cappuccino", meaning: "Rain and Cappuccino" },
-  { text: "花人局", romanji: "Hanabitayasumi", meaning: "Fireworks Holiday" },
-  { text: "だから僕は音楽を辞めた", romanji: "Dakara Boku wa Ongaku wo Yameta", meaning: "So I Quit Music" },
-  { text: "春泥棒", romanji: "Haru Dorobou", meaning: "Spring Thief" },
+  { text: "雨とカプチーノ", romanji: "Ame to Cappuccino", meaning: "Rain and Cappuccino", url: "https://www.youtube.com/results?search_query=Yorushika+Ame+to+Cappuccino" },
+  { text: "花人局", romanji: "Hanabitayasumi", meaning: "Fireworks Holiday", url: "https://www.youtube.com/results?search_query=Yorushika+Hanabitayasumi" },
+  { text: "だから僕は音楽を辞めた", romanji: "Dakara Boku wa Ongaku wo Yameta", meaning: "So I Quit Music", url: "https://www.youtube.com/results?search_query=Yorushika+Dakara+Boku+wa+Ongaku+wo+Yameta" },
+  { text: "春泥棒", romanji: "Haru Dorobou", meaning: "Spring Thief", url: "https://www.youtube.com/results?search_query=Yorushika+Haru+Dorobou" },
 ];
 
 const FLOATING_NOTES = ['♩', '♪', '♫', '♬', '𝄞', '𝄢'];
