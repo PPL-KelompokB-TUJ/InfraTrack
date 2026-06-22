@@ -9,6 +9,7 @@ import { NotificationProvider, InAppNotificationProvider } from './context/Notif
 import { ThemeProvider } from './context/ThemeContext';
 import FallingPetals from './components/FallingPetals';
 import CursorPetals from './components/CursorPetals';
+import YorushikaMusicPlayer from './components/YorushikaMusicPlayer';
 
 // Auth
 import {
@@ -158,6 +159,7 @@ export default function App() {
     <ThemeProvider>
       <FallingPetals />
       <CursorPetals />
+      <YorushikaMusicPlayer />
       <NotificationProvider>
         <InAppNotificationProvider>
           <BrowserRouter>
