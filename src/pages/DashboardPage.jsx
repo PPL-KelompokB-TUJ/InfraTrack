@@ -192,7 +192,17 @@ export default function DashboardPage() {
           
           {/* Left Column: Vitality Stream (Damage Trend) - takes 2 columns */}
           <div className="lg:col-span-2 glass-card petal-shape bg-white/60 border border-primary-container/20 p-8 shadow-sm relative overflow-hidden">
-            <h2 className="text-2xl font-serif font-bold text-slate-800 mb-6">Tren Kerusakan</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-serif font-bold text-slate-800">Tren Kerusakan</h2>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
+                className="glass-card border-none rounded-lg px-3 py-1.5 text-sm text-slate-600 outline-none w-32 focus:border-primary cursor-pointer relative z-20"
+              >
+                <option value="monthly">Bulanan</option>
+                <option value="weekly">Mingguan</option>
+              </select>
+            </div>
             
             <div className="flex gap-12 mb-8 relative z-10">
               <div>
