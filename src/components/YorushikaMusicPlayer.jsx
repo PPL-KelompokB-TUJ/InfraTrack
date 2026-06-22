@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 
 const PLAYLIST = [
-  { src: '/track1.mp3', title: 'アルジャーノン (Algernon)', artist: 'Yorushika' },
-  { src: '/track2.mp3', title: '春泥棒 (Haru Dorobou)', artist: 'Yorushika' },
+  { src: '/track1.mp3', title: 'アルジャーノン (Algernon)', artist: 'Yorushika', url: 'https://www.youtube.com/results?search_query=Yorushika+Algernon' },
+  { src: '/track2.mp3', title: '春泥棒 (Haru Dorobou)', artist: 'Yorushika', url: 'https://www.youtube.com/watch?v=Sw1Flgub9s8' },
 ];
 
 export default function YorushikaMusicPlayer() {
@@ -98,7 +98,16 @@ export default function YorushikaMusicPlayer() {
             <p className="text-[9px] font-black text-primary tracking-[0.15em] uppercase mb-0.5">
               {isPlaying ? 'Memutar' : 'Jeda'} ({currentTrackIndex + 1}/{PLAYLIST.length})
             </p>
-            <p className="text-sm font-bold text-slate-800 whitespace-nowrap">{currentTrack.title}</p>
+            <a 
+              href={currentTrack.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-slate-800 whitespace-nowrap hover:text-primary hover:underline transition-colors group/link flex items-center gap-1"
+              title="Tonton Musik Video"
+            >
+              {currentTrack.title}
+              <span className="material-symbols-outlined text-[10px] opacity-0 group-hover/link:opacity-100 transition-opacity">open_in_new</span>
+            </a>
             <p className="text-[10px] font-medium text-slate-500">{currentTrack.artist}</p>
           </div>
         </div>
