@@ -40,6 +40,7 @@ export default function ExportPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [currentServer, setCurrentServer] = useState(null); // X-Backend-Server dari nginx
+  const [serverInfoMap, setServerInfoMap] = useState({}); // jobId → server string (frozen per-record)
 
   // Polling reference
   const pollingRef = useRef(null);
@@ -66,7 +67,24 @@ export default function ExportPage() {
       const data = await res.json();
       const backendServer = res.headers.get('x-backend-server') || data.current_server;
       if (backendServer) setCurrentServer(backendServer);
-      setHistory(data.history || []);
+
+      const jobs = data.history || [];
+      setHistory(jobs);
+
+      // Simpan server info per-record di local state — dibekukan saat pertama muncul
+      // Jika job sudah punya server_info di DB → pakai itu (paling akurat)
+      // Jika belum → pakai backend yang sedang merespons saat ini (frozen, tidak berubah lagi)
+      setServerInfoMap(prev => {
+        const next = { ...prev };
+        jobs.forEach(job => {
+          if (job.server_info) {
+            next[job.id] = job.server_info; // akurat dari DB
+          } else if (!next[job.id] && backendServer) {
+            next[job.id] = backendServer; // frozen saat pertama kali muncul
+          }
+        });
+        return next;
+      });
     } catch (error) {
       console.error('Error loading history:', error);
     } finally {
@@ -245,10 +263,8 @@ export default function ExportPage() {
   };
 
   const getServerInfo = (job) => {
-    // Hanya tampilkan server_info yang disimpan di DB oleh worker yang benar-benar memproses job ini.
-    // Jangan fallback ke currentServer karena itu server yang merespons REQUEST SEKARANG,
-    // bukan server yang memproses job tersebut.
-    return job.server_info || null;
+    // Ambil dari map frozen — tidak berubah walau backend berganti
+    return serverInfoMap[job.id] || null;
   };
 
 
