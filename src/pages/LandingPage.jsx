@@ -331,7 +331,7 @@ export default function LandingPage() {
                 transition={{ duration: 1.5, ease: "easeOut" }}
                 alt="Smart City"
                 className="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/d/17V6O371r_4SKPz3Dx1Oz4TqxwbBwCxbY"
+                src="https://lh3.googleusercontent.com/d/1X7lQ7fy9QTVxc02bw63QtPvKQn6VflX_"
                 referrerPolicy="no-referrer"
               />
               {/* Gradient overlay */}
@@ -512,7 +512,7 @@ export default function LandingPage() {
           >
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-secondary/10 rounded-[3rem] transform translate-x-4 translate-y-4" />
             <img
-              src="https://lh3.googleusercontent.com/d/1X7lQ7fy9QTVxc02bw63QtPvKQn6VflX_"
+              src="https://lh3.googleusercontent.com/d/17V6O371r_4SKPz3Dx1Oz4TqxwbBwCxbY"
               alt="Tim Pekerja Infrastruktur"
               className="relative z-10 rounded-[3rem] shadow-2xl w-full h-[480px] object-cover border border-primary/10"
               referrerPolicy="no-referrer"
