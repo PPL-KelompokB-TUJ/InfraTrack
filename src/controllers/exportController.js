@@ -1,9 +1,25 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSupabaseClient } from '../services/exportService.js';
 import { exportQueue } from '../queues/exportQueue.js';
+
+/**
+ * Get the primary non-internal IPv4 of this server
+ */
+const getServerIP = () => {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return os.hostname();
+};
 
 /**
  * Helper to check if caller is an Admin in Supabase
@@ -88,7 +104,8 @@ export async function triggerExport(req, res) {
     return res.status(202).json({
       success: true,
       message: 'Proses ekspor telah dijadwalkan di background.',
-      job: jobRecord
+      job: jobRecord,
+      current_server: `${getServerIP()}:${process.env.PORT || 5000}`,
     });
 
   } catch (error) {
@@ -117,7 +134,11 @@ export async function getExportHistory(req, res) {
       return res.status(500).json({ error: `Gagal mengambil riwayat ekspor: ${fetchError.message}` });
     }
 
-    return res.json({ success: true, history });
+    return res.json({ 
+      success: true, 
+      history,
+      current_server: `${getServerIP()}:${process.env.PORT || 5000}`,
+    });
 
   } catch (error) {
     console.error('Error fetching export history:', error.message);

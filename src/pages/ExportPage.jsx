@@ -62,11 +62,9 @@ export default function ExportPage() {
         throw new Error('Gagal memuat riwayat ekspor');
       }
 
-      // Tangkap X-Backend-Server dari nginx load balancer
-      const backendServer = res.headers.get('x-backend-server');
-      if (backendServer) setCurrentServer(backendServer);
-
+      // Tangkap server backend dari JSON response (lebih reliable dari header)
       const data = await res.json();
+      if (data.current_server) setCurrentServer(data.current_server);
       setHistory(data.history || []);
     } catch (error) {
       console.error('Error loading history:', error);
@@ -153,11 +151,9 @@ export default function ExportPage() {
         }),
       });
 
-      // Tangkap X-Backend-Server dari nginx load balancer
-      const backendServer = response.headers.get('x-backend-server');
-      if (backendServer) setCurrentServer(backendServer);
-
+      // Tangkap server backend dari JSON response (lebih reliable dari header)
       const data = await response.json();
+      if (data.current_server) setCurrentServer(data.current_server);
 
       if (!response.ok) {
         throw new Error(data.error || 'Terjadi kesalahan saat memproses ekspor');
