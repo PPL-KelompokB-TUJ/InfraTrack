@@ -225,19 +225,21 @@ export default function LandingPage() {
             className="space-y-8"
           >
             {/* Yorushika season tag */}
-            <motion.div variants={itemVariants} className="flex items-center gap-3">
-              <div className="flex gap-1">
+            <motion.div variants={itemVariants} className="flex items-center gap-3.5 mb-2">
+              <div className="flex gap-1.5">
                 {['bg-[#f9bbd0]', 'bg-[#f48fb1]', 'bg-[#ce8093]'].map((c, i) => (
-                  <div key={i} className={`w-2 h-2 rounded-full ${c} opacity-80`} />
+                  <motion.div 
+                    key={i} 
+                    animate={{ y: [0, -4, 0], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+                    className={`w-2.5 h-2.5 rounded-full ${c} shadow-sm opacity-90`} 
+                  />
                 ))}
               </div>
               <motion.span 
-                animate={{ 
-                  color: ['#ce8093', '#8c3a56', '#ce8093'],
-                  textShadow: ['0px 0px 0px rgba(206,128,147,0)', '0px 0px 8px rgba(206,128,147,0.5)', '0px 0px 0px rgba(206,128,147,0)']
-                }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="text-xs font-bold text-primary tracking-[0.2em] uppercase"
+                animate={{ backgroundPosition: ['0% 50%', '200% 50%'] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                className="text-[13px] font-black tracking-[0.25em] uppercase bg-gradient-to-r from-[#ce8093] via-[#f9bbd0] to-[#ce8093] bg-[length:200%_auto] text-transparent bg-clip-text drop-shadow-sm"
               >
                 Haru — 春 — Spring
               </motion.span>
